@@ -1,0 +1,85 @@
+@model IEnumerable<PROJLRR.Models.Personnel>
+@{
+    // Si votre layout est dans le dossier Shared, le nom suffit
+    Layout = "/Views/Shared/Layout.cshtml";
+    ViewData["Title"] = "Liste des PERSONNELS ENSEIGNANTS";
+}
+
+<script>
+    function imprimerTableau() {
+        var contenu = document.getElementById('tableau').innerHTML;
+        var pageImpression = window.open('', '_blank', 'width=800,height=600');
+        if (!pageImpression) {
+            alert("Veuillez autoriser les pop-ups pour imprimer.");
+            return;
+        }
+        pageImpression.document.write(`
+            <html>
+            <head>
+                <title>Impression</title>
+                <style>
+                    body { font-family: Arial, sans-serif; }
+                    table { width: 100%; border-collapse: collapse; }
+                    th, td { border: 1px solid black; padding: 8px; text-align: center; } 
+                    th { background-color: #f2f2f2; }
+                    td:nth-child(3){ text-align: left; } 
+                    td:nth-child(5), td:nth-child(4) { width: 1px; white-space: nowrap; } 
+                    .table-wrapper { margin-top: 20px; }
+                </style>
+            </head>
+            <body>
+                <h2 align="center">LISTE DES PERSONNELS (PE)</h2>
+                ${contenu}
+            </body>
+            </html>`);
+        pageImpression.document.close();
+        pageImpression.focus();
+        setTimeout(() => { pageImpression.print(); pageImpression.close(); }, 500);
+    }
+</script>
+
+<h2>LISTE DES PERSONNELS ENSEIGNANTS</h2>
+<link rel="stylesheet" href="~/css/style3.css" />
+
+<div id="tableau" class="table-wrapper">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Num</th>
+                <th>MATRICULE</th>
+                <th>NOM ET PRÉNOMS</th>
+                <th>CIN</th>
+                <th class="col-contact">CONTACT</th>
+                <th>FONCTION</th>
+                <th>MATIERE</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                // Filtrage
+                var personnelsFiltres = Model
+                    .Where(p => p.Fonction != null && p.Fonction.ToUpper() == "PE")
+                    .OrderBy(p => p.Matiere)
+                    .ToList();
+
+                int index = 1; 
+            }
+
+            @foreach (var p in personnelsFiltres)
+            {
+                <tr>
+                    <td>@(index++)</td>
+                    <td>@p.Matricule</td>
+                    <td>@p.NomEtPrenoms</td>
+                    <td>@p.Cin</td>
+                    <td class="col-contact">@p.Contact</td>
+                    <td>@p.Fonction</td>
+                    <td>@p.Matiere</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<button class="btn btn-secondary" onclick="imprimerTableau()">🖨️ Imprimer</button>
+<a href="@Url.Action("Create", "Personnels")" class="btn btn-primary">Ajouter un personnel</a>

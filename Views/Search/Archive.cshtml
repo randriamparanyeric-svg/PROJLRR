@@ -1,0 +1,67 @@
+@model List<PROJLRR.Models.Base1>
+
+@{
+    Layout = "/Views/Shared/Layout.cshtml";
+    ViewData["Title"] = "Historique des Archives";
+}
+
+<link rel="stylesheet" href="~/css/style3.css" />
+
+<div class="container mt-4">
+    <h2 align="center" class="mb-4">📋 HISTORIQUE DES ARCHIVES</h2>
+
+    <div class="table-responsive">
+        @if (Model != null && Model.Any())
+        {
+            <table class="table table-bordered table-hover shadow-sm" style="background-color: #fff;">
+                <thead class="thead-light" style="background-color: #f8f9fa;">
+                    <tr>
+                        <th style="width: 10%;">Matricule</th>
+                        <th style="width: 25%;">Nom et Prénoms</th>
+                        <th style="width: 15%;">Date d'entrée</th>
+                        <th style="width: 15%;">CIN</th>
+                        <th style="width: 15%;">Corps</th>
+                        <th style="width: 12%;">Contact</th>
+                        <th style="width: 20%;">Matière / Fonction</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model)
+                    {
+                        <tr>
+                            <td>@p.Matricule</td>
+                            <td style="font-weight: bold;">@p.NomEtPrenoms</td>
+                            <td>@p.Datedentre</td>
+                            <td>@p.Cin</td>
+                            <td>@p.Corps</td>
+                            <td>@p.Contact</td>
+                            <td>@p.Matiere</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="alert alert-info text-center">
+                Aucune donnée archivée trouvée dans la base.
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    /* Ajustements rapides pour un look "feuille de données" */
+    .table th {
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        color: #333;
+    }
+    .table td {
+        vertical-align: middle !important;
+        font-size: 0.95rem;
+    }
+    .shadow-sm {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+    }
+</style>

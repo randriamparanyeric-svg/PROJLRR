@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"] - Mon Application</title>
+
+    <!-- Bootstrap -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="~/css/site.css" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            margin-top: 20px;
+            max-width: 1200px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 15px;
+            margin-top: 20px;
+            background-color: #343a40;
+            color: White;
+        }
+
+        /* Style pour limiter la largeur du contenu sur grand écran */
+        .content-wrapper {
+            max-width: 900px;
+            margin: auto;
+        }
+
+        /* Amélioration du menu sur mobile */
+        .navbar-toggler {
+            border: none;
+        }
+
+        .navbar-nav .nav-item {
+            margin-right: 10px;
+        }
+
+        /* Réduction du padding du bouton Déconnexion sur mobile */
+  
+        max-width: 768px {
+        .navbar-nav {
+            width: 100%;
+            text-align: center;
+        }
+        .col-contact
+        { width: 1000px;
+        min-width : 500px;
+        word-break:break-word;    }
+        .btn {
+            padding: 8px 12px;
+            font-size: 14px;
+        }
+        footer {
+            font-size: 14px;
+            padding: 10px;
+        }
+    }
+    </style>
+</head>
+<body>
+
+    <!-- Barre de navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid d-flex flex-column">
+          <!-- Ligne supérieure avec le logo et le texte "LYCÉE" centré -->
+        <div class="d-flex w-100 align-items-center justify-content-center py-2">
+            <!-- Logo à gauche -->
+            <img src="/uploads/LOGO LRR.png" alt="Logo" class="me-2" style="height: 40px;">
+            <span class="text-white fw-bold fs-4">LYCEE RAHERIVELO RAMAMONJY FIANARANTSOA</span>
+        </div>
+        <div class="d-flex w-100 justify-content-between align-items-center">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto">
+                <!-- MENU PRINCIPAL AVEC TOUS LES LIENS DÉROULANTS -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="menuPrincipal" role="button"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        MENU PRINCIPAL
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="menuPrincipal">
+                        <li><a class="dropdown-item" href="@Url.Action("SearchResults", "Search")">🔍 RECHERCHE</a></li>
+                        <li><a class="dropdown-item" href="@Url.Action("Index", "Personnels")">📜 LISTE DES PA ET PE</a></li>
+                        <li><a class="dropdown-item" href="@Url.Action("IndexEFA", "Personnels")">👤 LISTE DES PA</a></li>
+                        <li><a class="dropdown-item" href="@Url.Action("IndexPE", "Personnels")">👨‍🏫 LISTE DES PE</a></li>
+                        <li><a class="dropdown-item" href="@Url.Action("Create", "Personnels")">➕ AJOUTER DU PERSONNEL</a></li>
+                        <li><a class="dropdown-item" href="@Url.Action("STAT", "Personnels")">📊 STATISTIQUE PE</a></li>
+                        <li><a class="dropdown-item" href="@Url.Action("STAT2", "Personnels")">📈 STATISTIQUE PA</a></li>
+                        <li><a class="dropdown-item" href="@Url.Action("RETRAITE", "Personnels")">🧓 RETRAITÉS CETTE ANNÉE</a></li>
+                        <li><a class="dropdown-item" href="javascript:void(0);" onclick="naviguerVersPageSecurisee('@Url.Action("AddArticle", "Article")')">🛒 AJOUTER FOURNITURES</a></li>
+                        <li><a class="dropdown-item" href="javascript:void(0);" onclick="naviguerVersPageSecurisee('@Url.Action("Index", "Article")')">📦 LISTE DES ARTICLES</a></li>
+                        <li><a class="dropdown-item" href="javascript:void(0);" onclick="naviguerVersPageSecurisee('@Url.Action("Add", "Decharge")')"> ➕ FAIRE UNE DECHARGE</a></li>
+                        <li><a class="dropdown-item" href="javascript:void(0);" onclick="naviguerVersPageSecurisee('@Url.Action("Index", "Decharge")')">📜 LISTE DES DECHARGES</a></li>
+                    </ul>
+                </li>
+            </ul>
+
+            <!-- Vérification si l'utilisateur est connecté -->
+            <ul class="navbar-nav ms-auto">
+    @if (User.Identity.IsAuthenticated)
+    {
+        <li class="nav-item">
+            <span class="nav-link text-white">👋 Bienvenue, @User.Identity.Name</span>
+        </li>
+        <li class="nav-item ms-lg-2">
+            <a class="btn btn-danger btn-sm" href="@Url.Action("Logout", "Account")">Déconnexion</a>
+        </li>
+    }
+    else
+    {
+        <li class="nav-item">
+            <a class="btn btn-primary btn-sm" href="@Url.Action("Login", "Account")">Connexion</a>
+        </li>
+    }
+</ul>
+            </ul>
+        </div>
+
+        </div>
+    </nav>
+
+    <!-- Contenu principal -->
+    <div class="container content-wrapper">
+        @RenderBody()
+    </div>
+
+    <!-- Pied de page -->
+    <footer>
+        <p>&copy; @DateTime.Now.Year - LYCEE RAHERIVELO RAMAMONJY<br>FIANARANTSOA</p>
+    </footer>
+
+    <!-- Scripts Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="@Url.Content("~/js/site.js")"></script>
+</body>
+
+</html>

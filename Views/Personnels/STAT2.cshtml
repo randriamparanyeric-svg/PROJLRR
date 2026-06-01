@@ -1,0 +1,137 @@
+@model List<PROJLRR.Models.Personnel>
+@{
+    Layout = "/Views/Shared/Layout.cshtml";
+    ViewData["Title"] = "Liste des personnels";
+}
+<script>
+    function imprimerTableau() {
+        var contenu = document.getElementById('tableau').innerHTML;
+
+        // Récupérer la date du jour
+        let date = new Date();
+        let options = { day: "numeric", month: "long", year: "numeric" };
+        let today = date.toLocaleDateString("fr-FR", options);
+
+        // Créer la page d'impression
+        var pageImpression = window.open('', '_blank', 'width=800,height=600');
+        if (!pageImpression) {
+            alert("Veuillez autoriser les pop-ups pour imprimer.");
+            return;
+        }
+
+        pageImpression.document.write(`
+            <html>
+            <head>
+                <title>Impression</title>
+                <style>
+                    body { font-family: Arial, sans-serif; }
+                    table { width: 100%; border-collapse: collapse; }
+                    th, td { border: 1px solid black; padding: 8px; text-align: center; }
+                    th { background-color: #f2f2f2; }
+                    .table-wrapper { margin-top: 20px; }
+                </style>
+            </head>
+            <body>
+                <h2 align="center"><strong>SITUATION DU PERSONNEL ADMINISTRATIF <br>Aujourd'hui </strong>${today}</h2>
+                ${contenu}
+                <p style="text-align: right;"><em>Fait à Fianarantsoa, le </em>${today}</p>
+            </body>
+            </html>
+        `);
+
+        pageImpression.document.close();
+        pageImpression.focus();
+        setTimeout(() => { pageImpression.print(); pageImpression.close(); }, 500);
+    }
+</script>
+
+<h2 align="center">SITUATION DU PERSONNEL ADMINISTRATIF<br> Aujourd'hui <span id="cert_date"></span> </h2>
+<link rel="stylesheet" href="~/css/style1.css" />
+
+<div id="tableau" class="table-wrapper">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>STATUT</th>
+                <th colspan="2">FONCTIONNAIRE</th>
+                <th colspan="2">CONTRACTUEL</th>
+                <th colspan="2">FRAM</th>
+                <th rowspan="2">TOTAL</th>
+            </tr>
+            <tr>
+                <th>SEXE</th>
+                <th>H</th><th>F</th>
+                <th>H</th><th>F</th>
+                <th>H</th><th>F</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                var matieres = new List<string> { "PROVISEUR", "PROVISEUR ADJOINT", "ECONOME", "SG", "PROVISORAT", "SCOLARITE", "INFO", "SURVEILLANT", "COMPTABLE", "CDI", "LV II", "CAELF", "ILO", "EXAMEN", "LABO PC", "LABO SVT", "EMPL DE SERV", "INFIRMERIE", "GARDIEN" };
+
+                int totalH_Fonctionnaire = 0, totalF_Fonctionnaire = 0;
+                int totalH_Contractuel = 0, totalF_Contractuel = 0;
+                int totalH_FRAM = 0, totalF_FRAM = 0;
+                int totalGeneral = 0;
+            }
+
+            @foreach (var matiere in matieres)
+            {
+                // Mise à jour des accès propriétés avec le nouveau modèle
+                var hFonctionnaire = Model.Count(p => p.Matiere?.Trim().ToUpper() == matiere.ToUpper() && p.Sexe == "H" && p.Statut?.ToUpper() == "FONCTIONNAIRE");
+                var fFonctionnaire = Model.Count(p => p.Matiere?.Trim().ToUpper() == matiere.ToUpper() && p.Sexe == "F" && p.Statut?.ToUpper() == "FONCTIONNAIRE");
+
+                var hContractuel = Model.Count(p => p.Matiere?.Trim().ToUpper() == matiere.ToUpper() && p.Sexe == "H" && p.Statut?.ToUpper() == "EFA");
+                var fContractuel = Model.Count(p => p.Matiere?.Trim().ToUpper() == matiere.ToUpper() && p.Sexe == "F" && p.Statut?.ToUpper() == "EFA");
+
+                var hFRAM = Model.Count(p => p.Matiere?.Trim().ToUpper() == matiere.ToUpper() && p.Sexe == "H" && p.Statut?.ToUpper() == "VACATAIRE");
+                var fFRAM = Model.Count(p => p.Matiere?.Trim().ToUpper() == matiere.ToUpper() && p.Sexe == "F" && p.Statut?.ToUpper() == "VACATAIRE");
+
+                var total = hFonctionnaire + fFonctionnaire + hContractuel + fContractuel + hFRAM + fFRAM;
+
+                totalH_Fonctionnaire += hFonctionnaire;
+                totalF_Fonctionnaire += fFonctionnaire;
+                totalH_Contractuel += hContractuel;
+                totalF_Contractuel += fContractuel;
+                totalH_FRAM += hFRAM;
+                totalF_FRAM += fFRAM;
+                totalGeneral += total;
+
+                <tr>
+                    <td>@matiere</td>
+                    <td>@hFonctionnaire</td>
+                    <td>@fFonctionnaire</td>
+                    <td>@hContractuel</td>
+                    <td>@fContractuel</td>
+                    <td>@hFRAM</td>
+                    <td>@fFRAM</td>
+                    <td><b>@total</b></td>
+                </tr>
+            }
+
+            <tr style="font-weight: bold; background-color: #f8f9fa;">
+                <td>Total</td>
+                <td>@totalH_Fonctionnaire</td>
+                <td>@totalF_Fonctionnaire</td>
+                <td>@totalH_Contractuel</td>
+                <td>@totalF_Contractuel</td>
+                <td>@totalH_FRAM</td>
+                <td>@totalF_FRAM</td>
+                <td>@totalGeneral</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<p style="text-align: center;"><em>Fait à Fianarantsoa, le <span id="cert_date1"></span></em></p>
+
+<button onclick="imprimerTableau()">🖨️ Imprimer</button>
+<a href="@Url.Action("Create", "Personnels")" class="btn btn-primary">Ajouter un personnel</a>
+
+<script>
+    // Remplissage de la date dynamiquement
+    let options = { day: "numeric", month: "long", year: "numeric" };
+    let today = new Date().toLocaleDateString("fr-FR", options);
+    document.getElementById("cert_date").innerText = today;
+    document.getElementById("cert_date1").innerText = today;
+</script>

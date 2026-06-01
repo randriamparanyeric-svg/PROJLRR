@@ -1,0 +1,61 @@
+<h1>Recherche d'étudiants</h1>
+
+<form asp-controller="Search" asp-action="SearchResults" method="post">
+    <input type="text" name="searchTerm" placeholder="Entrez un numéro ou un nom" required />
+    <button type="submit">Rechercher</button>
+</form>
+@if (Model != null && Model.Count > 0)
+{
+    <h2>Résultats de la recherche :</h2>
+    <table>
+        <thead>
+            <tr>
+            <th>Num</th>
+            <th>MATRICULE</th>
+            <th>NOM_ET_PRENOMS</th>
+            <th>CIN</th>
+            <th>DEC</th>
+            <th>CORPS</th>
+            <th>MATIERE</th>
+            <th>DATENAISS</th>
+            <th>LIEUDENAISS</th>
+            <th>SEXE</th>
+            <th>STATUT</th>
+            <th>DATEDENTRE</th>
+            <th>DATEPRISE</th>
+            <th>DIPLOMEAC</th>
+            <th>DIPLOMEPED</th>
+            <th>CONTACT</th>
+            <th>FONCTION</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var student in Model)
+        {
+            <tr>
+            <td>@student.Num</td>
+            <td>@student.MATRICULE</td>
+            <td>@student.NOM_ET_studentRENOMS</td>
+            <td>@student.CIN</td>
+            <td>@student.DEC</td>
+            <td>@student.CORstudentS</td>
+            <td>@student.MATIERE</td>
+            <td>@student.DATENAISS.ToShortDateString()</td>
+            <td>@student.LIEUDENAISS</td>
+            <td>@student.SEXE</td>
+            <td>@student.STATUT</td>
+            <td>@student.DATEDENTRE</td>
+            <td>@student.DATEDEstudentRISE</td>
+            <td>@student.DIstudentLOMEAC</td>
+            <td>@student.DIstudentLOMEstudentED</td>
+            <td>@student.CONTACT</td>
+            <td>@student.FONCTION</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+else if (Model != null)
+{
+    <p>Aucun résultat trouvé.</p>
+}

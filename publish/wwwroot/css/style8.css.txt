@@ -1,0 +1,17 @@
+<script>
+    $(document).ready(function () {
+        $("#PersonnelNom").keyup(function () {
+            let searchValue = $(this).val().toLowerCase().trim(); // Convertir en minuscule et supprimer espaces inutiles
+
+            $(".dechargeRow").each(function () {
+                let personnelName = $(this).data("personnel");
+
+                if (personnelName.includes(searchValue) || searchValue === "") {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+        });
+    });
+</script>

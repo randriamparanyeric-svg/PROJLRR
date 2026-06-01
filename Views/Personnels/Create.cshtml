@@ -1,0 +1,244 @@
+@model PROJLRR.Models.Personnel
+
+@{
+    Layout = "/Views/Shared/Layout.cshtml";
+    ViewData["Title"] = "Ajouter un personnel";
+}
+
+<style>
+    .custom-label {
+        font-weight: bold;
+        color: #0056b3;
+        display: block;
+        margin-bottom: 5px;
+    }
+</style>
+
+<h2>Ajouter un personnel</h2>
+
+<form method="post" asp-action="Create">
+
+    <div class="form-group mb-3">
+        <label for="MATRICULE" class="custom-label">Matricule</label>
+        <input type="text" id="MATRICULE" name="MATRICULE" class="form-control"
+               value="@Model.Matricule"
+               placeholder="Ex: 123456 ou EN COURS" />
+    </div>
+
+
+    <div class="form-group mb-3">
+    <label for="NomEtPrenoms" class="custom-label">Nom et Prénoms</label>
+    <input type="text" id="NomEtPrenoms" name="NomEtPrenoms" class="form-control" value="@Model.NomEtPrenoms" />
+</div>
+
+    <div class="form-group mb-3">
+        <label for="CIN" class="custom-label">CIN</label>
+        <input type="text" id="CIN" name="CIN" class="form-control" value="@Model.Cin" />
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="DEC" class="custom-label">Décision</label>
+        <input type="text" id="DEC" name="DEC" class="form-control" value="@Model.Dec" />
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="CORPS" class="custom-label">Corps</label>
+        <input type="text" id="CORPS" name="CORPS" class="form-control" value="@Model.Corps" />
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="MATIERE" class="custom-label">Matière ou Bureau</label>
+        <select id="MATIERE" name="MATIERE" class="form-control">
+            <option value="" disabled selected>Sélectionner une matière</option>
+            <option value="ALL" selected="@(Model.Matiere == "ALL" ? "selected" : null)">ALLEMAND</option>
+            <option value="ANG" selected="@(Model.Matiere == "ANG" ? "selected" : null)">ANGLAIS</option>
+            <option value="EAC" selected="@(Model.Matiere == "EAC" ? "selected" : null)">EDUCATION A LA CITOYENNETE (EAC)</option>
+            <option value="EPS" selected="@(Model.Matiere == "EPS" ? "selected" : null)">EPS</option>
+            <option value="FRA" selected="@(Model.Matiere == "FRA" ? "selected" : null)">FRANCAIS</option>
+            <option value="HG" selected="@(Model.Matiere == "HG" ? "selected" : null)">HISTO-GEO</option>
+            <option value="MAT" selected="@(Model.Matiere == "MAT" ? "selected" : null)">MATHEMATIQUES</option>
+            <option value="MLG" selected="@(Model.Matiere == "MLG" ? "selected" : null)">MALAGASY</option>
+            <option value="PC" selected="@(Model.Matiere == "PC" ? "selected" : null)">PHYSIQUE-CHIMIE</option>
+            <option value="PHI" selected="@(Model.Matiere == "PHI" ? "selected" : null)">PHILOSOPHIE</option>
+            <option value="RUS" selected="@(Model.Matiere == "RUS" ? "selected" : null)">RUSSE</option>
+            <option value="ESP" selected="@(Model.Matiere == "ESP" ? "selected" : null)">ESPAGNOL</option>
+            <option value="SES" selected="@(Model.Matiere == "SES" ? "selected" : null)">SCIENCE ECONOMIQUE ET SOCIAL (SES)</option>
+            <option value="SVT" selected="@(Model.Matiere == "SVT" ? "selected" : null)">SCIENCE DE LA VIE ET DE LA TERRE (SVT)</option>
+            <option value="PROVISEUR" selected="@(Model.Matiere == "PROVISEUR" ? "selected" : null)">PROVISEUR</option>
+            <option value="PROVISEUR ADJOINT" selected="@(Model.Matiere == "PROVISEUR ADJOINT" ? "selected" : null)">PROVISEUR ADJOINT</option>
+            <option value="SG" selected="@(Model.Matiere == "SG" ? "selected" : null)">SURVEILLANT GENERAL</option>
+            <option value="ECONOME" selected="@(Model.Matiere == "ECONOME" ? "selected" : null)">ECONOME</option>
+            <option value="PROVISORAT" selected="@(Model.Matiere == "PROVISORAT" ? "selected" : null)">PROVISORAT</option>
+            <option value="SCOLARITE" selected="@(Model.Matiere == "SCOLARITE" ? "selected" : null)">SCOLARITE</option>
+            <option value="INFO" selected="@(Model.Matiere == "INFO" ? "selected" : null)">INFO</option>
+            <option value="SURVEILLANT" selected="@(Model.Matiere == "SURVEILLANT" ? "selected" : null)">SURVEILLANT</option>
+            <option value="COMPTABLE" selected="@(Model.Matiere == "COMPTABLE" ? "selected" : null)">COMPTABLE</option>
+            <option value="CDI" selected="@(Model.Matiere == "CDI" ? "selected" : null)">CDI</option>
+            <option value="LV II" selected="@(Model.Matiere == "LV II" ? "selected" : null)">LV II</option>
+            <option value="CAELF" selected="@(Model.Matiere == "CAELF" ? "selected" : null)">CAELF</option>
+            <option value="ILO" selected="@(Model.Matiere == "ILO" ? "selected" : null)">ILO</option>
+            <option value="EXAMEN" selected="@(Model.Matiere == "EXAMEN" ? "selected" : null)">EXAMEN</option>
+            <option value="LABO PC" selected="@(Model.Matiere == "LABO PC" ? "selected" : null)">LABO PC</option>
+            <option value="LABO SVT" selected="@(Model.Matiere == "LABO SVT" ? "selected" : null)">LABO SVT</option>
+            <option value="EMPL DE SERV" selected="@(Model.Matiere == "EMPL DE SERV" ? "selected" : null)">EMPL DE SERV</option>
+            <option value="INFIRMERIE" selected="@(Model.Matiere == "INFIRMERIE" ? "selected" : null)">INFIRMERIE</option>
+            <option value="GARDIEN" selected="@(Model.Matiere == "GARDIEN" ? "selected" : null)">GARDIEN</option>
+        </select>
+    </div>
+
+    <div class="form-group mb-3">
+    <label for="DATENAISS" class="custom-label">Date de naissance</label>
+    <input type="text" id="DATENAISS" name="DATENAISS" class="form-control"
+           value="@(DateTime.TryParse(Model.Datenaiss, out var d1) ? d1.ToString("dd/MM/yyyy") : "")"
+           placeholder="jj/mm/aaaa" />
+</div>
+
+    <div class="form-group mb-3">
+        <label for="LIEUDENAISS" class="custom-label">Lieu de naissance</label>
+        <input type="text" id="LIEUDENAISS" name="LIEUDENAISS" class="form-control" value="@Model.Lieudenaiss" />
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="SEXE" class="custom-label">Sexe</label>
+        <select id="SEXE" name="SEXE" class="form-control">
+            <option value="" disabled selected>Sélectionner le Sexe</option>
+            <option value="H" selected="@(Model.Sexe == "MASCULIN" ? "selected" : null)">MASCULIN</option>
+            <option value="F" selected="@(Model.Sexe == "FEMININ" ? "selected" : null)">FEMININ</option>
+        </select>
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="STATUT" class="custom-label">Statut</label>
+        <select id="STATUT" name="STATUT" class="form-control">
+            <option value="" disabled selected>Sélectionner le Statut</option>
+            <option value="EFA" selected="@(Model.Statut == "EFA" ? "selected" : null)">EFA</option>
+            <option value="FONCTIONNAIRE" selected="@(Model.Statut == "FONCTIONNAIRE" ? "selected" : null)">FONCTIONNAIRE</option>
+            <option value="VACATAIRE" selected="@(Model.Statut == "VACATAIRE" ? "selected" : null)">VACATAIRE</option>
+        </select>
+    </div>
+
+    <div class="form-group mb-3">
+    <label for="DATEDENTRE" class="custom-label">Date d'entrée dans l'administration</label>
+    <input type="text" id="DATEDENTRE" name="DATEDENTRE" class="form-control"
+           value="@(DateTime.TryParse(Model.Datedentre, out var d2) ? d2.ToString("dd/MM/yyyy") : "")"
+           placeholder="jj/mm/aaaa" />
+</div>
+
+    <div class="form-group mb-3">
+    <label for="DATEDEPRISE" class="custom-label">Date de prise de service au Lyceé</label>
+    <input type="text" id="DATEDEPRISE" name="DATEDEPRISE" class="form-control"
+           value="@(DateTime.TryParse(Model.Datedeprise, out var d3) ? d3.ToString("dd/MM/yyyy") : "")"
+           placeholder="jj/mm/aaaa" />
+</div>
+
+    <div class="form-group mb-3">
+        <label for="DIPLOMEAC" class="custom-label">Diplôme Academique le plus élevé</label>
+        <select id="DIPLOMEAC" name="DIPLOMEAC" class="form-control">
+            <option value="" disabled selected>Sélectionner le diplome Academique le plus élevé</option>
+            <option value="BEPC" selected="@(Model.Diplomeac == "BEPC" ? "selected" : null)">BEPC</option>
+            <option value="BACC" selected="@(Model.Diplomeac == "BACC" ? "selected" : null)">BACCALAUREAT</option>
+            <option value="DTS" selected="@(Model.Diplomeac == "DTS" ? "selected" : null)">Diplome de Technicien Superieur (BACC+2)</option>
+            <option value="LICENCE" selected="@(Model.Diplomeac == "LICENCE" ? "selected" : null)">LICENCE(BACC+3)</option>
+            <option value="MAITRISE" selected="@(Model.Diplomeac == "MAITRISE" ? "selected" : null)">MAITRISE(BACC+4)</option>
+            <option value="MASTER" selected="@(Model.Diplomeac == "MASTER" ? "selected" : null)">MASTER(BACC+5)</option>
+        </select>
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="DIPLOMEPED" class="custom-label">Diplôme Pédagogique le plus élevé</label>
+        <select id="DIPLOMEPED" name="DIPLOMEPED" class="form-control">
+            <option value="" disabled selected>Sélectionner le diplome Pedagogique le plus élevé</option>
+            <option value="LAPEN" selected="@(Model.Diplomeped == "LAPEN" ? "selected" : null)">LAPEN</option>
+            <option value="MAPEN" selected="@(Model.Diplomeped == "MAPEN" ? "selected" : null)">MAPEN</option>
+            <option value="CAPEN" selected="@(Model.Diplomeped == "CAPEN" ? "selected" : null)">CAPEN</option>
+        </select>
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="CONTACT" class="custom-label">Contact</label>
+        <input type="text" id="CONTACT" name="CONTACT" class="form-control" value="@Model.Contact" />
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="FONCTION" class="custom-label">FONCTION</label>
+        <select id="FONCTION" name="FONCTION" class="form-control">
+            <option value="" disabled selected>Sélectionner la fonction</option>
+            <option value="PE" selected="@(Model.Fonction == "PE" ? "selected" : null)">PERSONNEL ENSEIGNANT</option>
+            <option value="PA" selected="@(Model.Fonction == "PA" ? "selected" : null)">PERSONNEL ADMINISTRATIF</option>
+        </select>
+    </div>
+
+    <div class="form-group mb-3"><label for="PERAV" class="custom-label">1°AVANCEMENT</label><input type="text" id="PERAV" name="PERAV" class="form-control" value="@Model.Perav" /></div>
+    <div class="form-group mb-3"><label for="DEMAV" class="custom-label">2°AVANCEMENT</label><input type="text" id="DEMAV" name="DEMAV" class="form-control" value="@Model.Demav" /></div>
+    <div class="form-group mb-3"><label for="TEMAV" class="custom-label">3°AVANCEMENT</label><input type="text" id="TEMAV" name="TEMAV" class="form-control" value="@Model.Temav" /></div>
+    <div class="form-group mb-3"><label for="QEMAV" class="custom-label">4°AVANCEMENT</label><input type="text" id="QEMAV" name="QEMAV" class="form-control" value="@Model.Qemav" /></div>
+    <div class="form-group mb-3"><label for="CEMAV" class="custom-label">5°AVANCEMENT</label><input type="text" id="CEMAV" name="CEMAV" class="form-control" value="@Model.Cemav" /></div>
+    <div class="form-group mb-3"><label for="SEMAV" class="custom-label">6°AVANCEMENT</label><input type="text" id="SEMAV" name="SEMAV" class="form-control" value="@Model.Semav" /></div>
+    <div class="form-group mb-3"><label for="SEPMAV" class="custom-label">7°AVANCEMENT</label><input type="text" id="SEPMAV" name="SEPMAV" class="form-control" value="@Model.Sepmav" /></div>
+    <div class="form-group mb-3"><label for="HEMAV" class="custom-label">8°AVANCEMENT</label><input type="text" id="HEMAV" name="HEMAV" class="form-control" value="@Model.Hemav" /></div>
+    <div class="form-group mb-3"><label for="NEMAV" class="custom-label">9°AVANCEMENT</label><input type="text" id="NEMAV" name="NEMAV" class="form-control" value="@Model.Nemav" /></div>
+    <div class="form-group mb-3"><label for="DXEMAV" class="custom-label">10°AVANCEMENT</label><input type="text" id="DXEMAV" name="DXEMAV" class="form-control" value="@Model.Dxemav" /></div>
+    <div class="form-group mb-3"><label for="ONEMAV" class="custom-label">11°AVANCEMENT</label><input type="text" id="ONEMAV" name="ONEMAV" class="form-control" value="@Model.Onemav" /></div>
+    <div class="form-group mb-3"><label for="DOU" class="custom-label">12°AVANCEMENT</label><input type="text" id="DOU" name="DOU" class="form-control" value="@Model.Dou" /></div>
+    <div class="form-group mb-3"><label for="TREI" class="custom-label">13°AVANCEMENT</label><input type="text" id="TREI" name="TREI" class="form-control" value="@Model.Trei" /></div>
+    <div class="form-group mb-3"><label for="QUAT" class="custom-label">14°AVANCEMENT</label><input type="text" id="QUAT" name="QUAT" class="form-control" value="@Model.Quat" /></div>
+    <div class="form-group mb-3"><label for="QUIN" class="custom-label">15°AVANCEMENT</label><input type="text" id="QUIN" name="QUIN" class="form-control" value="@Model.Quin" /></div>
+    <div class="form-group mb-3"><label for="SEIZ" class="custom-label">16°AVANCEMENT</label><input type="text" id="SEIZ" name="SEIZ" class="form-control" value="@Model.Seiz" /></div>
+
+    <div class="mt-4">
+        <button type="submit" class="btn btn-success btn-lg">
+            <i class="fas fa-save"></i> Enregistrer
+        </button>
+        <a href="@Url.Action("Index", "Personnels")" class="btn btn-secondary btn-lg">
+            <i class="fas fa-arrow-left"></i> Retour
+        </a>
+    </div>
+</form>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.6/jquery.inputmask.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        
+        // 1. GESTION DES DOUBLONS (venant du C#)
+        var duplicateMsg = "@Html.Raw(TempData["DuplicateError"] ?? "")";
+        if (duplicateMsg.trim() !== "") {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Doublon détecté',
+                html: duplicateMsg, // Html utilisé ici car le message contient <b>
+                confirmButtonColor: '#f39c12',
+                confirmButtonText: 'Rectifier'
+            });
+        }
+
+        // 2. GESTION DES ERREURS SYSTÈME
+        var errorMsg = "@Html.Raw(TempData["Error"] ?? "")";
+        if (errorMsg.trim() !== "") {
+            Swal.fire({
+                icon: 'error',
+                title: 'Erreur système',
+                text: errorMsg
+            });
+        }
+    });
+
+    // 3. VERIFICATION CÔTÉ CLIENT (avant validation)
+    document.querySelector('form').addEventListener('submit', function (event) {
+        var fonctionSelect = document.getElementById('FONCTION');
+        
+        // Vérification de sécurité
+        if (!fonctionSelect || fonctionSelect.value === "" || fonctionSelect.value === null) {
+            event.preventDefault(); 
+            
+            Swal.fire({
+                icon: 'error',
+                title: 'Champ obligatoire',
+                text: 'Veuillez sélectionner une fonction !',
+                confirmButtonText: 'OK'
+            });
+        }
+    });
+</script>

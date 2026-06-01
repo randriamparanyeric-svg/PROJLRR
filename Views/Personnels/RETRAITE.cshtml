@@ -1,0 +1,93 @@
+@model IEnumerable<PROJLRR.Models.Personnel>
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Personnel en âge de retraite";
+    var anneeActuelle = DateTime.Now.Year;
+}
+
+<script>
+    function imprimerTableau() {
+        var contenu = document.getElementById('tableau').innerHTML;
+        var pageImpression = window.open('', '_blank', 'width=800,height=600');
+        if (!pageImpression) {
+            alert("Veuillez autoriser les pop-ups pour imprimer.");
+            return;
+        }
+        
+        pageImpression.document.write(`
+            <html>
+            <head>
+                <title>Impression - Retraite</title>
+                <style>
+                    body { font-family: Arial, sans-serif; }
+                    table { width: 100%; border-collapse: collapse; }
+                    th, td { border: 1px solid black; padding: 8px; text-align: left; }
+                    th { background-color: #f2f2f2; }
+                    .table-wrapper { margin-top: 20px; }
+                </style>
+            </head>
+            <body>
+                <h2 align="center">Liste des personnels partis à la retraite en @anneeActuelle</h2>
+                ${contenu}
+            </body>
+            </html>`);
+
+        pageImpression.document.close();
+        pageImpression.focus();
+        setTimeout(() => { pageImpression.print(); pageImpression.close(); }, 500);
+    }
+</script>
+
+<h2>Liste des personnels en âge de retraite (@anneeActuelle)</h2>
+<link rel="stylesheet" href="~/css/style3.css" />
+
+<div id="tableau" class="table-wrapper">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Num</th>
+                <th>MATRICULE</th>
+                <th>NOM ET PRÉNOMS</th>
+                <th>CONTACT</th>
+                <th>FONCTION</th>
+                <th>DATE DE NAISSANCE</th>
+                <th>ÂGE</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                // Filtrage avec vérification de nullité pour éviter les crashs
+                var retraitables = Model
+                    .Where(p => !string.IsNullOrEmpty(p.Datenaiss) && p.Datenaiss.Length >= 4)
+                    .Select(p => new {
+                        Personnel = p,
+                        AnneeNaiss = int.TryParse(p.Datenaiss.Substring(p.Datenaiss.Length - 4), out int an) ? an : 0
+                    })
+                    .Where(x => x.AnneeNaiss > 0 && (anneeActuelle - x.AnneeNaiss) >= 60)
+                    .OrderBy(x => x.AnneeNaiss)
+                    .ToList();
+
+                int index = 1;
+            }
+
+            @foreach (var item in retraitables)
+            {
+                int age = anneeActuelle - item.AnneeNaiss;
+                <tr>
+                    <td>@index</td>
+                    <td>@item.Personnel.Matricule</td>
+                    <td>@item.Personnel.NomEtPrenoms</td>
+                    <td>@item.Personnel.Contact</td>
+                    <td>@item.Personnel.Fonction</td>
+                    <td>@item.Personnel.Datenaiss</td>
+                    <td>@age ans</td>
+                </tr>
+                index++;
+            }
+        </tbody>
+    </table>
+</div>
+
+<button class="btn btn-secondary" onclick="imprimerTableau()">🖨️ Imprimer</button>
+<a href="@Url.Action("Create", "Personnels")" class="btn btn-primary">Ajouter un personnel</a>

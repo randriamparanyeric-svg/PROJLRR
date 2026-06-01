@@ -1,0 +1,101 @@
+@model List<PROJLRR.Models.Personnel>
+@{
+    Layout = "/Views/Shared/Layout.cshtml";
+    ViewData["Title"] = "Liste des personnels";
+}
+
+<script>
+function imprimerTableau() {
+    var contenu = document.getElementById('tableau').innerHTML;
+    
+    var pageImpression = window.open('', '_blank', 'width=800,height=600');
+    if (!pageImpression) {
+        alert("Veuillez autoriser les pop-ups pour imprimer.");
+        return;
+    }
+    
+    pageImpression.document.write(`
+        <html>
+        <head>
+            <title>Impression</title>
+            <style>
+                body { font-family: Arial, sans-serif; }
+                table { width: 100%; border-collapse: collapse; }
+                th, td { border: 1px solid black; padding: 8px; text-align: center; } 
+                th { background-color: #f2f2f2; }
+                td:nth-child(3){ text-align: left; } 
+                td:nth-child(5), td:nth-child(4) { width: 1px; white-space: nowrap; } 
+                .table-wrapper { margin-top: 20px; }
+            </style>
+        </head>
+        <body>
+            <h2>Liste des personnels</h2>
+            ${contenu}
+        </body>
+        </html>`);
+
+    pageImpression.document.close();
+    pageImpression.focus();
+    setTimeout(() => { pageImpression.print(); pageImpression.close(); }, 500);
+}
+</script>
+
+<h2>Liste des personnels</h2>
+
+<link rel="stylesheet" href="~/css/style3.css" />
+<div id="tableau" class="table-wrapper table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Num</th>
+                <th>MATRICULE</th>
+                <th>NOM ET PRÉNOMS</th>
+                <th>CIN</th>
+                <th class="col-contact">CONTACT</th>
+                <th>FONCTION</th>
+                <th>MATIERE</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                // Utilisation des nouveaux noms de propriétés (PascalCase)
+                var personnelsFiltres = Model.OrderBy(p => p.Matiere).ToList();
+                int index = 1; 
+            }
+
+            @foreach (var personnel in personnelsFiltres)
+            {
+                <tr>
+                    <td>@index</td>
+                    <td>@personnel.Matricule</td>
+                    <td>@personnel.NomEtPrenoms</td>
+                    <td>@personnel.Cin</td>
+                    <td class="col-contact">@personnel.Contact</td>
+                    <td>@personnel.Fonction</td>
+                    <td>@personnel.Matiere</td>
+                </tr>  
+                index++; 
+            }
+        </tbody>
+    </table>
+</div>
+
+<button class="btn btn-secondary" onclick="imprimerTableau()">🖨️ Imprimer</button>
+<a href="@Url.Action("Create", "Personnels")" class="btn btn-primary">Ajouter un personnel</a>
+ 
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var successMsg = "@Html.Raw(TempData["Success"])";
+
+            if (successMsg && successMsg.trim() !== "") {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Réussi !',
+                    text: successMsg,
+                    timer: 3000,
+                    showConfirmButton: false,
+                    timerProgressBar: true
+                });
+            }
+        });
+    </script>
