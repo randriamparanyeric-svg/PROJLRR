@@ -3,148 +3,277 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewData["Title"] - Mon Application</title>
+    <title>@ViewData["Title"] - Gestion LRR</title>
 
-    <!-- Bootstrap -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-  <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="~/css/site.css" />
+    
     <style>
+        /* --- CONFIGURATION DE LA POLICE INTER INTERNE (NOMS RÉELS) --- */
+@@font-face {
+    font-family: 'Inter';
+    src: url('/css/fonts/inter-latin-400-normal.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@@font-face {
+    font-family: 'Inter';
+    src: url('/css/fonts/inter-latin-700-normal.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+        /* --- VARIABLES DE DESIGN --- */
+        :root {
+            --primary-color: #4f46e5;       /* Indigo moderne */
+            --primary-hover: #4338ca;
+            --dark-surface: #0f172a;        /* Ardoise foncé professionnel */
+            --bg-body: #f8fafc;             /* Gris très doux contemporain */
+            --text-main: #1e293b;
+            --radius-md: 8px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -1px rgba(0,0,0,0.04);
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
-        .container {
-            margin-top: 20px;
-            max-width: 1200px;
+        /* --- HEADER & NAVIGATION --- */
+        .header-banner {
+            background-color: var(--dark-surface);
+            border-bottom: 1px solid #1e293b;
         }
 
-        footer {
-            text-align: center;
-            padding: 15px;
-            margin-top: 20px;
-            background-color: #343a40;
-            color: White;
+        .navbar-custom {
+            background-color: #1e293b;
+            box-shadow: var(--shadow-sm);
+            padding: 0.6rem 1rem;
         }
 
-        /* Style pour limiter la largeur du contenu sur grand écran */
-        .content-wrapper {
-            max-width: 900px;
-            margin: auto;
+        .navbar-custom .nav-link {
+            color: #cbd5e1 !important;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: color 0.2s ease;
         }
 
-        /* Amélioration du menu sur mobile */
-        .navbar-toggler {
-            border: none;
+        .navbar-custom .nav-link:hover,
+        .navbar-custom .nav-item.show .nav-link {
+            color: #ffffff !important;
         }
 
-        .navbar-nav .nav-item {
-            margin-right: 10px;
+        /* Menu Déroulant Élégant */
+        .dropdown-menu {
+            border: 1px solid #e2e8f0;
+            box-shadow: var(--shadow-md);
+            border-radius: var(--radius-md);
+            padding: 0.5rem;
+            animation: fadeIn 0.2s ease;
         }
 
-        /* Réduction du padding du bouton Déconnexion sur mobile */
-  
-        max-width: 768px {
-        .navbar-nav {
+        .dropdown-item {
+            border-radius: 6px;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            color: #334155;
+            font-weight: 500;
+            transition: all 0.15s ease;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            transform: translateX(3px);
+        }
+
+        /* --- CONTENEUR DE CONTENU PRINCIPAL --- */
+        .main-content {
+            flex: 1 0 auto;
             width: 100%;
-            text-align: center;
+            padding: 1.5rem 0;
         }
-        .col-contact
-        { width: 1000px;
-        min-width : 500px;
-        word-break:break-word;    }
-        .btn {
-            padding: 8px 12px;
-            font-size: 14px;
-        }
+
+        /* --- FOOTER ÉLÉGANT --- */
         footer {
-            font-size: 14px;
-            padding: 10px;
+            flex-shrink: 0;
+            text-align: center;
+            padding: 1.5rem;
+            background-color: #ffffff;
+            color: #64748b;
+            font-size: 0.85rem;
+            border-top: 1px solid #e2e8f0;
+            font-weight: 500;
         }
-    }
+
+        /* Animation d'affichage des menus (Échappement Razor @@) */
+        @@keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
 
-    <!-- Barre de navigation -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container-fluid d-flex flex-column">
-          <!-- Ligne supérieure avec le logo et le texte "LYCÉE" centré -->
-        <div class="d-flex w-100 align-items-center justify-content-center py-2">
-            <!-- Logo à gauche -->
-            <img src="/uploads/LOGO LRR.png" alt="Logo" class="me-2" style="height: 40px;">
-            <span class="text-white fw-bold fs-4">LYCEE RAHERIVELO RAMAMONJY FIANARANTSOA</span>
+    <header class="header-banner py-3">
+        <div class="container-fluid d-flex align-items-center justify-content-center text-center px-4">
+            <img src="/uploads/LOGO LRR.png" alt="Logo LRR" class="me-3" style="height: 48px; width: auto; object-fit: contain;">
+            <h1 class="text-white fw-bold m-0" style="font-size: 1.35rem; letter-spacing: 0.03em;">
+                LYCÉE RAHERIVELO RAMAMONJY FIANARANTSOA
+            </h1>
         </div>
-        <div class="d-flex w-100 justify-content-between align-items-center">
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+    </header>
+
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+        <div class="container-fluid px-4">
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-        </div>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center gap-1" href="#" id="menuPrincipal" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            📁 MENU PRINCIPAL
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="menuPrincipal">
+                            <li><a class="dropdown-item" href="@Url.Action("SearchResults", "Search")">🔍 Recherche</a></li>
+                            <div class="dropdown-divider"></div>
+                            <li><a class="dropdown-item" href="@Url.Action("Index", "Personnels")">📜 Liste des PA et PE</a></li>
+                            <li><a class="dropdown-item" href="@Url.Action("IndexEFA", "Personnels")">👤 Liste des PA</a></li>
+                            <li><a class="dropdown-item" href="@Url.Action("IndexPE", "Personnels")">👨‍🏫 Liste des PE</a></li>
+                            <li><a class="dropdown-item" href="@Url.Action("Create", "Personnels")">➕ Ajouter du Personnel</a></li>
+                            <div class="dropdown-divider"></div>
+                            <li><a class="dropdown-item" href="@Url.Action("STAT", "Personnels")">📊 Statistique PE</a></li>
+                            <li><a class="dropdown-item" href="@Url.Action("STAT2", "Personnels")">📈 Statistique PA</a></li>
+                            <li><a class="dropdown-item" href="@Url.Action("RETRAITE", "Personnels")">🧓 Retraités cette année</a></li>
+                            <li><a class="dropdown-item" href="@Url.Action("Archive", "Search")">📁 Liste des personnels archivés</a></li>
+                            <div class="dropdown-divider"></div>
+                            <li><a class="dropdown-item" href="javascript:void(0);" onclick="naviguerVersPageSecurisee('@Url.Action("AddArticle", "Article")')">🛒 Ajouter Fournitures</a></li>
+                            <li><a class="dropdown-item" href="javascript:void(0);" onclick="naviguerVersPageSecurisee('@Url.Action("Index", "Article")')">📦 Liste des Articles</a></li>
+                            <li><a class="dropdown-item" href="javascript:void(0);" onclick="naviguerVersPageSecurisee('@Url.Action("Add", "Decharge")')">➕ Faire une décharge</a></li>
+                            <li><a class="dropdown-item" href="javascript:void(0);" onclick="naviguerVersPageSecurisee('@Url.Action("Index", "Decharge")')">📜 Liste des décharges</a></li>
+                        </ul>
+                    </li>
+                </ul>
 
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav mx-auto">
-                <!-- MENU PRINCIPAL AVEC TOUS LES LIENS DÉROULANTS -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="menuPrincipal" role="button"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                        MENU PRINCIPAL
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="menuPrincipal">
-                        <li><a class="dropdown-item" href="@Url.Action("SearchResults", "Search")">🔍 RECHERCHE</a></li>
-                        <li><a class="dropdown-item" href="@Url.Action("Index", "Personnels")">📜 LISTE DES PA ET PE</a></li>
-                        <li><a class="dropdown-item" href="@Url.Action("IndexEFA", "Personnels")">👤 LISTE DES PA</a></li>
-                        <li><a class="dropdown-item" href="@Url.Action("IndexPE", "Personnels")">👨‍🏫 LISTE DES PE</a></li>
-                        <li><a class="dropdown-item" href="@Url.Action("Create", "Personnels")">➕ AJOUTER DU PERSONNEL</a></li>
-                        <li><a class="dropdown-item" href="@Url.Action("STAT", "Personnels")">📊 STATISTIQUE PE</a></li>
-                        <li><a class="dropdown-item" href="@Url.Action("STAT2", "Personnels")">📈 STATISTIQUE PA</a></li>
-                        <li><a class="dropdown-item" href="@Url.Action("RETRAITE", "Personnels")">🧓 RETRAITÉS CETTE ANNÉE</a></li>
-                        <li><a class="dropdown-item" href="javascript:void(0);" onclick="naviguerVersPageSecurisee('@Url.Action("AddArticle", "Article")')">🛒 AJOUTER FOURNITURES</a></li>
-                        <li><a class="dropdown-item" href="javascript:void(0);" onclick="naviguerVersPageSecurisee('@Url.Action("Index", "Article")')">📦 LISTE DES ARTICLES</a></li>
-                        <li><a class="dropdown-item" href="javascript:void(0);" onclick="naviguerVersPageSecurisee('@Url.Action("Add", "Decharge")')"> ➕ FAIRE UNE DECHARGE</a></li>
-                        <li><a class="dropdown-item" href="javascript:void(0);" onclick="naviguerVersPageSecurisee('@Url.Action("Index", "Decharge")')">📜 LISTE DES DECHARGES</a></li>
-                    </ul>
-                </li>
-            </ul>
-
-            <!-- Vérification si l'utilisateur est connecté -->
-            <ul class="navbar-nav ms-auto">
-    @if (User.Identity.IsAuthenticated)
-    {
-        <li class="nav-item">
-            <span class="nav-link text-white">👋 Bienvenue, @User.Identity.Name</span>
-        </li>
-        <li class="nav-item ms-lg-2">
-            <a class="btn btn-danger btn-sm" href="@Url.Action("Logout", "Account")">Déconnexion</a>
-        </li>
-    }
-    else
-    {
-        <li class="nav-item">
-            <a class="btn btn-primary btn-sm" href="@Url.Action("Login", "Account")">Connexion</a>
-        </li>
-    }
-</ul>
-            </ul>
-        </div>
-
+                <ul class="navbar-nav ms-auto align-items-center gap-2">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <li class="nav-item">
+                            <span class="nav-link text-white-50 small p-0">👋 Connecté : <b>@User.Identity.Name</b></span>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-outline-danger btn-sm px-3 rounded-pill" style="font-size: 0.85rem;" href="@Url.Action("Logout", "Account")" onclick="sessionStorage.clear();">Déconnexion</a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item">
+                            <a class="btn btn-primary btn-sm px-3 rounded-pill" style="font-size: 0.85rem; background-color: var(--primary-color); border: none;" href="@Url.Action("Login", "Account")">Connexion</a>
+                        </li>
+                    }
+                </ul>
+            </div>
         </div>
     </nav>
 
-    <!-- Contenu principal -->
-    <div class="container content-wrapper">
+    <main class="main-content">
         @RenderBody()
-    </div>
+    </main>
 
-    <!-- Pied de page -->
     <footer>
-        <p>&copy; @DateTime.Now.Year - LYCEE RAHERIVELO RAMAMONJY<br>FIANARANTSOA</p>
+        <div>&copy; @DateTime.Now.Year - Lycée Raherivelo Ramamonjy Fianarantsoa • Tous droits réservés.</div>
     </footer>
 
-    <!-- Scripts Bootstrap -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="@Url.Content("~/js/site.js")"></script>
-</body>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/sweetalert2.all.min.js"></script>
+    <script src="@Url.Content("~/js/site.js")"></script>
 
+    <script>
+        // 1. Fonction principale sécurisée
+        window.naviguerVersPageSecurisee = async function(url) {
+            if (await validerAccesGeneral()) {
+                window.location.href = url;
+            }
+        };
+
+        // 2. Pop-up d'autorisation d'accès SweetAlert2
+        window.validerAccesGeneral = async function() {
+            if (estAutorise()) return true;
+
+            const { value: pin } = await Swal.fire({
+                title: '🔒 SECTION SÉCURISÉE',
+                html: '<span style="color: #475569; font-size: 0.95rem;">Veuillez renseigner le code d\'autorisation requis.</span>',
+                input: 'password',
+                inputAttributes: {
+                    autocapitalize: 'off',
+                    autocorrect: 'off',
+                    autocomplete: 'new-password',
+                    spellcheck: 'false'
+                },
+                showCancelButton: true,
+                confirmButtonText: 'Confirmer',
+                cancelButtonText: 'Annuler',
+                confirmButtonColor: '#4f46e5',
+                cancelButtonColor: '#94a3b8',
+                background: '#ffffff',
+                inputValidator: (value) => {
+                    if (!value) return 'Le code d\'accès est obligatoire !';
+                }
+            });
+
+            if (pin === "2026") {
+                const maintenant = new Date().getTime();
+                sessionStorage.setItem("osief_access_unlocked", "true");
+                sessionStorage.setItem("osief_timestamp", maintenant);
+                
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Accès validé',
+                    background: '#ffffff',
+                    timer: 1000,
+                    showConfirmButton: false
+                });
+                
+                return true;
+            } else if (pin) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Échec',
+                    text: 'Code d\'accès incorrect.',
+                    confirmButtonColor: '#ef4444',
+                    background: '#ffffff'
+                });
+                return false;
+            }
+            return false;
+        };
+
+        // 3. Persistance glissante (1 heure)
+        function estAutorise() {
+            const uneHeure = 60 * 60 * 1000; 
+            const sessionTime = sessionStorage.getItem("osief_timestamp");
+            const maintenant = new Date().getTime();
+            
+            if (!sessionTime || (maintenant - sessionTime > uneHeure)) {
+                sessionStorage.removeItem("osief_access_unlocked");
+                sessionStorage.removeItem("osief_timestamp");
+                return false;
+            }
+            
+            sessionStorage.setItem("osief_timestamp", maintenant); 
+            return true;
+        }
+    </script>
+</body>
 </html>

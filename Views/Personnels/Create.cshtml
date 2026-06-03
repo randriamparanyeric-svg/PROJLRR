@@ -226,19 +226,65 @@
     });
 
     // 3. VERIFICATION CÔTÉ CLIENT (avant validation)
-    document.querySelector('form').addEventListener('submit', function (event) {
-        var fonctionSelect = document.getElementById('FONCTION');
+   // 3. VERIFICATION CÔTÉ CLIENT (avant validation)
+document.querySelector('form').addEventListener('submit', function (event) {
+    var fonctionSelect = document.getElementById('FONCTION');
+    var sexeSelect = document.getElementById('SEXE'); // 👈 Récupération du champ Sexe
+    
+    // Vérification de la Fonction
+    if (!fonctionSelect || fonctionSelect.value === "" || fonctionSelect.value === null) {
+        event.preventDefault(); 
         
-        // Vérification de sécurité
-        if (!fonctionSelect || fonctionSelect.value === "" || fonctionSelect.value === null) {
-            event.preventDefault(); 
-            
-            Swal.fire({
-                icon: 'error',
-                title: 'Champ obligatoire',
-                text: 'Veuillez sélectionner une fonction !',
-                confirmButtonText: 'OK'
-            });
-        }
-    });
+        Swal.fire({
+            icon: 'error',
+            title: 'Champ obligatoire',
+            text: 'Veuillez sélectionner une fonction !',
+            confirmButtonText: 'OK'
+        });
+        return; // Bloque ici pour ne pas exécuter la suite immédiatement
+    }
+
+    // Vérification du Sexe
+    if (!sexeSelect || sexeSelect.value === "" || sexeSelect.value === null) {
+        event.preventDefault(); // Empêche l'envoi du formulaire
+        
+        Swal.fire({
+            icon: 'error',
+            title: 'Champ obligatoire',
+            text: 'Veuillez sélectionner le Sexe !',
+            confirmButtonText: 'OK'
+        });
+        return;
+    }
+});// 3. VERIFICATION CÔTÉ CLIENT (avant validation)
+document.querySelector('form').addEventListener('submit', function (event) {
+    var fonctionSelect = document.getElementById('FONCTION');
+    var sexeSelect = document.getElementById('SEXE'); // 👈 Récupération du champ Sexe
+    
+    // Vérification de la Fonction
+    if (!fonctionSelect || fonctionSelect.value === "" || fonctionSelect.value === null) {
+        event.preventDefault(); 
+        
+        Swal.fire({
+            icon: 'error',
+            title: 'Champ obligatoire',
+            text: 'Veuillez sélectionner une fonction !',
+            confirmButtonText: 'OK'
+        });
+        return; // Bloque ici pour ne pas exécuter la suite immédiatement
+    }
+
+    // Vérification du Sexe
+    if (!sexeSelect || sexeSelect.value === "" || sexeSelect.value === null) {
+        event.preventDefault(); // Empêche l'envoi du formulaire
+        
+        Swal.fire({
+            icon: 'error',
+            title: 'Champ obligatoire',
+            text: 'Veuillez sélectionner le Sexe !',
+            confirmButtonText: 'OK'
+        });
+        return;
+    }
+});
 </script>

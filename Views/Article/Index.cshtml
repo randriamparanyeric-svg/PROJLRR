@@ -1,0 +1,79 @@
+@model List<PROJLRR.Models.Article>
+@using System.Linq
+
+@{
+    Layout = "/Views/Shared/Layout.cshtml";
+    ViewData["Title"] = "LISTE DES ARTICLES";
+}
+
+<h1 align="center">@ViewData["Title"]</h1>
+
+<link rel="stylesheet" href="~/css/stylesp.css" />
+<div id="tableau" class="table-wrapper">
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>NUM</th>
+            <th>NOM DE L'ARTICLE</th>
+            <th>QUANTITE <br> RESTANT</th>
+            <th>UNITE</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            var articlesTries = Model.AsEnumerable().OrderBy(a => a.Nom).ToList();  // Assurez-vous de convertir en IEnumerable et trier
+            int index = 1;  // Initialiser l'index
+        }
+
+        @foreach (var article in articlesTries)
+        {
+            <tr>
+                <td>@index</td>
+                <td>@article.Nom</td>
+                <td>@article.Quantite</td>
+                <td>@article.Unite</td>
+            </tr>
+            index++;  // Incrémenter l'index
+        }
+    </tbody>
+</table>
+</div>
+<!-- Placer le bouton en dehors de la table pour éviter qu'il ne soit "automatiquement" visible en haut -->
+<div class="text-center mt-3">
+    <button onclick="imprimerTableau()" class="btn btn-secondary">🖨️ Imprimer</button>
+<!-- Ajouter un bouton pour l'ajout d'article -->
+<a href="@Url.Action("AddArticle", "Article")" class="btn btn-primary">Ajouter un Article</a>
+</div>
+<script>
+function imprimerTableau() {
+    var contenu = document.getElementById('tableau').innerHTML;
+
+    var pageImpression = window.open('', '_blank', 'width=800,height=600');
+    if (!pageImpression) {
+        alert("Veuillez autoriser les pop-ups pour imprimer.");
+        return;
+    }
+    
+    pageImpression.document.write(`
+        <html>
+        <head>
+            <title>Impression</title>
+            <style>
+                body { font-family: Arial, sans-serif; }
+                table { width: 100%; border-collapse: collapse; }
+                th, td { border: 1px solid black; padding: 8px; text-align: left; } /* Centrer le texte dans les cellules */
+                th { background-color: #f2f2f2; }
+                .table-wrapper { margin-top: 20px; }
+            </style>
+        </head>
+        <body>
+            <h2 align="center">LISTE DES ARTICLES</h2>
+            ${contenu}
+        </body>
+        </html>`);
+
+    pageImpression.document.close();
+    pageImpression.focus();
+    setTimeout(() => { pageImpression.print(); pageImpression.close(); }, 500);
+}
+</script>

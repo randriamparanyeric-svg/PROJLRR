@@ -1,0 +1,40 @@
+@model PROJLRR.Models.Article
+@{
+    Layout="/Views/Shared/Layout.cshtml";
+}
+@{
+    ViewData["Title"] = "Ajouter un Article";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<form method="post" action="AddArticle">
+    <div class="form-group">
+        <label for="Nom">Nom de l'Article</label>
+        <input type="text" class="form-control" id="Nom" name="Nom" required />
+    </div>
+
+    <div class="form-group">
+        <label for="Quantite">Quantité</label>
+        <input type="number" class="form-control" id="Quantite" name="Quantite" required />
+    </div>
+
+     <div class="form-group">
+    <label for="Unite">Unité</label>
+    <select id="Unite" name="Unite" class="form-control">
+    <option value="" disabled selected>Sélectionner l'unité</option>
+      <option value="">Sélectionner l'unité</option>
+            <option value="PIECE">PIECE</option>
+             <option value="BOITE">BOITE</option>
+            <option value="RAM">RAM</option>
+            <option value="CARTON" >CARTON</option>
+            <option value="ROULEAU" >ROULEAU</option>
+            <option value="KILO">KILO</option>
+            <option value="Litre">LITRE</option>
+            <option value="Mètre">METRE</option>
+            
+            </select>
+</div>
+
+    <button type="submit" class="btn btn-primary">Ajouter l'Article</button>
+</form>

@@ -1,0 +1,305 @@
+@model PROJLRR.Models.MultiDechargeViewModel
+
+@{
+    Layout = "/Views/Shared/Layout.cshtml";
+    ViewData["Title"] = "Nouvelle Décharge";
+}
+
+<link rel="stylesheet" href="~/css/stylecanva.css" />
+<link rel="stylesheet" href="~/css/select2.min.css" />
+
+<style>
+    /* Ajustement pour que Select2 ressemble aux inputs Bootstrap */
+    .select2-container--default .select2-selection--single {
+        height: 38px;
+        border: 1px solid #ced4da;
+        border-radius: 0.375rem;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 36px;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 36px;
+    }
+</style>
+
+<div class="container mt-4">
+    <h2 class="mb-4">@ViewData["Title"]</h2>
+    <div asp-validation-summary="All" class="text-danger fw-bold mb-3"></div>
+
+    <form method="post" asp-action="Add" id="dechargeForm">
+
+        <div class="card mb-4 shadow-sm">
+            <div class="card-body">
+                <div class="form-group position-relative">
+                    <label for="PersonnelNom" class="form-label fw-bold">Nom du Personnel</label>
+                    <input type="text" class="form-control form-control-lg" id="PersonnelNom" name="PersonnelNom"
+                           required autocomplete="off" value="@Model?.PersonnelNom" placeholder="Saisissez un nom ou un matricule..." />
+                    <div id="suggestions" class="list-group shadow" style="position: absolute; z-index: 1000; width: 100%;"></div>
+                </div>
+
+                <div id="historique-personnel" class="mt-3" style="display:none;">
+                    <div class="card border-info">
+                        <div class="card-header bg-info text-white py-1 px-2" style="font-size: 0.9em;">
+                            <strong>Dernières décharges effectuées :</strong>
+                        </div>
+                        <div class="card-body p-0">
+                            <table class="table table-sm table-striped mb-0" style="font-size: 0.85em;">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Article</th>
+                                        <th>Quantité</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="historique-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4 shadow-sm">
+            <div class="card-body">
+                <h4 class="card-title mb-3">Articles à décharger</h4>
+                <div id="articles-container">
+                    <div class="article-row row g-2 align-items-center mb-2">
+                        <div class="col-12 col-sm-6">
+                            <select class="form-select article-select" name="Articles[0].ArticleNom" required>
+                                <option value="">Chargement des articles...</option>
+                            </select>
+                        </div>
+                        <div class="col-4 col-sm-2">
+                            <input type="number" class="form-control" name="Articles[0].Quantite"
+                                   value="1" min="1" required placeholder="Qté" />
+                        </div>
+                        <div class="col-4 col-sm-2">
+                            <input type="text" class="form-control bg-light" name="Articles[0].Unite" readonly placeholder="Unité" />
+                        </div>
+                        <div class="col-4 col-sm-2 text-center">
+                            <button type="button" class="btn btn-danger remove-article w-100">Suppr.</button>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" id="add-article" class="btn btn-outline-secondary btn-sm mt-2">+ Ajouter un article</button>
+            </div>
+        </div>
+
+        <div class="card mb-4 shadow-sm">
+            <div class="card-body">
+                <label for="DateDecharge" class="form-label fw-bold">Date et Heure</label>
+                <input type="datetime-local" class="form-control" id="DateDecharge" name="DateDecharge"
+                       value="@(Model?.DateDecharge == default ? DateTime.Now.ToString("yyyy-MM-ddTHH:mm") : Model.DateDecharge.ToString("yyyy-MM-ddTHH:mm"))" required />
+            </div>
+        </div>
+
+        <div class="signature-wrapper mb-4">
+            <div class="signature-left">
+                <label class="signature-label fw-bold">Signature du réceptionnaire</label>
+                <div class="border rounded bg-white">
+                    <canvas id="signature-pad" width="400" height="200" style="width: 100%; max-width: 400px;"></canvas>
+                </div>
+                <div class="mt-2">
+                    <button type="button" id="clear-signature" class="btn btn-sm btn-outline-success">Refaire la signature</button>
+                </div>
+            </div>
+        </div>
+        <input type="hidden" id="SignatureData" name="SignatureData" />
+
+        <div class="text-center mt-4 mb-5">
+            <button type="submit" class="btn btn-primary btn-lg px-5 mb-3 shadow">Enregistrer la décharge</button>
+            <div class="d-flex justify-content-center gap-2">
+                <a href="@Url.Action("IndexBis", "Decharge")" class="btn btn-outline-secondary">Décharges du jour</a>
+                <a href="@Url.Action("Index", "Decharge")" class="btn btn-outline-secondary">Toutes les décharges</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script src="~/js/jquery.min.js"></script>
+<script src="~/js/select2.min.js"></script>
+<script src="~/js/sweetalert2.all.min.js"></script>
+<script src="~/js/signature_pad.min.js"></script>
+
+<script>
+$(document).ready(function () {
+    
+    // --- 1. NOTIFICATIONS SWEETALERT2 AU CHARGEMENT ---
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <text>
+        Swal.fire({
+            icon: 'success',
+            title: '<span style="color: #166534;">Réussi</span>',
+            html: '<b style="color: #14532d; font-size: 1.1rem;">@Html.Raw(TempData["SuccessMessage"])</b>', 
+            background: '#f0fdf4', 
+            iconColor: '#22c55e',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+            customClass: { 
+                popup: 'rounded-4 shadow border border-success' 
+            }
+        });
+        </text>
+    }
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        var errors = string.Join("<br/>", ViewData.ModelState.Values
+                            .SelectMany(v => v.Errors)
+                            .Select(e => e.ErrorMessage));
+        <text>
+        Swal.fire({
+            icon: 'error',
+            title: 'Erreur de validation',
+            html: '@Html.Raw(errors)',
+            confirmButtonColor: '#d33',
+            customClass: { popup: 'rounded-4 shadow' }
+        });
+        </text>
+    }
+
+    // --- 2. LOGIQUE MÉTIER ---
+    let articleData = []; 
+
+    function chargerHistorique(nom) {
+        if (!nom || nom.length < 2) { 
+            $("#historique-personnel").hide(); 
+            return; 
+        }
+        $.ajax({
+            url: "/Decharge/GetDerniereDechargePersonnel",
+            type: "GET",
+            data: { nom: nom },
+            success: function (data) {
+                let body = $("#historique-body").empty();
+                if (data && data.length > 0) {
+                    data.forEach(item => {
+                        body.append(`<tr><td>${item.article}</td><td>${item.quantite} ${item.unite}</td><td>${item.date}</td></tr>`);
+                    });
+                    $("#historique-personnel").fadeIn();
+                } else { 
+                    $("#historique-personnel").hide(); 
+                }
+            }
+        });
+    }
+
+    function populateSelect(selectElement) {
+        selectElement.empty().append('<option value="">Rechercher un article...</option>');
+        articleData.forEach(function (article) {
+            let label = article.nom + ' (' + article.quantite + ' ' + article.unite + ')';
+            selectElement.append(`<option value="${article.nom}" data-unite="${article.unite}">${label}</option>`);
+        });
+        
+        selectElement.select2({
+            width: '100%',
+            dropdownParent: $('#articles-container') 
+        });
+    }
+
+    function loadInitialArticles() {
+        $.ajax({
+            url: "/Decharge/GetArt",
+            type: "GET",
+            success: function (data) {
+                articleData = data;
+                populateSelect($(".article-select").first());
+            }
+        });
+    }
+
+    loadInitialArticles();
+
+    let articleIndex = 1;
+    $("#add-article").click(function () {
+        let newRow = `
+        <div class="article-row row g-2 align-items-center mb-2">
+            <div class="col-12 col-sm-6">
+                <select class="form-select article-select" name="Articles[${articleIndex}].ArticleNom" required></select>
+            </div>
+            <div class="col-4 col-sm-2">
+                <input type="number" class="form-control" name="Articles[${articleIndex}].Quantite" value="1" min="1" required />
+            </div>
+            <div class="col-4 col-sm-2">
+                <input type="text" class="form-control bg-light" name="Articles[${articleIndex}].Unite" readonly />
+            </div>
+            <div class="col-4 col-sm-2 text-center">
+                <button type="button" class="btn btn-danger remove-article w-100">Suppr.</button>
+            </div>
+        </div>`;
+        
+        let $row = $(newRow);
+        $("#articles-container").append($row);
+        populateSelect($row.find(".article-select"));
+        articleIndex++;
+    });
+
+    $(document).on("click", ".remove-article", function () {
+        $(this).closest(".article-row").remove();
+    });
+
+    $(document).on("change", ".article-select", function () {
+        let unite = $(this).find(":selected").data("unite") || "";
+        $(this).closest(".article-row").find("input[name$='.Unite']").val(unite);
+    });
+
+    $("#PersonnelNom").keyup(function () {
+        let query = $(this).val().trim();
+        if (query.length >= 2) {  
+            $.ajax({
+                url: "/Decharge/SearchPersonnel",
+                type: "GET",
+                data: { search: query },
+                success: function (data) {
+                    let suggestions = $("#suggestions").empty();
+                    data.forEach(p => {
+                        let affichage = $.isNumeric(query) ? p.matricule : p.nom;
+                        suggestions.append(`<a href="#" class="list-group-item list-group-item-action suggestion-item" data-name="${p.nom}">${affichage}</a>`);
+                    });
+                }
+            });
+        } else { 
+            $("#suggestions").empty(); 
+            $("#historique-personnel").hide(); 
+        }
+    });
+
+    $(document).on("click", ".suggestion-item", function (e) {
+        e.preventDefault();
+        let name = $(this).data("name");
+        $("#PersonnelNom").val(name);  
+        $("#suggestions").empty();
+        chargerHistorique(name);
+    });
+
+    let checkName = $("#PersonnelNom").val().trim();
+    if(checkName.length >= 2) {
+        chargerHistorique(checkName);
+    }
+
+    // --- 3. SIGNATURE ET VALIDATION FORMULAIRE ---
+    var canvas = document.getElementById("signature-pad");
+    var signaturePad = new SignaturePad(canvas);
+
+    $("#clear-signature").click(function () {
+        signaturePad.clear();
+    });
+
+    $("#dechargeForm").submit(function(e){
+        if (signaturePad.isEmpty()) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Signature obligatoire',
+                text: 'Le réceptionnaire doit signer avant de pouvoir enregistrer.',
+                confirmButtonColor: '#3085d6'
+            });
+            e.preventDefault();
+        } else {
+            $("#SignatureData").val(signaturePad.toDataURL());
+        }
+    });
+});
+</script>

@@ -20,124 +20,121 @@ public partial class PerslrrsanscodeContext : DbContext
     public virtual DbSet<Base1> Base1s { get; set; }
     public virtual DbSet<Decharge> Decharges { get; set; }
 
- protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-{
-    // On vérifie si le Program.cs n'a pas déjà configuré la base de données
-    if (!optionsBuilder.IsConfigured)
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        // Ce chemin ne sera utilisé QU'EN LOCAL sur votre PC
-        string dbPath = @"C:\Users\HP\PROJLRR\PERSLRRSANSCODE.db";
-        optionsBuilder.UseSqlite($"Data Source={dbPath}");
+        // Ne pas configurer ici - laisser Program.cs gérer le chemin
+        // C'est Program.cs qui détermine le chemin selon l'environnement (LOCAL ou PRODUCTION)
     }
-}
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Article>(entity =>
         {
-            entity
-                .HasNoKey()
-                .ToTable("ARTICLE");
+            entity.HasKey(e => e.Id);
+            entity.ToTable("ARTICLE");
 
-            entity.Property(e => e.Nom).HasColumnType("VARCHAR(255)");
-            entity.Property(e => e.Unite).HasColumnType("VARCHAR(255)");
+            entity.Property(e => e.Id).HasColumnName("Id").ValueGeneratedOnAdd();
+            entity.Property(e => e.Nom).HasColumnType("TEXT").HasColumnName("Nom");
+            entity.Property(e => e.Quantite).HasColumnName("Quantite");
+            entity.Property(e => e.Unite).HasColumnType("TEXT").HasColumnName("Unite");
+            entity.Property(e => e.StockSec).HasColumnName("StockSec");
         });
 
-        // --- CORRECTION EFFECTUÉE ICI ---
         modelBuilder.Entity<Personnel>(entity =>
         {
-            entity.HasKey(e => e.Num); // Définition de la Clé Primaire
+            entity.HasKey(e => e.Num);
             entity.Property(e => e.Num).ValueGeneratedOnAdd();
             entity.ToTable("BASE");
 
-            entity.Property(e => e.Num).HasColumnName("Num"); // Assurez-vous que Num est mappé ici
-            entity.Property(e => e.Cemav).HasColumnType("VARCHAR(255)").HasColumnName("CEMAV");
-            entity.Property(e => e.Cin).HasColumnType("VARCHAR(255)").HasColumnName("CIN");
-            entity.Property(e => e.Contact).HasColumnType("VARCHAR(255)").HasColumnName("CONTACT");
-            entity.Property(e => e.Corps).HasColumnType("VARCHAR(255)").HasColumnName("CORPS");
-            entity.Property(e => e.Datedentre).HasColumnType("VARCHAR(255)").HasColumnName("DATEDENTRE");
-            entity.Property(e => e.Datedeprise).HasColumnType("VARCHAR(255)").HasColumnName("DATEDEPRISE");
-            entity.Property(e => e.Datenaiss).HasColumnType("VARCHAR(255)").HasColumnName("DATENAISS");
-            entity.Property(e => e.Dec).HasColumnType("VARCHAR(255)").HasColumnName("DEC");
-            entity.Property(e => e.Demav).HasColumnType("VARCHAR(255)").HasColumnName("DEMAV");
-            entity.Property(e => e.Diplomeac).HasColumnType("VARCHAR(255)").HasColumnName("DIPLOMEAC");
-            entity.Property(e => e.Diplomeped).HasColumnType("VARCHAR(255)").HasColumnName("DIPLOMEPED");
-            entity.Property(e => e.Dou).HasColumnType("VARCHAR(255)").HasColumnName("DOU");
-            entity.Property(e => e.Dxemav).HasColumnType("VARCHAR(255)").HasColumnName("DXEMAV");
-            entity.Property(e => e.Fonction).HasColumnType("VARCHAR(255)").HasColumnName("FONCTION");
-            entity.Property(e => e.Hemav).HasColumnType("VARCHAR(255)").HasColumnName("HEMAV");
-            entity.Property(e => e.Lieudenaiss).HasColumnType("VARCHAR(255)").HasColumnName("LIEUDENAISS");
-            entity.Property(e => e.Matiere).HasColumnType("VARCHAR(255)").HasColumnName("MATIERE");
-            entity.Property(e => e.Matricule).HasColumnType("VARCHAR(255)").HasColumnName("MATRICULE");
-            entity.Property(e => e.Nemav).HasColumnType("VARCHAR(255)").HasColumnName("NEMAV");
-            entity.Property(e => e.NomEtPrenoms).HasColumnType("VARCHAR(255)").HasColumnName("NOM_ET_PRENOMS");
-            entity.Property(e => e.Onemav).HasColumnType("VARCHAR(255)").HasColumnName("ONEMAV");
-            entity.Property(e => e.Perav).HasColumnType("VARCHAR(255)").HasColumnName("PERAV");
-            entity.Property(e => e.Photo).HasColumnType("VARCHAR(255)");
-            entity.Property(e => e.Qemav).HasColumnType("VARCHAR(255)").HasColumnName("QEMAV");
-            entity.Property(e => e.Quat).HasColumnType("VARCHAR(255)").HasColumnName("QUAT");
-            entity.Property(e => e.Quin).HasColumnType("VARCHAR(255)").HasColumnName("QUIN");
-            entity.Property(e => e.Seiz).HasColumnType("VARCHAR(255)").HasColumnName("SEIZ");
-            entity.Property(e => e.Semav).HasColumnType("VARCHAR(255)").HasColumnName("SEMAV");
-            entity.Property(e => e.Sepmav).HasColumnType("VARCHAR(255)").HasColumnName("SEPMAV");
-            entity.Property(e => e.Sexe).HasColumnType("VARCHAR(255)").HasColumnName("SEXE");
-            entity.Property(e => e.Statut).HasColumnType("VARCHAR(255)").HasColumnName("STATUT");
-            entity.Property(e => e.Temav).HasColumnType("VARCHAR(255)").HasColumnName("TEMAV");
-            entity.Property(e => e.Trei).HasColumnType("VARCHAR(255)").HasColumnName("TREI");
+            entity.Property(e => e.Num).HasColumnName("Num");
+            entity.Property(e => e.Cemav).HasColumnType("TEXT").HasColumnName("CEMAV");
+            entity.Property(e => e.Cin).HasColumnType("TEXT").HasColumnName("CIN");
+            entity.Property(e => e.Contact).HasColumnType("TEXT").HasColumnName("CONTACT");
+            entity.Property(e => e.Corps).HasColumnType("TEXT").HasColumnName("CORPS");
+            entity.Property(e => e.Datedentre).HasColumnType("TEXT").HasColumnName("DATEDENTRE");
+            entity.Property(e => e.Datedeprise).HasColumnType("TEXT").HasColumnName("DATEDEPRISE");
+            entity.Property(e => e.Datenaiss).HasColumnType("TEXT").HasColumnName("DATENAISS");
+            entity.Property(e => e.Dec).HasColumnType("TEXT").HasColumnName("DEC");
+            entity.Property(e => e.Demav).HasColumnType("TEXT").HasColumnName("DEMAV");
+            entity.Property(e => e.Diplomeac).HasColumnType("TEXT").HasColumnName("DIPLOMEAC");
+            entity.Property(e => e.Diplomeped).HasColumnType("TEXT").HasColumnName("DIPLOMEPED");
+            entity.Property(e => e.Dou).HasColumnType("TEXT").HasColumnName("DOU");
+            entity.Property(e => e.Dxemav).HasColumnType("TEXT").HasColumnName("DXEMAV");
+            entity.Property(e => e.Fonction).HasColumnType("TEXT").HasColumnName("FONCTION");
+            entity.Property(e => e.Hemav).HasColumnType("TEXT").HasColumnName("HEMAV");
+            entity.Property(e => e.Lieudenaiss).HasColumnType("TEXT").HasColumnName("LIEUDENAISS");
+            entity.Property(e => e.Matiere).HasColumnType("TEXT").HasColumnName("MATIERE");
+            entity.Property(e => e.Matricule).HasColumnType("TEXT").HasColumnName("MATRICULE");
+            entity.Property(e => e.Nemav).HasColumnType("TEXT").HasColumnName("NEMAV");
+            entity.Property(e => e.NomEtPrenoms).HasColumnType("TEXT").HasColumnName("NOM_ET_PRENOMS");
+            entity.Property(e => e.Onemav).HasColumnType("TEXT").HasColumnName("ONEMAV");
+            entity.Property(e => e.Perav).HasColumnType("TEXT").HasColumnName("PERAV");
+            entity.Property(e => e.Photo).HasColumnType("TEXT");
+            entity.Property(e => e.Qemav).HasColumnType("TEXT").HasColumnName("QEMAV");
+            entity.Property(e => e.Quat).HasColumnType("TEXT").HasColumnName("QUAT");
+            entity.Property(e => e.Quin).HasColumnType("TEXT").HasColumnName("QUIN");
+            entity.Property(e => e.Seiz).HasColumnType("TEXT").HasColumnName("SEIZ");
+            entity.Property(e => e.Semav).HasColumnType("TEXT").HasColumnName("SEMAV");
+            entity.Property(e => e.Sepmav).HasColumnType("TEXT").HasColumnName("SEPMAV");
+            entity.Property(e => e.Sexe).HasColumnType("TEXT").HasColumnName("SEXE");
+            entity.Property(e => e.Statut).HasColumnType("TEXT").HasColumnName("STATUT");
+            entity.Property(e => e.Temav).HasColumnType("TEXT").HasColumnName("TEMAV");
+            entity.Property(e => e.Trei).HasColumnType("TEXT").HasColumnName("TREI");
         });
 
-       modelBuilder.Entity<Base1>(entity =>
-{
-    entity.ToTable("BASE1");
-    entity.HasKey(e => e.Num); // Déclarez la clé primaire ici
-            entity.Property(e => e.Cemav).HasColumnType("VARCHAR(255)").HasColumnName("CEMAV");
-            entity.Property(e => e.Cin).HasColumnType("VARCHAR(255)").HasColumnName("CIN");
-            entity.Property(e => e.Contact).HasColumnType("VARCHAR(255)").HasColumnName("CONTACT");
-            entity.Property(e => e.Corps).HasColumnType("VARCHAR(255)").HasColumnName("CORPS");
-            entity.Property(e => e.Datedentre).HasColumnType("VARCHAR(255)").HasColumnName("DATEDENTRE");
-            entity.Property(e => e.Datedeprise).HasColumnType("VARCHAR(255)").HasColumnName("DATEDEPRISE");
-            entity.Property(e => e.Datenaiss).HasColumnType("VARCHAR(255)").HasColumnName("DATENAISS");
-            entity.Property(e => e.Dec).HasColumnType("VARCHAR(255)").HasColumnName("DEC");
-            entity.Property(e => e.Demav).HasColumnType("VARCHAR(255)").HasColumnName("DEMAV");
-            entity.Property(e => e.Diplomeac).HasColumnType("VARCHAR(255)").HasColumnName("DIPLOMEAC");
-            entity.Property(e => e.Diplomeped).HasColumnType("VARCHAR(255)").HasColumnName("DIPLOMEPED");
-            entity.Property(e => e.Dou).HasColumnType("VARCHAR(255)").HasColumnName("DOU");
-            entity.Property(e => e.Dxemav).HasColumnType("VARCHAR(255)").HasColumnName("DXEMAV");
-            entity.Property(e => e.Fonction).HasColumnType("VARCHAR(255)").HasColumnName("FONCTION");
-            entity.Property(e => e.Hemav).HasColumnType("VARCHAR(255)").HasColumnName("HEMAV");
-            entity.Property(e => e.Lieudenaiss).HasColumnType("VARCHAR(255)").HasColumnName("LIEUDENAISS");
-            entity.Property(e => e.Matiere).HasColumnType("VARCHAR(255)").HasColumnName("MATIERE");
-            entity.Property(e => e.Matricule).HasColumnType("VARCHAR(255)").HasColumnName("MATRICULE");
-            entity.Property(e => e.Nemav).HasColumnType("VARCHAR(255)").HasColumnName("NEMAV");
-            entity.Property(e => e.NomEtPrenoms).HasColumnType("VARCHAR(255)").HasColumnName("NOM_ET_PRENOMS");
-            entity.Property(e => e.Onemav).HasColumnType("VARCHAR(255)").HasColumnName("ONEMAV");
-            entity.Property(e => e.Perav).HasColumnType("VARCHAR(255)").HasColumnName("PERAV");
-            entity.Property(e => e.Photo).HasColumnType("VARCHAR(255)");
-            entity.Property(e => e.Qemav).HasColumnType("VARCHAR(255)").HasColumnName("QEMAV");
-            entity.Property(e => e.Quat).HasColumnType("VARCHAR(255)").HasColumnName("QUAT");
-            entity.Property(e => e.Quin).HasColumnType("VARCHAR(255)").HasColumnName("QUIN");
-            entity.Property(e => e.Seiz).HasColumnType("VARCHAR(255)").HasColumnName("SEIZ");
-            entity.Property(e => e.Semav).HasColumnType("VARCHAR(255)").HasColumnName("SEMAV");
-            entity.Property(e => e.Sepmav).HasColumnType("VARCHAR(255)").HasColumnName("SEPMAV");
-            entity.Property(e => e.Sexe).HasColumnType("VARCHAR(255)").HasColumnName("SEXE");
-            entity.Property(e => e.Statut).HasColumnType("VARCHAR(255)").HasColumnName("STATUT");
-            entity.Property(e => e.Temav).HasColumnType("VARCHAR(255)").HasColumnName("TEMAV");
-            entity.Property(e => e.Trei).HasColumnType("VARCHAR(255)").HasColumnName("TREI");
+        modelBuilder.Entity<Base1>(entity =>
+        {
+            entity.ToTable("BASE1");
+            entity.HasKey(e => e.Num);
+            entity.Property(e => e.Num).ValueGeneratedOnAdd();
+            
+            entity.Property(e => e.Cemav).HasColumnType("TEXT").HasColumnName("CEMAV");
+            entity.Property(e => e.Cin).HasColumnType("TEXT").HasColumnName("CIN");
+            entity.Property(e => e.Contact).HasColumnType("TEXT").HasColumnName("CONTACT");
+            entity.Property(e => e.Corps).HasColumnType("TEXT").HasColumnName("CORPS");
+            entity.Property(e => e.Datedentre).HasColumnType("TEXT").HasColumnName("DATEDENTRE");
+            entity.Property(e => e.Datedeprise).HasColumnType("TEXT").HasColumnName("DATEDEPRISE");
+            entity.Property(e => e.Datenaiss).HasColumnType("TEXT").HasColumnName("DATENAISS");
+            entity.Property(e => e.Dec).HasColumnType("TEXT").HasColumnName("DEC");
+            entity.Property(e => e.Demav).HasColumnType("TEXT").HasColumnName("DEMAV");
+            entity.Property(e => e.Diplomeac).HasColumnType("TEXT").HasColumnName("DIPLOMEAC");
+            entity.Property(e => e.Diplomeped).HasColumnType("TEXT").HasColumnName("DIPLOMEPED");
+            entity.Property(e => e.Dou).HasColumnType("TEXT").HasColumnName("DOU");
+            entity.Property(e => e.Dxemav).HasColumnType("TEXT").HasColumnName("DXEMAV");
+            entity.Property(e => e.Fonction).HasColumnType("TEXT").HasColumnName("FONCTION");
+            entity.Property(e => e.Hemav).HasColumnType("TEXT").HasColumnName("HEMAV");
+            entity.Property(e => e.Lieudenaiss).HasColumnType("TEXT").HasColumnName("LIEUDENAISS");
+            entity.Property(e => e.Matiere).HasColumnType("TEXT").HasColumnName("MATIERE");
+            entity.Property(e => e.Matricule).HasColumnType("TEXT").HasColumnName("MATRICULE");
+            entity.Property(e => e.Nemav).HasColumnType("TEXT").HasColumnName("NEMAV");
+            entity.Property(e => e.NomEtPrenoms).HasColumnType("TEXT").HasColumnName("NOM_ET_PRENOMS");
+            entity.Property(e => e.Onemav).HasColumnType("TEXT").HasColumnName("ONEMAV");
+            entity.Property(e => e.Perav).HasColumnType("TEXT").HasColumnName("PERAV");
+            entity.Property(e => e.Photo).HasColumnType("TEXT");
+            entity.Property(e => e.Qemav).HasColumnType("TEXT").HasColumnName("QEMAV");
+            entity.Property(e => e.Quat).HasColumnType("TEXT").HasColumnName("QUAT");
+            entity.Property(e => e.Quin).HasColumnType("TEXT").HasColumnName("QUIN");
+            entity.Property(e => e.Seiz).HasColumnType("TEXT").HasColumnName("SEIZ");
+            entity.Property(e => e.Semav).HasColumnType("TEXT").HasColumnName("SEMAV");
+            entity.Property(e => e.Sepmav).HasColumnType("TEXT").HasColumnName("SEPMAV");
+            entity.Property(e => e.Sexe).HasColumnType("TEXT").HasColumnName("SEXE");
+            entity.Property(e => e.Statut).HasColumnType("TEXT").HasColumnName("STATUT");
+            entity.Property(e => e.Temav).HasColumnType("TEXT").HasColumnName("TEMAV");
+            entity.Property(e => e.Trei).HasColumnType("TEXT").HasColumnName("TREI");
         });
-
 
         modelBuilder.Entity<Decharge>(entity =>
         {
-            entity
-                .HasNoKey()
-                .ToTable("DECHARGE");
+            entity.HasKey(e => e.Id);
+            entity.ToTable("DECHARGE");
 
-            entity.Property(e => e.ArticleNom).HasColumnType("VARCHAR(255)");
-            entity.Property(e => e.DateDecharge).HasColumnType("TIMESTAMP(26)");
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.PersonnelNom).HasColumnType("VARCHAR(255)");
-            entity.Property(e => e.Quantite).HasColumnName("QUANTITE");
-            entity.Property(e => e.SignaturePath).HasColumnType("VARCHAR(255)");
-            entity.Property(e => e.Unite).HasColumnType("VARCHAR(255)");
+            entity.Property(e => e.Id).HasColumnName("Id");
+            entity.Property(e => e.ArticleNom).HasColumnType("TEXT").HasColumnName("ArticleNom");
+            entity.Property(e => e.DateDecharge).HasColumnName("DateDecharge");
+            entity.Property(e => e.PersonnelNom).HasColumnType("TEXT").HasColumnName("PersonnelNom");
+            entity.Property(e => e.Quantite).HasColumnName("Quantite");
+            entity.Property(e => e.SignaturePath).HasColumnType("TEXT").HasColumnName("SignaturePath");
+            entity.Property(e => e.Unite).HasColumnType("TEXT").HasColumnName("Unite");
         });
 
         OnModelCreatingPartial(modelBuilder);

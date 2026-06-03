@@ -83,14 +83,26 @@ public async Task<IActionResult> Create(Personnel personnel)
             View(await _context.Personnels.Where(p => p.Fonction == "PE").OrderBy(p => p.Matiere).ToListAsync());
 
         public async Task<IActionResult> RETRAITE() 
-        { 
-            int anneeActuelle = DateTime.Now.Year;
-            var list = await _context.Personnels.ToListAsync();
-            var retraitables = list.Where(p => !string.IsNullOrEmpty(p.Datenaiss) && 
-                               DateTime.TryParse(p.Datenaiss, out var d) && 
-                               (anneeActuelle - d.Year) >= 60).ToList();
-            return View(retraitables); 
-        }
+{ 
+    int anneeActuelle = DateTime.Now.Year;
+    
+    // Récupération de la liste depuis SQLite
+    var list = await _context.Personnels.ToListAsync();
+    
+    // Formats de date autorisés
+    string[] formatsAutorises = { "dd/MM/yyyy", "yyyy-MM-dd", "d/M/yyyy", "yyyy-M-d" };
+
+    var retraitables = list.Where(p => !string.IsNullOrEmpty(p.Datenaiss) && 
+                                       DateTime.TryParseExact(p.Datenaiss, 
+                                                              formatsAutorises, 
+                                                              System.Globalization.CultureInfo.InvariantCulture, // 🎯 Chemin complet
+                                                              System.Globalization.DateTimeStyles.None,          // 🎯 Chemin complet
+                                                              out var d) && 
+                                       (anneeActuelle - d.Year) >= 60)
+                           .ToList();
+
+    return View(retraitables); 
+}
 
         public async Task<IActionResult> STAT() => View(await _context.Personnels.ToListAsync());
 

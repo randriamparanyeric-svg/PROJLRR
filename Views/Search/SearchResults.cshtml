@@ -57,7 +57,7 @@
         <button type="button" id="btnSubmitSearch" style="background-color: green; color: black; border: none; padding: 10px 15px; cursor: pointer;">
             🔍 Rechercher
         </button>
-        <div id="suggestions" class="list-group" style="position: absolute; z-index: 1000; left: 50%; transform: translateX(-50%); width: 100%; background: white; border: 1px solid #ccc;"></div>
+        <div id="suggestions" class="list-group" style="position: absolute; z-index: 1000; left: 0; top: 100%; width: 100%; background: white; border: 1px solid #ccc; text-align: left;"></div>
     </div>
 </form>
 
@@ -300,7 +300,7 @@
                     let s = $("#suggestions");
                     s.empty();
                     data.forEach(p => {
-                        s.append(`<a href="#" class="list-group-item suggestion-item" data-name="${p.nom}">${p.nom} (${p.matricule})</a>`);
+                        s.append(`<a href="#" class="list-group-item suggestion-item" data-name="${p.nom}">${p.nom}</a>`);
                     });
                 });
             } else {

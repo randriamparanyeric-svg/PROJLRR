@@ -20,6 +20,7 @@ html {
 body {
   margin-bottom: 60px;
 }
+
 #generateCertificate {
     background-color: #007bff;
     color: white;
@@ -33,14 +34,18 @@ body {
 #generateCertificate:hover {
     background-color: #0056b3;
 }
-    @media print {
-      #certificate  button {
-            display: none; /* Cache tous les boutons lors de l'impression */
-        }
-	 #certificate { margin-top:0;
-	 padding-top:0;}
+
+@media print {
+    #certificate button {
+        display: none; /* Cache tous les boutons lors de l'impression */
     }
-	/* Personnalisation de la couleur de fond de la navbar */
+    #certificate { 
+        margin-top: 0;
+        padding-top: 0;
+    }
+}
+
+/* Personnalisation de la couleur de fond de la navbar */
 .navbar {
     background-color: #007bff;
 }
@@ -72,4 +77,25 @@ body {
     font-size: 16px;
     padding-left: 20px;
     padding-right: 20px;
+}
+
+/* 📱 AJOUT ICI : Améliorations de la barre de navigation et du footer sur Mobile */
+@media (max-width: 768px) {
+    .navbar-nav {
+        width: 100%;
+        text-align: center;
+    }
+    .col-contact { 
+        width: 1000px;
+        min-width: 500px;
+        word-break: break-word;    
+    }
+    .btn {
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+    footer {
+        font-size: 14px;
+        padding: 10px;
+    }
 }
