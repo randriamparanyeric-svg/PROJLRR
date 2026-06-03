@@ -9,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // --- 1. SERVICES ---
 
+<<<<<<< HEAD
 // MODIFICATION : Ajout du Verrouillage Global des Contrôleurs
 builder.Services.AddControllersWithViews(options =>
 {
@@ -26,6 +27,16 @@ string dbPath = DetermineDbPath(builder.Environment, isDevelopment);
 string dbDirectory = Path.GetDirectoryName(dbPath);
 if (!string.IsNullOrEmpty(dbDirectory))
 {
+=======
+// Déterminer l'environnement
+bool isDevelopment = builder.Environment.IsDevelopment();
+string dbPath = DetermineDbPath(builder.Environment, isDevelopment);
+
+// Créer le dossier s'il n'existe pas
+string dbDirectory = Path.GetDirectoryName(dbPath);
+if (!string.IsNullOrEmpty(dbDirectory))
+{
+>>>>>>> 7f0a99a855ed5671f02684b63111d25d552d9f53
     Directory.CreateDirectory(dbDirectory);
 }
 
@@ -40,7 +51,11 @@ Console.WriteLine($"[INFO] WebRootPath: {builder.Environment.WebRootPath}");
 builder.Services.AddDbContext<PerslrrsanscodeContext>(options =>
     options.UseSqlite($"Data Source={dbPath}"));
 
+<<<<<<< HEAD
 // MODIFICATION : Sécurisation de l'authentification par Cookies (Anti-Restart et Anti-Cache)
+=======
+// Configuration de l'authentification par Cookies
+>>>>>>> 7f0a99a855ed5671f02684b63111d25d552d9f53
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
@@ -105,8 +120,11 @@ else
 }
 
 app.UseHttpsRedirection();
+<<<<<<< HEAD
 
 // Les fichiers statiques (images, CSS, JS) restent cachables pour préserver les performances
+=======
+>>>>>>> 7f0a99a855ed5671f02684b63111d25d552d9f53
 app.UseStaticFiles();
 
 // 1. Activer la session en premier (obligatoire pour le OnValidatePrincipal des cookies)
@@ -136,12 +154,24 @@ app.Run();
 
 /// <summary>
 /// Détermine le chemin de la base de données en fonction de l'environnement
+<<<<<<< HEAD
+=======
+/// - LOCAL (Développement) : C:\Users\HP\PROJLRR\PERSLRRSANSCODE.db
+/// - HÉBERGEMENT (Production) : wwwroot/PERSLRRSANSCODE.db
+>>>>>>> 7f0a99a855ed5671f02684b63111d25d552d9f53
 /// </summary>
 string DetermineDbPath(IWebHostEnvironment env, bool isDevelopment)
 {
     if (isDevelopment)
     {
+<<<<<<< HEAD
         Console.WriteLine("[DEBUG] Mode DÉVELOPPEMENT activé");
+=======
+        // ===== ENVIRONNEMENT LOCAL (DÉVELOPPEMENT) =====
+        Console.WriteLine("[DEBUG] Mode DÉVELOPPEMENT activé");
+        
+        // Chemin local de développement
+>>>>>>> 7f0a99a855ed5671f02684b63111d25d552d9f53
         var localDevDb = @"C:\Users\HP\PROJLRR\PERSLRRSANSCODE.db";
         
         if (File.Exists(localDevDb))
@@ -150,6 +180,10 @@ string DetermineDbPath(IWebHostEnvironment env, bool isDevelopment)
             return localDevDb;
         }
 
+<<<<<<< HEAD
+=======
+        // Sinon, essayer à la racine du projet
+>>>>>>> 7f0a99a855ed5671f02684b63111d25d552d9f53
         var rootDb = Path.Combine(env.ContentRootPath, "PERSLRRSANSCODE.db");
         if (File.Exists(rootDb))
         {
@@ -157,12 +191,23 @@ string DetermineDbPath(IWebHostEnvironment env, bool isDevelopment)
             return rootDb;
         }
 
+<<<<<<< HEAD
+=======
+        // Par défaut en développement, utiliser la racine du projet
+>>>>>>> 7f0a99a855ed5671f02684b63111d25d552d9f53
         Console.WriteLine($"[WARNING] Utilisation du chemin par défaut (racine du projet) : {rootDb}");
         return rootDb;
     }
     else
     {
+<<<<<<< HEAD
         Console.WriteLine("[DEBUG] Mode PRODUCTION activé");
+=======
+        // ===== ENVIRONNEMENT HÉBERGEMENT (PRODUCTION) =====
+        Console.WriteLine("[DEBUG] Mode PRODUCTION activé");
+        
+        // En production, utiliser wwwroot directement
+>>>>>>> 7f0a99a855ed5671f02684b63111d25d552d9f53
         var wwwrootPath = env.WebRootPath ?? Path.Combine(env.ContentRootPath, "wwwroot");
         var productionDb = Path.Combine(wwwrootPath, "PERSLRRSANSCODE.db");
 
@@ -171,4 +216,8 @@ string DetermineDbPath(IWebHostEnvironment env, bool isDevelopment)
         
         return productionDb;
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7f0a99a855ed5671f02684b63111d25d552d9f53
