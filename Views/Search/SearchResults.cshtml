@@ -2,6 +2,10 @@
 @{
     Layout = "/Views/Shared/Layout.cshtml";
     ViewData["Title"] = "Résultats de la recherche";
+
+    // Récupération des droits (Par défaut Admin si non spécifié)
+    bool isAdmin = ViewBag.IsAdmin ?? true;
+    string userNom = ViewBag.UserNom ?? "";
 }
 
 <style>
@@ -53,10 +57,23 @@
 <form id="searchForm" onsubmit="return false;">
     <div align="center" style="position: relative; display: inline-block;">
         <label for="searchTerm">Rechercher par Matricule ou Nom :</label>
-        <input type="text" id="PersonnelNom" name="searchTerm" required autocomplete="off" />
-        <button type="button" id="btnSubmitSearch" style="background-color: green; color: black; border: none; padding: 10px 15px; cursor: pointer;">
-            🔍 Rechercher
-        </button>
+        
+        @if (isAdmin)
+        {
+            <input type="text" id="PersonnelNom" name="searchTerm" required autocomplete="off" value="@ViewBag.SearchTerm" />
+            <button type="button" id="btnSubmitSearch" style="background-color: green; color: black; border: none; padding: 10px 15px; cursor: pointer;">
+                🔍 Rechercher
+            </button>
+        }
+        else
+        {
+            <input type="text" id="PersonnelNom" name="searchTerm" required autocomplete="off" value="@userNom" readonly 
+                   style="background-color: #e9ecef; color: #6c757d; cursor: not-allowed; border: 1px solid #ced4da;" />
+            <button type="button" id="btnSubmitSearch" disabled style="background-color: #d3d3d3; color: #777; border: none; padding: 10px 15px; cursor: not-allowed; opacity: 0.6;">
+                🔍 Rechercher
+            </button>
+        }
+        
         <div id="suggestions" class="list-group" style="position: absolute; z-index: 1000; left: 0; top: 100%; width: 100%; background: white; border: 1px solid #ccc; text-align: left;"></div>
     </div>
 </form>
@@ -110,17 +127,25 @@
                     </tbody>
                 </table>
                 <div>
-                    <button class="btn-edit" data-id="@p.Num" style="background-color: yellow; color: Black; border: none; padding: 10px 15px; cursor: pointer;">Modifier</button>
-                   <button type="button" class="btn-delete" data-id="@p.Num" 
-        style="background-color: red; color: Black; border: none; padding: 10px 15px; cursor: pointer;">
-    🗑 Archiver
-</button>
-                    <button class="REMPLIR" style="padding: 10px 15px; cursor: pointer;">GENERER UN CERTIFICAT ADMINISTRATIF</button>
+                    @if (isAdmin)
+                    {
+                        <button type="button" class="btn-edit" data-id="@p.Num" style="background-color: yellow; color: Black; border: none; padding: 10px 15px; cursor: pointer;">Modifier</button>
+                        <button type="button" class="btn-delete" data-id="@p.Num" style="background-color: red; color: Black; border: none; padding: 10px 15px; cursor: pointer;">🗑 Archiver</button>
+                        <button type="button" class="REMPLIR" style="padding: 10px 15px; cursor: pointer;">GENERER UN CERTIFICAT ADMINISTRATIF</button>
+                    }
+                    else
+                    {
+                        <!-- Modifier disponible et cliquable sans restriction -->
+                        <button type="button" class="btn-edit" data-id="@p.Num" style="background-color: yellow; color: Black; border: none; padding: 10px 15px; cursor: pointer;">Modifier</button>
+                        <button type="button" class="btn-delete" disabled style="background-color: #e9ecef; color: #777; border: none; padding: 10px 15px; cursor: not-allowed; opacity: 0.6;">🗑 Archiver</button>
+                        <button type="button" class="REMPLIR" disabled style="background-color: #e9ecef; color: #777; border: none; padding: 10px 15px; cursor: not-allowed; opacity: 0.6;">GENERER UN CERTIFICAT ADMINISTRATIF</button>
+                    }
                 </div>
             </div>
         }
     }
 </div>
+
 <div id="lieu" style="display: none; border: 1px solid black; padding: 20px; margin-top: 20px; width: 350px; background: #f9f9f9; border-radius: 8px;">
     <label for="inputLieu">Lieu de délivrance du Cin :</label>
     <input type="text" id="inputLieu" placeholder="Entrez le lieu" /><br>
@@ -151,24 +176,22 @@
     <button onclick="window.print()">Imprimer</button>
 </div>
 
+<!-- Formulaire accessible à tous -->
 <div id="editPersonnelForm" style="display:none; padding: 20px; background: #eee; margin-top: 20px;">
     <h3 style="text-align:center; margin-bottom:20px;">Modifier le personnel</h3>
     
     <form id="updateForm" enctype="multipart/form-data">
         <input type="hidden" name="Num" id="editNum" />
         
-        <div class="photo-upload-container" style="grid-column: span 2; text-align: center; margin-bottom: 15px; padding: 15px; background: #fff; border: 1px dashed #999; border-radius: 8px;">
-    <label style="display:block; font-weight:bold; margin-bottom:10px;">Photo du personnel :</label>
-    
-    <img id="editPhotoPreview" src="" alt="Aperçu" style="width:120px; height:150px; object-fit:cover; border:2px solid #333; margin-bottom:10px; display:inline-block;" />
-    <br/>
-    
-    <input type="file" id="editPhotoFile" name="PhotoFile" accept="image/*" style="display: none;" />
-    
-    <button type="button" id="btnTriggerUpload" style="background-color: #007bff; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">
-        📁 Choisir une photo
-    </button>
-</div>
+        <div class="photo-upload-container">
+            <label style="display:block; font-weight:bold; margin-bottom:10px;">Photo du personnel :</label>
+            <img id="editPhotoPreview" src="" alt="Aperçu" style="width:120px; height:150px; object-fit:cover; border:2px solid #333; margin-bottom:10px; display:inline-block;" />
+            <br/>
+            <input type="file" id="editPhotoFile" name="PhotoFile" accept="image/*" style="display: none;" />
+            <button type="button" id="btnTriggerUpload" style="background-color: #007bff; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                📁 Choisir une photo
+            </button>
+        </div>
 
         <div class="form-group"><label>Matricule:</label> <input type="text" id="editMatricule" name="Matricule" readonly /></div>
         <div class="form-group"><label>Nom & Prénoms:</label> <input type="text" id="editNomEtPrenoms" name="NomEtPrenoms" required /></div>
@@ -177,44 +200,44 @@
         <div class="form-group"><label>Décision:</label> <input type="text" id="editDec" name="Dec" /></div>
         
         <div class="form-group"><label>Corps:</label> <input type="text" id="editCorps" name="Corps" /></div>
-       <div class="form-group">
-    <label>Matière:</label> 
-    <select id="editMatiere" name="Matiere" class="form-control">
-        <option value="ALL">ALLEMAND</option>
-        <option value="ANG">ANGLAIS</option>
-        <option value="EAC">EDUCATION A LA CITOYENNETE (EAC)</option>
-        <option value="EPS">EPS</option>
-        <option value="FRA">FRANCAIS</option>
-        <option value="HG">HISTO-GEO</option>
-        <option value="MAT">MATHEMATIQUES</option>
-        <option value="MLG">MALAGASY</option>
-        <option value="PC">PHYSIQUE-CHIMIE</option>
-        <option value="PHI">PHILOSOPHIE</option>
-        <option value="RUS">RUSSE</option>
-        <option value="ESP">ESPAGNOL</option>
-        <option value="SES">SCIENCE ECONOMIQUE ET SOCIAL (SES)</option>
-        <option value="SVT">SCIENCE DE LA VIE ET DE LA TERRE (SVT)</option>
-        <option value="PROVISEUR">PROVISEUR</option>
-        <option value="PROVISEUR ADJOINT">PROVISEUR ADJOINT</option>
-        <option value="SG">SURVEILLANT GENERAL</option>
-        <option value="ECONOME">ECONOME</option>
-        <option value="PROVISORAT">PROVISORAT</option>
-        <option value="SCOLARITE">SCOLARITE</option>
-        <option value="INFO">INFO</option>
-        <option value="SURVEILLANT">SURVEILLANT</option>
-        <option value="COMPTABLE">COMPTABLE</option>
-        <option value="CDI">CDI</option>
-        <option value="LV II">LV II</option>
-        <option value="CAELF">CAELF</option>
-        <option value="ILO">ILO</option>
-        <option value="EXAMEN">EXAMEN</option>
-        <option value="LABO PC">LABO PC</option>
-        <option value="LABO SVT">LABO SVT</option>
-        <option value="EMPL DE SERV">EMPL DE SERV</option>
-        <option value="INFIRMERIE">INFIRMERIE</option>
-        <option value="GARDIEN">GARDIEN</option>
-    </select>
-</div>
+        <div class="form-group">
+            <label>Matière:</label> 
+            <select id="editMatiere" name="Matiere" class="form-control">
+                <option value="ALL">ALLEMAND</option>
+                <option value="ANG">ANGLAIS</option>
+                <option value="EAC">EDUCATION A LA CITOYENNETE (EAC)</option>
+                <option value="EPS">EPS</option>
+                <option value="FRA">FRANCAIS</option>
+                <option value="HG">HISTO-GEO</option>
+                <option value="MAT">MATHEMATIQUES</option>
+                <option value="MLG">MALAGASY</option>
+                <option value="PC">PHYSIQUE-CHIMIE</option>
+                <option value="PHI">PHILOSOPHIE</option>
+                <option value="RUS">RUSSE</option>
+                <option value="ESP">ESPAGNOL</option>
+                <option value="SES">SCIENCE ECONOMIQUE ET SOCIAL (SES)</option>
+                <option value="SVT">SCIENCE DE LA VIE ET DE LA TERRE (SVT)</option>
+                <option value="PROVISEUR">PROVISEUR</option>
+                <option value="PROVISEUR ADJOINT">PROVISEUR ADJOINT</option>
+                <option value="SG">SURVEILLANT GENERAL</option>
+                <option value="ECONOME">ECONOME</option>
+                <option value="PROVISORAT">PROVISORAT</option>
+                <option value="SCOLARITE">SCOLARITE</option>
+                <option value="INFO">INFO</option>
+                <option value="SURVEILLANT">SURVEILLANT</option>
+                <option value="COMPTABLE">COMPTABLE</option>
+                <option value="CDI">CDI</option>
+                <option value="LV II">LV II</option>
+                <option value="CAELF">CAELF</option>
+                <option value="ILO">ILO</option>
+                <option value="EXAMEN">EXAMEN</option>
+                <option value="LABO PC">LABO PC</option>
+                <option value="LABO SVT">LABO SVT</option>
+                <option value="EMPL DE SERV">EMPL DE SERV</option>
+                <option value="INFIRMERIE">INFIRMERIE</option>
+                <option value="GARDIEN">GARDIEN</option>
+            </select>
+        </div>
         
         <div class="form-group"><label>Date Naissance:</label> <input type="date" id="editDatenaiss" name="Datenaiss" /></div>
         <div class="form-group"><label>Lieu Naissance:</label> <input type="text" id="editLieudenaiss" name="Lieudenaiss" /></div>
@@ -226,26 +249,26 @@
         <div class="form-group"><label>Date Prise Service:</label> <input type="date" id="editDatedeprise" name="Datedeprise" /></div>
         
         <div class="form-group mb-3">
-    <label for="editDiplomeac" class="custom-label">Diplôme Académique le plus élevé</label>
-    <select id="editDiplomeac" name="Diplomeac" class="form-control">
-        <option value="" disabled selected>Sélectionner le diplôme Académique le plus élevé</option>
-        <option value="BEPC">BEPC</option>
-        <option value="BACC">BACCALAUREAT</option>
-        <option value="DTS">Diplôme de Technicien Supérieur (BACC+2)</option>
-        <option value="LICENCE">LICENCE(BACC+3)</option>
-        <option value="MAITRISE">MAITRISE(BACC+4)</option>
-        <option value="MASTER">MASTER(BACC+5)</option>
-    </select>
-</div>
+            <label for="editDiplomeac" class="custom-label">Diplôme Académique le plus élevé</label>
+            <select id="editDiplomeac" name="Diplomeac" class="form-control">
+                <option value="" disabled selected>Sélectionner le diplôme Académique le plus élevé</option>
+                <option value="BEPC">BEPC</option>
+                <option value="BACC">BACCALAUREAT</option>
+                <option value="DTS">Diplôme de Technicien Supérieur (BACC+2)</option>
+                <option value="LICENCE">LICENCE(BACC+3)</option>
+                <option value="MAITRISE">MAITRISE(BACC+4)</option>
+                <option value="MASTER">MASTER(BACC+5)</option>
+            </select>
+        </div>
         <div class="form-group mb-3">
-    <label for="editDiplomeped" class="custom-label">Diplôme Pédagogique le plus élevé</label>
-    <select id="editDiplomeped" name="Diplomeped" class="form-control">
-        <option value="" disabled selected>Sélectionner le diplôme Pédagogique le plus élevé</option>
-        <option value="LAPEN">LAPEN</option>
-        <option value="MAPEN">MAPEN</option>
-        <option value="CAPEN">CAPEN</option>
-    </select>
-</div>
+            <label for="editDiplomeped" class="custom-label">Diplôme Pédagogique le plus élevé</label>
+            <select id="editDiplomeped" name="Diplomeped" class="form-control">
+                <option value="" disabled selected>Sélectionner le diplôme Pédagogique le plus élevé</option>
+                <option value="LAPEN">LAPEN</option>
+                <option value="MAPEN">MAPEN</option>
+                <option value="CAPEN">CAPEN</option>
+            </select>
+        </div>
         
         <div class="form-group"><label>Contact:</label> <input type="text" id="editContact" name="Contact" /></div>
         <div class="form-group"><label>Fonction:</label> <select id="editFonction" name="Fonction"><option value="PA">PA</option><option value="PE">PE</option></select></div>
@@ -276,13 +299,19 @@
     </form>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"
+        asp-fallback-src="~/js/jquery-3.6.0.min.js"
+        asp-fallback-test="window.jQuery"
+        crossorigin="anonymous">
+</script>
 <script>
     $(document).ready(function () {
+        const IS_ADMIN = @(isAdmin ? "true" : "false");
         var searchUrl = "/Search/SearchPersonnel";
 
-        // Recherche par bouton (AJAX)
+        // Recherche par bouton (AJAX) - Uniquement si admin
         $("#btnSubmitSearch").click(function () {
+            if (!IS_ADMIN) return false;
             let query = $("#PersonnelNom").val();
             if (query) {
                 $.get('/Search/SearchResults', { searchTerm: query }, function (data) {
@@ -292,8 +321,9 @@
             }
         });
 
-        // Autocomplete (Suggestion)
+        // Autocomplete (Suggestion) - Uniquement si admin
         $("#PersonnelNom").keyup(function () {
+            if (!IS_ADMIN) return false;
             let query = $(this).val().trim();
             if (query.length >= 2) {
                 $.get(searchUrl, { search: query }, function (data) {
@@ -314,230 +344,213 @@
             $("#suggestions").empty();
         });
 
-        // Fonction de sécurité pour formater les dates reçues (FR ou ISO) au format AAAA-MM-JJ
-function formatHTML5Date(rawDate) {
-    if (!rawDate) return '';
-    
-    let dateStr = String(rawDate).trim();
+        // Fonction de sécurité pour formater les dates
+        function formatHTML5Date(rawDate) {
+            if (!rawDate) return '';
+            let dateStr = String(rawDate).trim();
 
-    // 1. Si le serveur renvoie le format FR "14/09/2017" (avec ou sans l'heure)
-    if (dateStr.includes('/')) {
-        let datePart = dateStr.split(' ')[0]; 
-        let parts = datePart.split('/'); // ["14", "09", "2017"]
-        
-        if (parts.length === 3) {
-            // Reconstruit au format International requis par l'input date : "2017-09-14"
-            return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+            if (dateStr.includes('/')) {
+                let datePart = dateStr.split(' ')[0]; 
+                let parts = datePart.split('/'); 
+                if (parts.length === 3) {
+                    return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+                }
+            }
+            if (dateStr.includes('T')) {
+                return dateStr.split('T')[0];
+            }
+            return dateStr.substring(0, 10);
         }
-    }
 
-    // 2. Si c'est un format ISO long (ex: "2017-09-14T00:00:00")
-    if (dateStr.includes('T')) {
-        return dateStr.split('T')[0];
-    }
-
-    // 3. Si c'est déjà du "2017-09-14"
-    return dateStr.substring(0, 10);
-}
-
-// Édition : Remplissage des données (Version Corrigée)
-$(document).on('click', '.btn-edit', function () {
-    let id = $(this).data("id");
-    $.get('/Search/GetPersonnelDetails', { id: id }, function (data) {
-        $("#editNum").val(data.num);
-        $("#editMatricule").val(data.matricule);
-        $("#editNomEtPrenoms").val(data.nomEtPrenoms);
-        $("#editCin").val(data.cin);
-        $("#editDec").val(data.dec);
-        
-        // .trigger('change') maintient l'affichage de vos listes de suggestions/Select2
-        $("#editCorps").val(data.corps).trigger('change');
-        $("#editMatiere").val(data.matiere).trigger('change');
-
-        // --- CORRECTION ET CONVERSION DES INPUTS DATES ---
-        let dateNaissRaw = data.datenaiss || data.dateNaiss || data.Datenaiss;
-        let dateEntreRaw = data.datedentre || data.dateDentre || data.Datedentre;
-        let datePriseRaw = data.datedeprise || data.dateDeprise || data.Datedeprise;
-
-        $("#editDatenaiss").val(formatHTML5Date(dateNaissRaw)).trigger('change');
-        $("#editDatedentre").val(formatHTML5Date(dateEntreRaw)).trigger('change');
-        $("#editDatedeprise").val(formatHTML5Date(datePriseRaw)).trigger('change');
-        // -------------------------------------------------
-
-        $("#editLieudenaiss").val(data.lieudenaiss);
-        $("#editSexe").val(data.sexe).trigger('change');
-        $("#editStatut").val(data.statut).trigger('change');
-        
-        $("#editDiplomeac").val(data.diplomeac).trigger('change');
-        $("#editDiplomeped").val(data.diplomeped).trigger('change');
-        $("#editContact").val(data.contact);
-        $("#editFonction").val(data.fonction).trigger('change');
-        
-        // Remplissage des Avancements
-        $("#editPerav").val(data.perav);
-        $("#editDemav").val(data.demav);
-        $("#editTemav").val(data.temav);
-        $("#editQemav").val(data.qemav);
-        $("#editCemav").val(data.cemav);
-        $("#editSemav").val(data.semav);
-        $("#editSepmav").val(data.sepmav);
-        $("#editHemav").val(data.hemav);
-        $("#editNemav").val(data.nemav);
-        $("#editDxemav").val(data.dxemav);
-        $("#editOnemav").val(data.onemav);
-        $("#editDou").val(data.dou);
-        $("#editTrei").val(data.trei);
-        $("#editQuat").val(data.quat);
-        $("#editQuin").val(data.quin);
-        $("#editSeiz").val(data.seiz);
-
-        // Gérer l'affichage de la photo actuelle
-        if (data.photo) {
-            $("#editPhotoPreview").attr("src", data.photo);
-        } else {
-            $("#editPhotoPreview").attr("src", "/images/default.jpg"); 
-        }
-        
-        $("#editPhotoFile").val(''); // Réinitialise l'input file caché
-
-        $("#editPersonnelForm").slideDown();
-    });
-});
-
-       $("#updateForm").submit(function(e){
-    e.preventDefault();
-    
-    let formData = new FormData(this); // Gère les inputs texte ET le fichier photo
-    
-    // 1. Récupérer l'ID (Num) du personnel en cours de modification
-    // (Assurez-vous d'avoir un <input type="hidden" id="editNum" name="Num" /> ou équivalent dans votre formulaire)
-    let personnelNum = $("#editNum").val(); 
-    
-    $.ajax({ 
-        url: '/Search/UpdatePersonnel', 
-        type: 'POST', 
-        data: formData, 
-        processData: false,  // Empêche jQuery de transformer les données en string
-        contentType: false,  // Empêche jQuery de forcer le header
-        success: res => { 
-            if (res.success) {
-                alert("Enregistré avec succès !"); 
+        // Édition : Remplissage des données (Autorisé GLOBALEMENT)
+        $(document).on('click', '.btn-edit', function (e) {
+            e.preventDefault();
+            let id = $(this).data("id");
+            
+            $.get('/Search/GetPersonnelDetails', { id: id }, function (data) {
+                $("#editNum").val(data.num);
+                $("#editMatricule").val(data.matricule);
+                $("#editNomEtPrenoms").val(data.nomEtPrenoms);
+                $("#editCin").val(data.cin);
+                $("#editDec").val(data.dec);
                 
-                // 2. On cible précisément la fiche de ce personnel
-                let $card = $("#card-" + personnelNum);
-                
-                if ($card.length > 0) {
-                    let cacheBuster = new Date().getTime(); 
-                    
-                    // A. Mise à jour de la photo dans le formulaire ET dans la bonne fiche
-                    $("#editPhotoPreview").attr("src", res.photoUrl + "?t=" + cacheBuster);
-                    $card.find(".photo-personnel").attr("src", res.photoUrl + "?t=" + cacheBuster);
-                    
-                    // B. Mise à jour des informations textuelles et listes déroulantes
-                    $card.find(".Matricule").text($("#editMatricule").val());
-                    $card.find(".nom_prenoms").text($("#editNomEtPrenoms").val()); // Ajustez l'ID selon votre formulaire
-                    $card.find(".Cin").text($("#editCin").val());
-                    $card.find(".Corps").text($("#editCorps").val());
-                    $card.find(".Matiere").text($("#editMatiere").val());
-                    $card.find(".Diplomeac").text($("#editDiplomeac").val());
-                    $card.find(".Diplomeped").text($("#editDiplomeped").val());
-                    $card.find(".Contact").text($("#editContact").val());
-                    $card.find(".Fonction").text($("#editFonction").val());
-                    
-                    // C. Mise à jour des dates (Optionnel : gestion du format HTML5 YYYY-MM-DD vers FR)
-                    let dateNaiss = $("#editDatenaiss").val();
-                    if(dateNaiss && dateNaiss.includes("-")) {
-                        let d = dateNaiss.split('-'); $card.find(".Datenaiss").text(`${d[2]}/${d[1]}/${d[0]}`);
-                    }
-                    let dateEntree = $("#editDatedentre").val();
-                    if(dateEntree && dateEntree.includes("-")) {
-                        let d = dateEntree.split('-'); $card.find(".Datedentre").text(`${d[2]}/${d[1]}/${d[0]}`);
-                    }
-                    let datePrise = $("#editDatedeprise").val();
-                    if(datePrise && datePrise.includes("-")) {
-                        let d = datePrise.split('-'); $card.find(".Datedeprise").text(`${d[2]}/${d[1]}/${d[0]}`);
-                    }
+                $("#editCorps").val(data.corps).trigger('change');
+                $("#editMatiere").val(data.matiere).trigger('change');
 
-                    // D. Mise à jour des Avancements (si présents dans le formulaire de modification)
-                    $card.find(".Perav").text($("#editPerav").val());
-                    $card.find(".Demav").text($("#editDemav").val());
-                    $card.find(".Temav").text($("#editTemav").val());
-                    $card.find(".Qemav").text($("#editQemav").val());
-                    $card.find(".Cemav").text($("#editCemav").val());
-                    $card.find(".Semav").text($("#editSemav").val());
-                    $card.find(".Sepmav").text($("#editSepmav").val());
-                    $card.find(".Hemav").text($("#editHemav").val());
-                    $card.find(".Nemav").text($("#editNemav").val());
-                    $card.find(".Dxemav").text($("#editDxemav").val());
-                    $card.find(".Onemav").text($("#editOnemav").val());
-                    $card.find(".Dou").text($("#editDou").val());
-                    $card.find(".Trei").text($("#editTrei").val());
-                    $card.find(".Quat").text($("#editQuat").val());
-                    $card.find(".Quin").text($("#editQuin").val());
-                    $card.find(".Seiz").text($("#editSeiz").val());
+                let dateNaissRaw = data.datenaiss || data.dateNaiss || data.Datenaiss;
+                let dateEntreRaw = data.datedentre || data.dateDentre || data.Datedentre;
+                let datePriseRaw = data.datedeprise || data.dateDeprise || data.Datedeprise;
+
+                $("#editDatenaiss").val(formatHTML5Date(dateNaissRaw)).trigger('change');
+                $("#editDatedentre").val(formatHTML5Date(dateEntreRaw)).trigger('change');
+                $("#editDatedeprise").val(formatHTML5Date(datePriseRaw)).trigger('change');
+
+                $("#editLieudenaiss").val(data.lieudenaiss);
+                $("#editSexe").val(data.sexe).trigger('change');
+                $("#editStatut").val(data.statut).trigger('change');
+                
+                $("#editDiplomeac").val(data.diplomeac).trigger('change');
+                $("#editDiplomeped").val(data.diplomeped).trigger('change');
+                $("#editContact").val(data.contact);
+                $("#editFonction").val(data.fonction).trigger('change');
+                
+                $("#editPerav").val(data.perav);
+                $("#editDemav").val(data.demav);
+                $("#editTemav").val(data.temav);
+                $("#editQemav").val(data.qemav);
+                $("#editCemav").val(data.cemav);
+                $("#editSemav").val(data.semav);
+                $("#editSepmav").val(data.sepmav);
+                $("#editHemav").val(data.hemav);
+                $("#editNemav").val(data.nemav);
+                $("#editDxemav").val(data.dxemav);
+                $("#editOnemav").val(data.onemav);
+                $("#editDou").val(data.dou);
+                $("#editTrei").val(data.trei);
+                $("#editQuat").val(data.quat);
+                $("#editQuin").val(data.quin);
+                $("#editSeiz").val(data.seiz);
+
+                if (data.photo) {
+                    $("#editPhotoPreview").attr("src", data.photo);
+                } else {
+                    $("#editPhotoPreview").attr("src", "/images/default.jpg"); 
                 }
                 
-                // On ferme le formulaire proprement
-                $("#editPersonnelForm").slideUp();
-            } else {
-                alert("Erreur : " + res.message);
-            }
-        },
-        error: err => {
-            alert("Erreur lors de l'enregistrement.");
-        }
-    });
-});
+                $("#editPhotoFile").val('');
+                $("#editPersonnelForm").slideDown();
+            }).fail(function (xhr, status, error) {
+                // Alerte de diagnostic si le serveur rejette la demande (ex: [Authorize])
+                alert("Sécurité serveur : L'action 'GetPersonnelDetails' a renvoyé une erreur " + xhr.status + " (" + error + "). Si vous êtes connecté en tant que non-admin, l'accès doit être également autorisé dans votre fichier SearchController.cs.");
+            });
+        });
 
-       $(document).on('click', '.btn-delete', function () {
-    let id = $(this).data("id");
-    let $card = $("#card-" + id);
-
-    // Remplacement du confirm() natif par SweetAlert2
-    Swal.fire({
-        title: 'Archiver ce personnel ?',
-        text: "Cette action va déplacer les données vers l'historique.",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#28a745',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Oui, archiver !',
-        cancelButtonText: 'Annuler'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // Appel AJAX maintenu
-            $.ajax({
-                url: '/Search/DeletePersonnel',
-                type: 'POST',
-                data: { id: id },
-                success: function (res) {
+        // Soumission du formulaire (Autorisé GLOBALEMENT)
+        $("#updateForm").submit(function(e){
+            e.preventDefault();
+            
+            let formData = new FormData(this);
+            let personnelNum = $("#editNum").val(); 
+            
+            $.ajax({ 
+                url: '/Search/UpdatePersonnel', 
+                type: 'POST', 
+                data: formData, 
+                processData: false, 
+                contentType: false, 
+                success: res => { 
                     if (res.success) {
-                        // Succès : Message SweetAlert + Suppression visuelle
-                        Swal.fire('Archivé !', res.message, 'success');
-                        $card.fadeOut(500, function () {
-                            $(this).remove();
-                        });
+                        alert("Enregistré avec succès !"); 
+                        let $card = $("#card-" + personnelNum);
+                        
+                        if ($card.length > 0) {
+                            let cacheBuster = new Date().getTime(); 
+                            
+                            $("#editPhotoPreview").attr("src", res.photoUrl + "?t=" + cacheBuster);
+                            $card.find(".photo-personnel").attr("src", res.photoUrl + "?t=" + cacheBuster);
+                            
+                            $card.find(".Matricule").text($("#editMatricule").val());
+                            $card.find(".nom_prenoms").text($("#editNomEtPrenoms").val()); 
+                            $card.find(".Cin").text($("#editCin").val());
+                            $card.find(".Corps").text($("#editCorps").val());
+                            $card.find(".Matiere").text($("#editMatiere").val());
+                            $card.find(".Diplomeac").text($("#editDiplomeac").val());
+                            $card.find(".Diplomeped").text($("#editDiplomeped").val());
+                            $card.find(".Contact").text($("#editContact").val());
+                            $card.find(".Fonction").text($("#editFonction").val());
+                            
+                            let dateNaiss = $("#editDatenaiss").val();
+                            if(dateNaiss && dateNaiss.includes("-")) {
+                                let d = dateNaiss.split('-'); $card.find(".Datenaiss").text(`${d[2]}/${d[1]}/${d[0]}`);
+                            }
+                            let dateEntree = $("#editDatedentre").val();
+                            if(dateEntree && dateEntree.includes("-")) {
+                                let d = dateEntree.split('-'); $card.find(".Datedentre").text(`${d[2]}/${d[1]}/${d[0]}`);
+                            }
+                            let datePrise = $("#editDatedeprise").val();
+                            if(datePrise && datePrise.includes("-")) {
+                                let d = datePrise.split('-'); $card.find(".Datedeprise").text(`${d[2]}/${d[1]}/${d[0]}`);
+                            }
+
+                            $card.find(".Perav").text($("#editPerav").val());
+                            $card.find(".Demav").text($("#editDemav").val());
+                            $card.find(".Temav").text($("#editTemav").val());
+                            $card.find(".Qemav").text($("#editQemav").val());
+                            $card.find(".Cemav").text($("#editCemav").val());
+                            $card.find(".Semav").text($("#editSemav").val());
+                            $card.find(".Sepmav").text($("#editSepmav").val());
+                            $card.find(".Hemav").text($("#editHemav").val());
+                            $card.find(".Nemav").text($("#editNemav").val());
+                            $card.find(".Dxemav").text($("#editDxemav").val());
+                            $card.find(".Onemav").text($("#editOnemav").val());
+                            $card.find(".Dou").text($("#editDou").val());
+                            $card.find(".Trei").text($("#editTrei").val());
+                            $card.find(".Quat").text($("#editQuat").val());
+                            $card.find(".Quin").text($("#editQuin").val());
+                            $card.find(".Seiz").text($("#editSeiz").val());
+                        }
+                        $("#editPersonnelForm").slideUp();
                     } else {
-                        // Erreur gérée par le contrôleur
-                        Swal.fire('Erreur', res.message, 'error');
+                        alert("Erreur : " + res.message);
                     }
                 },
-                error: function () {
-                    Swal.fire('Erreur', 'Une erreur de communication est survenue.', 'error');
+                error: err => {
+                    alert("Erreur serveur lors de la mise à jour (Statut: " + err.status + ").");
                 }
             });
-        }
-    });
-});
+        });
 
-        // Génération Certificat (Mise à jour : Remplacer l'ID par une classe)
+        // Archivage - Limité à l'admin
+        $(document).on('click', '.btn-delete', function () {
+            if (!IS_ADMIN) return false;
+
+            let id = $(this).data("id");
+            let $card = $("#card-" + id);
+
+            Swal.fire({
+                title: 'Archiver ce personnel ?',
+                text: "Cette action va déplacer les données vers l'historique.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Oui, archiver !',
+                cancelButtonText: 'Annuler'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '/Search/DeletePersonnel',
+                        type: 'POST',
+                        data: { id: id },
+                        success: function (res) {
+                            if (res.success) {
+                                Swal.fire('Archivé !', res.message, 'success');
+                                $card.fadeOut(500, function () {
+                                    $(this).remove();
+                                });
+                            } else {
+                                Swal.fire('Erreur', res.message, 'error');
+                            }
+                        },
+                        error: function () {
+                            Swal.fire('Erreur', 'Une erreur de communication est survenue.', 'error');
+                        }
+                    });
+                }
+            });
+        });
+
+        // Certificat - Limité à l'admin
         $(document).on('click', '.REMPLIR', function () {
+            if (!IS_ADMIN) return false; 
             $("#lieu").show();
-            window.lastClickedRow = $(this).closest('table');
+            window.lastClickedRow = $(this).closest('.personnel-card').find('table');
         });
 
         $("#generateCertificate").click(function () {
             let table = window.lastClickedRow;
+            if(!table || table.length === 0) return;
+
             $("#cert_nom").text(table.find(".nom_prenoms").text());
             $("#cert_Matricule").text(table.find(".Matricule").text());
             $("#cert_Corps").text(table.find(".Corps").text());
@@ -556,22 +569,20 @@ $(document).on('click', '.btn-edit', function () {
         $(document).click(e => { if (!$(e.target).closest("#PersonnelNom, #suggestions").length) $("#suggestions").empty(); });
         $("#cancelEdit").click(() => $("#editPersonnelForm").slideUp());
     });
-    // Déclencher le choix du fichier au clic sur le bouton stylisé
-$(document).on('click', '#btnTriggerUpload', function () {
-    $("#editPhotoFile").click();
-});
 
-// Prévisualisation de la photo en temps réel dès qu'on la choisit
-$(document).on('change', '#editPhotoFile', function () {
-    let file = this.files[0];
-    if (file) {
-        let reader = new FileReader();
-        reader.onload = function (e) {
-            // Met à jour l'image à l'écran instantanément
-            $('#editPhotoPreview').attr('src', e.target.result);
+    // Photos
+    $(document).on('click', '#btnTriggerUpload', function () {
+        $("#editPhotoFile").click();
+    });
+
+    $(document).on('change', '#editPhotoFile', function () {
+        let file = this.files[0];
+        if (file) {
+            let reader = new FileReader();
+            reader.onload = function (e) {
+                $('#editPhotoPreview').attr('src', e.target.result);
+            }
+            reader.readAsDataURL(file);
         }
-        reader.readAsDataURL(file);
-    }
-});
-
+    });
 </script>

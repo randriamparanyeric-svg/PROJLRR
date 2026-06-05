@@ -1,0 +1,60 @@
+/* Appliquer un style général à la table */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: auto; /* Permet aux colonnes de s'ajuster au contenu */
+}
+
+.table th, .table td   , .table tr{
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #ddd;
+    font-size: 14px;
+    word-wrap: break-word; 
+    white-space: normal;
+    overflow-wrap: break-word;
+}
+
+/* Ajustement spécifique des colonnes */
+/* Empêcher le retour à la ligne dans la colonne NOM ET PRÉNOMS */
+td:nth-child(3) { 
+    text-align: left;
+    white-space: nowrap; /* Empêche le texte de passer à la ligne */
+    overflow: hidden; /* Cache tout texte dépassant */
+    text-overflow: ellipsis; /* Ajoute "..." si le texte dépasse */
+    max-width: 500px; /* Ajustez la largeur si nécessaire */
+}
+
+
+td:nth-child(4), td:nth-child(5) { 
+    width: 1px; 
+    white-space: nowrap; /* Empêcher CIN et CONTACT de s'étendre */
+}
+
+/* Boutons */
+.btn {
+    padding: 10px 15px;
+    text-decoration: none;
+    border-radius: 5px;
+    color: white;
+    background-color: #007bff;
+    border: none;
+}
+
+.btn:hover {
+    background-color: #0056b3;
+}
+
+
+
+    .table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .btn {
+        width: 100%;
+        text-align: center;
+        margin-top: 10px;
+    }
+

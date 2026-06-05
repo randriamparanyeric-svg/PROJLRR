@@ -1,0 +1,125 @@
+/* ==========================
+   TABLEAU - LISTE PERSONNELS
+   ========================== */
+
+/* Style général du tableau */
+.table-wrapper {
+    margin-top: 20px;
+    overflow-x: auto; /* Permet le défilement horizontal si nécessaire */
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* En-têtes du tableau */
+.table thead th {
+    background-color: #007BFF;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+/* Lignes du tableau */
+.table tbody tr:nth-child(even) {
+    background-color: #f8f9fa; /* Gris clair */
+}
+
+.table tbody tr:hover {
+    background-color: #e9ecef; /* Gris légèrement plus foncé */
+}
+
+/* Cellules */
+.table td {
+    padding: 8px;
+    border: 1px solid #ddd;
+    text-align: center;
+}
+
+/* ------------------------------
+   AJUSTEMENTS POUR CHAQUE COLONNE
+   ------------------------------ */
+
+/* Nom et Prénoms - Forcer un retour à la ligne */
+.table td:nth-child(3) {
+    text-align: left;
+    word-wrap: break-word;
+    white-space: normal;
+    max-width: 200px; /* Ajuste selon ton affichage */
+}
+
+
+/* CIN et CONTACT - Éviter trop de largeur */
+.table td:nth-child(4),
+.table td:nth-child(5) {
+    white-space: nowrap;
+    width: 1px; /* Ajuste automatiquement à la taille du contenu */
+}
+
+/* Ajustement pour la colonne Fonction et Matière */
+.table td:nth-child(6),
+.table td:nth-child(7) {
+    text-align: left;
+}
+
+/* ======================
+   BOUTON D'IMPRESSION
+   ====================== */
+
+button {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+button:hover {
+    background-color: #218838;
+}
+
+/* ======================
+   LIEN AJOUT PERSONNEL
+   ====================== */
+
+.btn-primary {
+    display: inline-block;
+    padding: 10px 15px;
+    margin-top: 10px;
+    background-color: #007BFF;
+    color: white;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+/* Table responsive */
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto; /* Permet le défilement horizontal sur mobile */
+}
+
+/* Table compacte sur mobile */
+@media screen and (max-width: 768px) {
+    .table {
+        font-size: 12px; /* Réduit la taille de la police */
+        min-width: 600px; /* Évite que les colonnes soient trop écrasées */
+    }
+    .table td, .table th {
+        padding: 6px; /* Réduit l’espace pour éviter les débordements */
+    }
+    .table th {
+        white-space: nowrap; /* Évite que les titres de colonnes se cassent */
+    }
+}

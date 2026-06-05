@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using PROJLRR.Models;
 using System.Linq;
 using System.IO;
+using Microsoft.AspNetCore.Authorization;
 using System.Threading.Tasks;
 using System;
 
@@ -18,28 +19,53 @@ namespace PROJLRR.Controllers
         }
 
         // 1. Recherche
-       [HttpGet]
-        public IActionResult SearchResults(string searchTerm = "")
+       // 1. Recherche
+[HttpGet]
+[Authorize] // Optionnel mais fortement recommandé pour éviter les crashs si aucun utilisateur n'est connecté
+public IActionResult SearchResults(string searchTerm = "")
+{
+    List<Personnel> results = new List<Personnel>();
+    bool isAdmin = User.IsInRole("Admin");
+    string userNom = "";
+
+    if (!isAdmin)
+    {
+        // L'utilisateur est connecté via son CIN (Non-admin)
+        var userCin = User.FindFirst("UserCin")?.Value;
+
+        if (!string.IsNullOrEmpty(userCin))
         {
-
-            // Correction : Utilisation du singulier 'Personnel' pour la liste
-            List<Personnel> results = new List<Personnel>();
-
-            if (!string.IsNullOrWhiteSpace(searchTerm))
+            // On cherche le personnel associé au CIN de connexion
+            var monProfil = _context.Personnels.FirstOrDefault(p => p.Cin == userCin);
+            if (monProfil != null)
             {
-                var term = searchTerm.ToLower();
-                
-                // Correction : Ici on utilise le nom de la propriété définie dans le DbContext
-                // (Si vous avez une erreur ici, vérifiez le nom dans PerslrrsanscodeContext.cs)
-                results = _context.Personnels
-                    .Where(p => (p.NomEtPrenoms != null && p.NomEtPrenoms.ToLower().Contains(term)) || 
-                                (p.Matricule != null && p.Matricule.ToLower().Contains(term)))
-                    .ToList(); 
+                userNom = monProfil.NomEtPrenoms;
+                // On écrase le searchTerm pour forcer uniquement son profil
+                searchTerm = userNom; 
+                results.Add(monProfil);
             }
-
-            ViewBag.SearchTerm = searchTerm;
-            return View(results);
         }
+    }
+    else
+    {
+        // Logique originale pour l'administrateur
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            var term = searchTerm.ToLower();
+            results = _context.Personnels
+                .Where(p => (p.NomEtPrenoms != null && p.NomEtPrenoms.ToLower().Contains(term)) || 
+                            (p.Matricule != null && p.Matricule.ToLower().Contains(term)))
+                .ToList(); 
+        }
+    }
+
+    // On envoie les informations de droits à la Vue
+    ViewBag.IsAdmin = isAdmin;
+    ViewBag.UserNom = userNom;
+    ViewBag.SearchTerm = searchTerm;
+
+    return View(results);
+}
         // 2. Détail (Json)
         [HttpGet]
         public JsonResult GetPersonnelDetails(int id)
@@ -247,16 +273,43 @@ public IActionResult SearchPersonnel(string search)
 
     return Json(resultats);
 }
-[HttpGet]
-public IActionResult SearchResultsPartial(string searchTerm)
-{
-    var model = _context.Personnels
-        .Where(p => p.NomEtPrenoms.Contains(searchTerm) || p.Matricule.Contains(searchTerm))
-        .ToList();
+        [HttpGet]
+        [Authorize] // Bloque l'accès aux utilisateurs non connectés
+        public IActionResult SearchResultsPartial(string searchTerm)
+        {
+            // 1. SÉCURITÉ : Si l'utilisateur connecté n'est pas l'administrateur (Enseignant/Agent)
+            if (!User.IsInRole("Admin"))
+            {
+                // On extrait le CIN de l'utilisateur depuis son cookie de connexion
+                var userCin = User.FindFirst("UserCin")?.Value;
 
-    // On retourne une "PartialView" (vous devez créer le fichier _PersonnelList.cshtml)
-    return PartialView("_PersonnelList", model);
-}
+                if (string.IsNullOrEmpty(userCin))
+                {
+                    return Challenge(); // Redirige vers la page de login si le claim est corrompu
+                }
+
+                // On ignore totalement le mot-clé tapé (searchTerm) et on force l'affichage de sa propre ligne uniquement
+                var monRenseignement = _context.Personnels
+                    .AsNoTracking()
+                    .Where(p => p.Cin == userCin)
+                    .ToList();
+
+                return PartialView("_PersonnelList", monRenseignement);
+            }
+
+            // 2. LOGIQUE POUR L'ADMINISTRATEUR (L'admin peut chercher n'importe qui)
+            var queryable = _context.Personnels.AsNoTracking().AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                queryable = queryable.Where(p => p.NomEtPrenoms.Contains(searchTerm) || p.Matricule.Contains(searchTerm));
+            }
+
+            var model = queryable.ToList();
+
+            // On retourne la liste filtrée complète pour l'administrateur
+            return PartialView("_PersonnelList", model);
+        } // <-- L'accolade manquante a été ajoutée ici
 public IActionResult Archive()
 {
     // Récupère tous les éléments de la table d'archives

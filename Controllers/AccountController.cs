@@ -2,17 +2,27 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using PROJLRR.ViewModels;
-using System.Diagnostics;
+using System.Collections.Generic;
+using System;
+using System.Threading.Tasks;
+using PROJLRR.Models; 
+using PROJLRR.ViewModels; // Indispensable pour trouver votre LoginViewModel
 
 public class AccountController : Controller
 {
+    private readonly PerslrrsanscodeContext _context;
+
+    public AccountController(PerslrrsanscodeContext context)
+    {
+        _context = context;
+    }
+
     [AllowAnonymous]
     [HttpGet]
     public IActionResult Login(string? returnUrl = null)
     {
-        // On passe le returnUrl à la vue pour ne pas le perdre lors du POST
         ViewData["ReturnUrl"] = returnUrl;
         return View();
     }
@@ -20,55 +30,77 @@ public class AccountController : Controller
     [HttpPost]
     [AllowAnonymous]
     [ValidateAntiForgeryToken]
+    // On réintègre votre LoginViewModel pour s'accorder parfaitement avec votre vue HTML
     public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
     {
-        // Affichage des erreurs dans la console de debug de Visual Studio
-        foreach (var state in ModelState)
+        // 1. Vérification de la validité du modèle (champs requis, etc.)
+        if (!ModelState.IsValid)
         {
-            foreach (var error in state.Value.Errors)
-            {
-                Debug.WriteLine($"Erreur sur {state.Key}: {error.ErrorMessage}");
-            }
+            return View(model);
         }
 
-        if (!ModelState.IsValid) 
-        {
-            return View(model); 
-        }
+        // On nettoie les espaces inutiles pour éviter les erreurs de frappe
+        string username = model.Username?.Trim() ?? string.Empty;
+        string password = model.Password ?? string.Empty;
 
-        // ===== LOGIQUE DE VÉRIFICATION ET CONNEXION =====
-        if (model.Username == "admin" && model.Password == "password123")
+        // ===== 1. LOGIQUE COMPTE ADMINISTRATEUR (admin / password123) =====
+        if (username == "admin" && password == "password123")
         {
-            // 1. Création des revendications (Claims) de l'utilisateur
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, model.Username),
-                new Claim(ClaimTypes.Role, "Administrator") // Optionnel : si vous gérez des rôles plus tard
+                new Claim(ClaimTypes.Name, username),
+                new Claim(ClaimTypes.Role, "Admin")
             };
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             
-            var authProperties = new AuthenticationProperties
-            {
-                IsPersistent = true, // Permet de conserver le cookie selon l'ExpireTimeSpan du Program.cs
-                ExpiresUtc = DateTimeOffset.UtcNow.AddHours(2)
-            };
-
-            // 2. Génération du Cookie d'authentification
             await HttpContext.SignInAsync(
                 CookieAuthenticationDefaults.AuthenticationScheme, 
-                new ClaimsPrincipal(claimsIdentity), 
-                authProperties
+                new ClaimsPrincipal(claimsIdentity),
+                new AuthenticationProperties { IsPersistent = true, ExpiresUtc = DateTimeOffset.UtcNow.AddHours(2) }
             );
 
-            // 3. CLÉ DE SÉCURITÉ ANTI-RESTART : On initialise la session immédiatement après le SignIn
+            // On lève le verrou de session attendu par le Program.cs
             HttpContext.Session.SetString("ServerReady", "True");
 
-            // 4. Redirection intelligente (soit vers la page demandée initialement, soit vers la recherche)
             return RedirectToLocal(returnUrl);
         }
 
-        // Si l'authentification échoue
+        // ===== 2. LOGIQUE ENSEIGNANT / AGENT (Connexion par CIN) =====
+        // L'utilisateur tape son CIN dans Username ET dans Password
+        if (username == password && !string.IsNullOrEmpty(username))
+        {
+            // On cherche dans la table Personnels si le CIN existe
+            var personnel = await _context.Personnels
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.Cin == username);
+
+            if (personnel != null)
+            {
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Name, personnel.NomEtPrenoms ?? personnel.Cin),
+                    new Claim("UserCin", personnel.Cin), // Sauvegarde du CIN pour filtrer ses données
+                    new Claim(ClaimTypes.Role, "PersonnelRestreint")
+                };
+
+                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                
+                await HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme, 
+                    new ClaimsPrincipal(claimsIdentity),
+                    new AuthenticationProperties { IsPersistent = true, ExpiresUtc = DateTimeOffset.UtcNow.AddHours(2) }
+                );
+
+                // On lève le verrou de session attendu par le Program.cs
+                HttpContext.Session.SetString("ServerReady", "True");
+
+                // Redirection directe de l'enseignant vers sa fiche de recherche
+                return RedirectToAction("SearchResults", "Search");
+            }
+        }
+
+        // Si aucune correspondance n'est trouvée
         ModelState.AddModelError(string.Empty, "Nom d'utilisateur ou mot de passe incorrect.");
         return View(model);
     }
@@ -76,24 +108,17 @@ public class AccountController : Controller
     [HttpGet]
     public async Task<IActionResult> Logout()
     {
-        // Suppression du cookie d'authentification
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        
-        // Nettoyage complet de la session (supprime "ServerReady")
         HttpContext.Session.Clear();
-        
         return RedirectToAction("Login", "Account");
     }
 
     private IActionResult RedirectToLocal(string? returnUrl)
     {
-        // Sécurité : Vérifie que l'URL de retour est bien locale au site pour éviter les failles "Open Redirect"
         if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
         {
             return Redirect(returnUrl);
         }
-            
-        // Si pas d'URL locale, redirection par défaut vers les résultats de recherche
         return RedirectToAction("SearchResults", "Search", new { searchTerm = "" });
     }
 }

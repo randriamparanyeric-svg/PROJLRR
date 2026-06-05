@@ -11,21 +11,21 @@
     
     <style>
         /* --- CONFIGURATION DE LA POLICE INTER INTERNE (NOMS RÉELS) --- */
-@@font-face {
-    font-family: 'Inter';
-    src: url('/css/fonts/inter-latin-400-normal.woff2') format('woff2');
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
-}
+        @@font-face {
+            font-family: 'Inter';
+            src: url('/css/fonts/inter-latin-400-normal.woff2') format('woff2');
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
 
-@@font-face {
-    font-family: 'Inter';
-    src: url('/css/fonts/inter-latin-700-normal.woff2') format('woff2');
-    font-weight: 700;
-    font-style: normal;
-    font-display: swap;
-}
+        @@font-face {
+            font-family: 'Inter';
+            src: url('/css/fonts/inter-latin-700-normal.woff2') format('woff2');
+            font-weight: 700;
+            font-style: normal;
+            font-display: swap;
+        }
 
         /* --- VARIABLES DE DESIGN --- */
         :root {
@@ -141,29 +141,33 @@
             
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav mx-auto">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center gap-1" href="#" id="menuPrincipal" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            📁 MENU PRINCIPAL
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="menuPrincipal">
-                            <li><a class="dropdown-item" href="@Url.Action("SearchResults", "Search")">🔍 Recherche</a></li>
-                            <div class="dropdown-divider"></div>
-                            <li><a class="dropdown-item" href="@Url.Action("Index", "Personnels")">📜 Liste des PA et PE</a></li>
-                            <li><a class="dropdown-item" href="@Url.Action("IndexEFA", "Personnels")">👤 Liste des PA</a></li>
-                            <li><a class="dropdown-item" href="@Url.Action("IndexPE", "Personnels")">👨‍🏫 Liste des PE</a></li>
-                            <li><a class="dropdown-item" href="@Url.Action("Create", "Personnels")">➕ Ajouter du Personnel</a></li>
-                            <div class="dropdown-divider"></div>
-                            <li><a class="dropdown-item" href="@Url.Action("STAT", "Personnels")">📊 Statistique PE</a></li>
-                            <li><a class="dropdown-item" href="@Url.Action("STAT2", "Personnels")">📈 Statistique PA</a></li>
-                            <li><a class="dropdown-item" href="@Url.Action("RETRAITE", "Personnels")">🧓 Retraités cette année</a></li>
-                            <li><a class="dropdown-item" href="@Url.Action("Archive", "Search")">📁 Liste des personnels archivés</a></li>
-                            <div class="dropdown-divider"></div>
-                            <li><a class="dropdown-item" href="javascript:void(0);" onclick="naviguerVersPageSecurisee('@Url.Action("AddArticle", "Article")')">🛒 Ajouter Fournitures</a></li>
-                            <li><a class="dropdown-item" href="javascript:void(0);" onclick="naviguerVersPageSecurisee('@Url.Action("Index", "Article")')">📦 Liste des Articles</a></li>
-                            <li><a class="dropdown-item" href="javascript:void(0);" onclick="naviguerVersPageSecurisee('@Url.Action("Add", "Decharge")')">➕ Faire une décharge</a></li>
-                            <li><a class="dropdown-item" href="javascript:void(0);" onclick="naviguerVersPageSecurisee('@Url.Action("Index", "Decharge")')">📜 Liste des décharges</a></li>
-                        </ul>
-                    </li>
+                    @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+                    {
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center gap-1" href="#" id="menuPrincipal" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                📁 MENU PRINCIPAL
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="menuPrincipal">
+                                <li><a class="dropdown-item" href="@Url.Action("SearchResults", "Search")">🔍 Recherche</a></li>
+                                <div class="dropdown-divider"></div>
+                                <li><a class="dropdown-item" href="@Url.Action("Index", "Personnels")">📜 Liste des PA et PE</a></li>
+                                <li><a class="dropdown-item" href="@Url.Action("IndexEFA", "Personnels")">👤 Liste des PA</a></li>
+                                <li><a class="dropdown-item" href="@Url.Action("IndexPE", "Personnels")">👨‍🏫 Liste des PE</a></li>
+                                <li><a class="dropdown-item" href="@Url.Action("Create", "Personnels")">➕ Ajouter du Personnel</a></li>
+                                <div class="dropdown-divider"></div>
+                                <li><a class="dropdown-item" href="@Url.Action("STAT", "Personnels")">📊 Statistique PE</a></li>
+                                <li><a class="dropdown-item" href="@Url.Action("STAT2", "Personnels")">📈 Statistique PA</a></li>
+                                <li><a class="dropdown-item" href="@Url.Action("RETRAITE", "Personnels")">🧓 Retraités cette année</a></li>
+                                <li><a class="dropdown-item" href="@Url.Action("Archive", "Search")">📁 Liste des personnels archivés</a></li>
+                                <li><a class="dropdown-item" href="@Url.Action("ExporterExcel", "Personnels")">🟢 Exporter vers Excel</a></li>
+                                <div class="dropdown-divider"></div>
+                                <li><a class="dropdown-item" href="javascript:void(0);" onclick="naviguerVersPageSecurisee('@Url.Action("AddArticle", "Article")')">🛒 Ajouter Fournitures</a></li>
+                                <li><a class="dropdown-item" href="javascript:void(0);" onclick="naviguerVersPageSecurisee('@Url.Action("Index", "Article")')">📦 Liste des Articles</a></li>
+                                <li><a class="dropdown-item" href="javascript:void(0);" onclick="naviguerVersPageSecurisee('@Url.Action("Add", "Decharge")')">➕ Faire une décharge</a></li>
+                                <li><a class="dropdown-item" href="javascript:void(0);" onclick="naviguerVersPageSecurisee('@Url.Action("Index", "Decharge")')">📜 Liste des décharges</a></li>
+                            </ul>
+                        </li>
+                    }
                 </ul>
 
                 <ul class="navbar-nav ms-auto align-items-center gap-2">
@@ -200,14 +204,12 @@
     <script src="@Url.Content("~/js/site.js")"></script>
 
     <script>
-        // 1. Fonction principale sécurisée
         window.naviguerVersPageSecurisee = async function(url) {
             if (await validerAccesGeneral()) {
                 window.location.href = url;
             }
         };
 
-        // 2. Pop-up d'autorisation d'accès SweetAlert2
         window.validerAccesGeneral = async function() {
             if (estAutorise()) return true;
 
@@ -259,7 +261,6 @@
             return false;
         };
 
-        // 3. Persistance glissante (1 heure)
         function estAutorise() {
             const uneHeure = 60 * 60 * 1000; 
             const sessionTime = sessionStorage.getItem("osief_timestamp");
