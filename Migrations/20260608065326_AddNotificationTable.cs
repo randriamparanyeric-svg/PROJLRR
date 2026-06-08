@@ -5,20 +5,18 @@
 namespace PROJLRR.Migrations
 {
     /// <inheritdoc />
-    public partial class FixBase1Key : Migration
+    public partial class AddNotificationTable : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // 🛑 CETTE MÉTHODE EST LAISSÉE VIDE EXPRÈS 
-            // Cela empêche EF Core d'essayer de recréer vos tables existantes (ARTICLE, BASE, etc.)
-            // Vos données existantes sont ainsi 100% protégées.
+
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            // Laissée vide également pour la cohérence
+
         }
     }
 }

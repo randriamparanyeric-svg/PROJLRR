@@ -15,10 +15,12 @@ public partial class PerslrrsanscodeContext : DbContext
     {
     }
 
+    // --- Les Tables de la Base de Données ---
     public virtual DbSet<Article> Articles { get; set; }
     public virtual DbSet<Personnel> Personnels { get; set; }
     public virtual DbSet<Base1> Base1s { get; set; }
     public virtual DbSet<Decharge> Decharges { get; set; }
+    public virtual DbSet<Notification> Notifications { get; set; } // 🔔 Placé correctement au niveau de la classe
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -28,6 +30,9 @@ public partial class PerslrrsanscodeContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+
+        // 1. Configuration de la table ARTICLE
         modelBuilder.Entity<Article>(entity =>
         {
             entity.HasKey(e => e.Id);
@@ -40,6 +45,7 @@ public partial class PerslrrsanscodeContext : DbContext
             entity.Property(e => e.StockSec).HasColumnName("StockSec");
         });
 
+        // 2. Configuration de la table PERSONNEL (BASE)
         modelBuilder.Entity<Personnel>(entity =>
         {
             entity.HasKey(e => e.Num);
@@ -82,6 +88,7 @@ public partial class PerslrrsanscodeContext : DbContext
             entity.Property(e => e.Trei).HasColumnType("TEXT").HasColumnName("TREI");
         });
 
+        // 3. Configuration de la table BASE1
         modelBuilder.Entity<Base1>(entity =>
         {
             entity.ToTable("BASE1");
@@ -123,6 +130,7 @@ public partial class PerslrrsanscodeContext : DbContext
             entity.Property(e => e.Trei).HasColumnType("TEXT").HasColumnName("TREI");
         });
 
+        // 4. Configuration de la table DECHARGE
         modelBuilder.Entity<Decharge>(entity =>
         {
             entity.HasKey(e => e.Id);
@@ -135,6 +143,14 @@ public partial class PerslrrsanscodeContext : DbContext
             entity.Property(e => e.Quantite).HasColumnName("Quantite");
             entity.Property(e => e.SignaturePath).HasColumnType("TEXT").HasColumnName("SignaturePath");
             entity.Property(e => e.Unite).HasColumnType("TEXT").HasColumnName("Unite");
+        });
+
+        // 5. 🔔 Configuration de la table NOTIFICATION (Intégrée proprement)
+        modelBuilder.Entity<Notification>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.ToTable("Notifications");
+            entity.Property(e => e.Message).IsRequired();
         });
 
         OnModelCreatingPartial(modelBuilder);

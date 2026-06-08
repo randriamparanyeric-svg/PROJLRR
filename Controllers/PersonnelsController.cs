@@ -21,46 +21,66 @@ namespace PROJLRR.Controllers
             // On passe une nouvelle instance vide à la vue pour éviter le null
             return View(new Personnel());
         }
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Personnel personnel)
+       [HttpPost]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> Create(Personnel personnel)
+{
+    // 1. Vérification du Matricule (IM)
+    var existingMatricule = await _context.Personnels
+        .FirstOrDefaultAsync(p => p.Matricule == personnel.Matricule);
+
+    if (existingMatricule != null)
+    {
+        TempData["DuplicateError"] = $"Le matricule <b>{personnel.Matricule}</b> est déjà utilisé par <b>{existingMatricule.NomEtPrenoms}</b>.";
+        return View(personnel);
+    }
+
+    // 2. Vérification du CIN
+    var existingCin = await _context.Personnels
+        .FirstOrDefaultAsync(p => p.Cin == personnel.Cin);
+
+    if (existingCin != null)
+    {
+        TempData["DuplicateError"] = $"Le numéro de CIN <b>{personnel.Cin}</b> est déjà utilisé par <b>{existingCin.NomEtPrenoms}</b>.";
+        return View(personnel);
+    }
+
+    // 3. Calcul du prochain ID si tout est conforme
+    int nextId = _context.Personnels.Any() ? _context.Personnels.Max(p => p.Num) + 1 : 1;
+    personnel.Num = nextId;
+
+    if (ModelState.IsValid)
+    {
+        // On prépare l'ajout du personnel
+        _context.Add(personnel);
+
+        // =================================================================
+        // 🔔 NOUVEAU : CRÉATION DE LA NOTIFICATION ENTRE ADMINS
+        // =================================================================
+        string nomAdmin = User.Identity?.Name ?? "Un administrateur";
+        
+        var notification = new Notification
         {
-            // 1. Vérification du Matricule (IM)
-            var existingMatricule = await _context.Personnels
-                .FirstOrDefaultAsync(p => p.Matricule == personnel.Matricule);
+            // Message formaté (le Layout transformera les ** en gras <b>)
+            Message = $"L'administrateur **{nomAdmin}** a créé la fiche du nouveau personnel : **{personnel.NomEtPrenoms ?? personnel.Matricule}**.",
+            DateCreation = DateTime.Now,
+            IsRead = false, // Lu = non, pour qu'il apparaisse dans la cloche
+            ModifiePar = nomAdmin
+        };
+        
+        // On prépare l'ajout de la notification
+        _context.Notifications.Add(notification);
+        // =================================================================
 
-            if (existingMatricule != null)
-            {
-                TempData["DuplicateError"] = $"Le matricule <b>{personnel.Matricule}</b> est déjà utilisé par <b>{existingMatricule.NomEtPrenoms}</b>.";
-                return View(personnel);
-            }
+        // On valide le tout en une seule transaction SQL 🚀
+        await _context.SaveChangesAsync();
+        
+        TempData["Success"] = "Personnel ajouté avec succès !";
+        return RedirectToAction(nameof(Index));
+    }
 
-            // 2. Vérification du CIN
-            var existingCin = await _context.Personnels
-                .FirstOrDefaultAsync(p => p.Cin == personnel.Cin);
-
-            if (existingCin != null)
-            {
-                TempData["DuplicateError"] = $"Le numéro de CIN <b>{personnel.Cin}</b> est déjà utilisé par <b>{existingCin.NomEtPrenoms}</b>.";
-                return View(personnel);
-            }
-
-            // 3. Calcul du prochain ID si tout est conforme
-            int nextId = _context.Personnels.Any() ? _context.Personnels.Max(p => p.Num) + 1 : 1;
-            personnel.Num = nextId;
-
-            if (ModelState.IsValid)
-            {
-                _context.Add(personnel);
-                await _context.SaveChangesAsync();
-                TempData["Success"] = "Personnel ajouté avec succès !";
-                return RedirectToAction(nameof(Index));
-            }
-
-            return View(personnel);
-        }
-        public async Task<IActionResult> Delete(int? id) => View(await _context.Personnels.FindAsync(id));
-
+    return View(personnel);
+}
         [HttpPost, ActionName("Delete")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {

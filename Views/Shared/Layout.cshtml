@@ -32,7 +32,7 @@
             --primary-color: #4f46e5;       /* Indigo moderne */
             --primary-hover: #4338ca;
             --dark-surface: #0f172a;        /* Ardoise foncé professionnel */
-            --bg-body: #f8fafc;             /* Gris très doux contemporain */
+            --bg-body: #f8fafc;              /* Gris très doux contemporain */
             --text-main: #1e293b;
             --radius-md: 8px;
             --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
@@ -96,6 +96,31 @@
             transform: translateX(3px);
         }
 
+        /* AFFICHAGE DES CLOCHES ET DES LISTES */
+        .dropdown-wide {
+            width: 320px;
+            max-height: 380px;
+            overflow-y: auto;
+        }
+        .badge-notify {
+            font-size: 0.65rem;
+            padding: 0.25rem 0.45rem;
+            border-radius: 50rem;
+            position: absolute;
+            top: 2px;
+            right: -2px;
+        }
+        .notification-item-text {
+            white-space: normal;
+            font-size: 0.85rem;
+            line-height: 1.35;
+            border-bottom: 1px dashed #f1f5f9;
+            padding-bottom: 0.5rem;
+        }
+        .notification-item-text:last-child {
+            border-bottom: none;
+        }
+
         /* --- CONTENEUR DE CONTENU PRINCIPAL --- */
         .main-content {
             flex: 1 0 auto;
@@ -115,7 +140,7 @@
             font-weight: 500;
         }
 
-        /* Animation d'affichage des menus (Échappement Razor @@) */
+        /* Animation d'affichage des menus */
         @@keyframes fadeIn {
             from { opacity: 0; transform: translateY(8px); }
             to { opacity: 1; transform: translateY(0); }
@@ -170,9 +195,32 @@
                     }
                 </ul>
 
-                <ul class="navbar-nav ms-auto align-items-center gap-2">
+                <ul class="navbar-nav ms-auto align-items-center gap-3">
                     @if (User.Identity.IsAuthenticated)
                     {
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle d-flex align-items-center position-relative px-2" href="#" id="bellModifs" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    🔔 <span id="badgeModifsCount" class="badge bg-danger badge-notify d-none">0</span>
+                                </a>
+                                <ul id="listModifs" class="dropdown-menu dropdown-menu-end dropdown-wide shadow p-2" aria-labelledby="bellModifs">
+                                    <li class="dropdown-header text-uppercase fw-bold text-muted small border-bottom pb-1">Modifications Récentes</li>
+                                    <li id="emptyModifs" class="dropdown-item text-muted text-center py-2 small">Aucune modification non lue</li>
+                                </ul>
+                            </li>
+
+                            <li class="nav-item dropdown me-2">
+                                <a class="nav-link dropdown-toggle d-flex align-items-center position-relative px-2" href="#" id="bellOnline" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    🟢 <span id="badgeOnlineCount" class="badge bg-success badge-notify d-none">0</span>
+                                </a>
+                                <ul id="listOnlineTeachers" class="dropdown-menu dropdown-menu-end dropdown-wide shadow p-2" aria-labelledby="bellOnline">
+                                    <li class="dropdown-header text-uppercase fw-bold text-muted small border-bottom pb-1">Enseignants En Ligne</li>
+                                    <li id="emptyOnline" class="dropdown-item text-muted text-center py-2 small">Aucun enseignant en ligne</li>
+                                </ul>
+                            </li>
+                        }
+
                         <li class="nav-item">
                             <span class="nav-link text-white-50 small p-0">👋 Connecté : <b>@User.Identity.Name</b></span>
                         </li>
@@ -204,6 +252,89 @@
     <script src="@Url.Content("~/js/site.js")"></script>
 
     <script>
+        // =================================================================
+        // LOGIQUE OPTIMISÉE DE VEILLE ET REQUÊTE COMMUNE (DASHBOARD)
+        // =================================================================
+        $(document).ready(function() {
+            const isAuthenticated = "@User.Identity.IsAuthenticated" === "True";
+            const isAdmin = "@User.IsInRole("Admin")" === "True";
+
+            if (isAuthenticated) {
+                // Signal initial + Pulsation (Heartbeat) calée à 60 secondes pour ménager MonsterASP
+                envoiSignalPresence();
+                setInterval(envoiSignalPresence, 60000);
+
+                // Si Administrateur, on appelle le point unifié toutes les 60 secondes (au lieu de 20s)
+                if (isAdmin) {
+                    chargerDashboardTempsReel();
+                    setInterval(chargerDashboardTempsReel, 60000);
+                }
+            }
+        });
+
+        function envoiSignalPresence() {
+            $.post('/Search/Heartbeat');
+        }
+
+        function chargerDashboardTempsReel() {
+            // 🚀 REQUÊTE PACKAGÉE UNIQUE (Notifications + Enseignants connectés d'un seul coup)
+            $.get('/Search/GetLiveDashboardData', function(data) {
+                
+                // --- TRAITEMENT DES NOTIFICATIONS ---
+                const notifCount = data.notifications.length;
+                if (notifCount > 0) {
+                    $('#badgeModifsCount').text(notifCount).removeClass('d-none');
+                    $('.notification-dynamic').remove();
+                    $('#emptyModifs').addClass('d-none');
+
+                    data.notifications.forEach(function(notif) {
+                        let cleanMessage = notif.message.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+                        const item = `<li class="dropdown-item notification-dynamic notification-item-text" onclick="marquerCommeLu(${notif.id}, this)">
+                            ${cleanMessage} <br>
+                            <span class="text-primary tracking-tight" style="font-size:0.75rem; cursor:pointer; font-weight:600;">📥 Marquer comme lu</span>
+                        </li>`;
+                        $('#listModifs').append(item);
+                    });
+                } else {
+                    $('#badgeModifsCount').addClass('d-none');
+                    $('.notification-dynamic').remove();
+                    $('#emptyModifs').removeClass('d-none');
+                }
+
+                // --- TRAITEMENT DES ENSEIGNANTS EN LIGNE ---
+                const teachersCount = data.teachers.length;
+                if (teachersCount > 0) {
+                    $('#badgeOnlineCount').text(teachersCount).removeClass('d-none');
+                    $('.teacher-dynamic').remove();
+                    $('#emptyOnline').addClass('d-none');
+
+                    data.teachers.forEach(function(username) {
+                        const item = `<li class="dropdown-item teacher-dynamic small py-1 text-success fw-bold" style="font-size:0.82rem;">🟢 ${username}</li>`;
+                        $('#listOnlineTeachers').append(item);
+                    });
+                } else {
+                    $('#badgeOnlineCount').addClass('d-none');
+                    $('.teacher-dynamic').remove();
+                    $('#emptyOnline').removeClass('d-none');
+                }
+            });
+        }
+
+        window.marquerCommeLu = function(id, element) {
+            $.post('/Search/MarkAsRead', { id: id }, function(res) {
+                if(res.success) {
+                    $(element).fadeOut(250, function() { 
+                        $(this).remove(); 
+                        // Met à jour instantanément les compteurs du layout
+                        chargerDashboardTempsReel(); 
+                    });
+                }
+            });
+        };
+
+        // =================================================================
+        // VERROUILLAGE DES SECTIONS ADMINISTRATIVES SÉCURISÉES (CODE PIN)
+        // =================================================================
         window.naviguerVersPageSecurisee = async function(url) {
             if (await validerAccesGeneral()) {
                 window.location.href = url;

@@ -6,6 +6,9 @@ using System.IO;
 using Microsoft.AspNetCore.Authorization;
 using System.Threading.Tasks;
 using System;
+using System.Collections.Generic;
+using System.Collections.Concurrent;
+using Microsoft.AspNetCore.Http;
 
 namespace PROJLRR.Controllers
 {
@@ -13,193 +16,249 @@ namespace PROJLRR.Controllers
     {
         private readonly PerslrrsanscodeContext _context;
 
+        // 🧠 Mémoire vive globale pour suivre la présence en ligne des enseignants en temps réel
+        private static readonly ConcurrentDictionary<string, DateTime> UtilisateursEnLigne = new ConcurrentDictionary<string, DateTime>();
+
         public SearchController(PerslrrsanscodeContext context)
         {
             _context = context;
         }
 
-        // 1. Recherche
-       // 1. Recherche
-[HttpGet]
-[Authorize] // Optionnel mais fortement recommandé pour éviter les crashs si aucun utilisateur n'est connecté
-public IActionResult SearchResults(string searchTerm = "")
-{
-    List<Personnel> results = new List<Personnel>();
-    bool isAdmin = User.IsInRole("Admin");
-    string userNom = "";
-
-    if (!isAdmin)
-    {
-        // L'utilisateur est connecté via son CIN (Non-admin)
-        var userCin = User.FindFirst("UserCin")?.Value;
-
-        if (!string.IsNullOrEmpty(userCin))
+        // =================================================================
+        // 1. RECHERCHE PRINCIPALE (Vue complète) - Optimisé AsNoTracking
+        // =================================================================
+        [HttpGet]
+        [Authorize] 
+        public IActionResult SearchResults(string searchTerm = "")
         {
-            // On cherche le personnel associé au CIN de connexion
-            var monProfil = _context.Personnels.FirstOrDefault(p => p.Cin == userCin);
-            if (monProfil != null)
+            List<Personnel> results = new List<Personnel>();
+            bool isAdmin = User.IsInRole("Admin");
+            string userNom = "";
+
+            if (!isAdmin)
             {
-                userNom = monProfil.NomEtPrenoms;
-                // On écrase le searchTerm pour forcer uniquement son profil
-                searchTerm = userNom; 
-                results.Add(monProfil);
+                var userCin = User.FindFirst("UserCin")?.Value;
+
+                if (!string.IsNullOrEmpty(userCin))
+                {
+                    // Utilisation de AsNoTracking() : économise la mémoire vive sur MonsterASP
+                    var monProfil = _context.Personnels.AsNoTracking().FirstOrDefault(p => p.Cin == userCin);
+                    if (monProfil != null)
+                    {
+                        userNom = monProfil.NomEtPrenoms;
+                        searchTerm = userNom; 
+                        results.Add(monProfil);
+                    }
+                }
             }
-        }
-    }
-    else
-    {
-        // Logique originale pour l'administrateur
-        if (!string.IsNullOrWhiteSpace(searchTerm))
-        {
-            var term = searchTerm.ToLower();
-            results = _context.Personnels
-                .Where(p => (p.NomEtPrenoms != null && p.NomEtPrenoms.ToLower().Contains(term)) || 
-                            (p.Matricule != null && p.Matricule.ToLower().Contains(term)))
-                .ToList(); 
-        }
-    }
+            else
+            {
+                if (!string.IsNullOrWhiteSpace(searchTerm))
+                {
+                    var term = searchTerm.ToLower();
+                    results = _context.Personnels
+                        .AsNoTracking() // Gain de performance immédiat pour la recherche administrative
+                        .Where(p => (p.NomEtPrenoms != null && p.NomEtPrenoms.ToLower().Contains(term)) || 
+                                    (p.Matricule != null && p.Matricule.ToLower().Contains(term)))
+                        .ToList(); 
+                }
+            }
 
-    // On envoie les informations de droits à la Vue
-    ViewBag.IsAdmin = isAdmin;
-    ViewBag.UserNom = userNom;
-    ViewBag.SearchTerm = searchTerm;
+            ViewBag.IsAdmin = isAdmin;
+            ViewBag.UserNom = userNom;
+            ViewBag.SearchTerm = searchTerm;
 
-    return View(results);
-}
-        // 2. Détail (Json)
+            return View(results);
+        }
+
+        // =================================================================
+        // 2. DÉTAIL (JSON) - Optimisé AsNoTracking
+        // =================================================================
         [HttpGet]
         public JsonResult GetPersonnelDetails(int id)
         {
-            var personnel = _context.Personnels.FirstOrDefault(p => p.Num == id);
+            var personnel = _context.Personnels.AsNoTracking().FirstOrDefault(p => p.Num == id);
             return Json(personnel);
         }
 
-        // 3. Mise à jour
-     [HttpPost]
-public async Task<IActionResult> UpdatePersonnel([FromForm] Personnel updatedPersonnel, IFormFile? PhotoFile)
-{
-    if (updatedPersonnel == null) 
-        return BadRequest(new { success = false, message = "Données invalides" });
-
-    var existing = await _context.Personnels.FindAsync(updatedPersonnel.Num);
-    if (existing == null) 
-        return NotFound(new { success = false, message = "Personnel non trouvé" });
-
-    // --- GESTION DE LA PHOTO ---
-    if (PhotoFile != null && PhotoFile.Length > 0)
-    {
-        try
+        // =================================================================
+        // 3. MISE À JOUR + ANALYSE EXHAUSTIVE DE TOUS LES ÉCARTS
+        // =================================================================
+        [HttpPost]
+        public async Task<IActionResult> UpdatePersonnel([FromForm] Personnel updatedPersonnel, IFormFile? PhotoFile)
         {
-            var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "photos");
-            if (!Directory.Exists(folderPath))
+            if (updatedPersonnel == null) 
+                return BadRequest(new { success = false, message = "Données invalides" });
+
+            var existing = await _context.Personnels.FindAsync(updatedPersonnel.Num);
+            if (existing == null) 
+                return NotFound(new { success = false, message = "Personnel non trouvé" });
+
+            // --- GESTION DE LA PHOTO ---
+            if (PhotoFile != null && PhotoFile.Length > 0)
             {
-                Directory.CreateDirectory(folderPath);
+                try
+                {
+                    var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "photos");
+                    if (!Directory.Exists(folderPath))
+                    {
+                        Directory.CreateDirectory(folderPath);
+                    }
+
+                    var fileName = updatedPersonnel.Matricule + Path.GetExtension(PhotoFile.FileName);
+                    var filePath = Path.Combine(folderPath, fileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await PhotoFile.CopyToAsync(stream);
+                    }
+
+                    updatedPersonnel.Photo = "/photos/" + fileName;
+                }
+                catch (Exception ex)
+                {
+                    return StatusCode(500, new { success = false, message = "Erreur lors de l'enregistrement de l'image : " + ex.Message });
+                }
+            }
+            else
+            {
+                updatedPersonnel.Photo = existing.Photo;
             }
 
-            var fileName = updatedPersonnel.Matricule + Path.GetExtension(PhotoFile.FileName);
-            var filePath = Path.Combine(folderPath, fileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
+            // --- ENREGISTREMENT DES DATES AU FORMAT FR (JJ/MM/AAAA) ---
+            if (!string.IsNullOrEmpty(updatedPersonnel.Datenaiss) && updatedPersonnel.Datenaiss.Contains("-"))
             {
-                await PhotoFile.CopyToAsync(stream);
+                var parts = updatedPersonnel.Datenaiss.Split('-');
+                if (parts.Length == 3) updatedPersonnel.Datenaiss = $"{parts[2]}/{parts[1]}/{parts[0]}";
             }
 
-            updatedPersonnel.Photo = "/photos/" + fileName;
+            if (!string.IsNullOrEmpty(updatedPersonnel.Datedentre) && updatedPersonnel.Datedentre.Contains("-"))
+            {
+                var parts = updatedPersonnel.Datedentre.Split('-');
+                if (parts.Length == 3) updatedPersonnel.Datedentre = $"{parts[2]}/{parts[1]}/{parts[0]}";
+            }
+
+            if (!string.IsNullOrEmpty(updatedPersonnel.Datedeprise) && updatedPersonnel.Datedeprise.Contains("-"))
+            {
+                var parts = updatedPersonnel.Datedeprise.Split('-');
+                if (parts.Length == 3) updatedPersonnel.Datedeprise = $"{parts[2]}/{parts[1]}/{parts[0]}";
+            }
+
+            // --- 🔔 DÉTECTION DE TOUS LES ÉCARTS (POUR ENSEIGNANTS ET ADMINS) ---
+            bool isAdmin = User.IsInRole("Admin");
+            List<string> changements = new List<string>();
+
+            if (existing.Matricule != updatedPersonnel.Matricule) changements.Add($"Matricule : '{existing.Matricule}' ➡️ '{updatedPersonnel.Matricule}'");
+            if (existing.NomEtPrenoms != updatedPersonnel.NomEtPrenoms) changements.Add($"Nom & Prénoms : '{existing.NomEtPrenoms}' ➡️ '{updatedPersonnel.NomEtPrenoms}'");
+            if (existing.Cin != updatedPersonnel.Cin) changements.Add($"CIN : '{existing.Cin}' ➡️ '{updatedPersonnel.Cin}'");
+            if (existing.Dec != updatedPersonnel.Dec) changements.Add($"Dec : '{existing.Dec}' ➡️ '{updatedPersonnel.Dec}'");
+            if (existing.Corps != updatedPersonnel.Corps) changements.Add($"Corps : '{existing.Corps}' ➡️ '{updatedPersonnel.Corps}'");
+            if (existing.Matiere != updatedPersonnel.Matiere) changements.Add($"Matière : '{existing.Matiere}' ➡️ '{updatedPersonnel.Matiere}'");
+            if (existing.Datenaiss != updatedPersonnel.Datenaiss) changements.Add($"Date Naiss : '{existing.Datenaiss}' ➡️ '{updatedPersonnel.Datenaiss}'");
+            if (existing.Lieudenaiss != updatedPersonnel.Lieudenaiss) changements.Add($"Lieu Naiss : '{existing.Lieudenaiss}' ➡️ '{updatedPersonnel.Lieudenaiss}'");
+            if (existing.Sexe != updatedPersonnel.Sexe) changements.Add($"Sexe : '{existing.Sexe}' ➡️ '{updatedPersonnel.Sexe}'");
+            if (existing.Statut != updatedPersonnel.Statut) changements.Add($"Statut : '{existing.Statut}' ➡️ '{updatedPersonnel.Statut}'");
+            if (existing.Datedentre != updatedPersonnel.Datedentre) changements.Add($"Date Entrée : '{existing.Datedentre}' ➡️ '{updatedPersonnel.Datedentre}'");
+            if (existing.Datedeprise != updatedPersonnel.Datedeprise) changements.Add($"Date Prise : '{existing.Datedeprise}' ➡️ '{updatedPersonnel.Datedeprise}'");
+            if (existing.Diplomeac != updatedPersonnel.Diplomeac) changements.Add($"Diplôme Ac. : '{existing.Diplomeac}' ➡️ '{updatedPersonnel.Diplomeac}'");
+            if (existing.Diplomeped != updatedPersonnel.Diplomeped) changements.Add($"Diplôme Péd. : '{existing.Diplomeped}' ➡️ '{updatedPersonnel.Diplomeped}'");
+            if (existing.Contact != updatedPersonnel.Contact) changements.Add($"Contact : '{existing.Contact}' ➡️ '{updatedPersonnel.Contact}'");
+            if (existing.Perav != updatedPersonnel.Perav) changements.Add($"Perav : '{existing.Perav}' ➡️ '{updatedPersonnel.Perav}'");
+            if (existing.Demav != updatedPersonnel.Demav) changements.Add($"Demav : '{existing.Demav}' ➡️ '{updatedPersonnel.Demav}'");
+            if (existing.Temav != updatedPersonnel.Temav) changements.Add($"Temav : '{existing.Temav}' ➡️ '{updatedPersonnel.Temav}'");
+            if (existing.Qemav != updatedPersonnel.Qemav) changements.Add($"Qemav : '{existing.Qemav}' ➡️ '{updatedPersonnel.Qemav}'");
+            if (existing.Cemav != updatedPersonnel.Cemav) changements.Add($"Cemav : '{existing.Cemav}' ➡️ '{updatedPersonnel.Cemav}'");
+            if (existing.Semav != updatedPersonnel.Semav) changements.Add($"Semav : '{existing.Semav}' ➡️ '{updatedPersonnel.Semav}'");
+            if (existing.Sepmav != updatedPersonnel.Sepmav) changements.Add($"Sepmav : '{existing.Sepmav}' ➡️ '{updatedPersonnel.Sepmav}'");
+            if (existing.Hemav != updatedPersonnel.Hemav) changements.Add($"Hemav : '{existing.Hemav}' ➡️ '{updatedPersonnel.Hemav}'");
+            if (existing.Nemav != updatedPersonnel.Nemav) changements.Add($"Nemav : '{existing.Nemav}' ➡️ '{updatedPersonnel.Nemav}'");
+            if (existing.Dxemav != updatedPersonnel.Dxemav) changements.Add($"Dxemav : '{existing.Dxemav}' ➡️ '{updatedPersonnel.Dxemav}'");
+            if (existing.Onemav != updatedPersonnel.Onemav) changements.Add($"Onemav : '{existing.Onemav}' ➡️ '{updatedPersonnel.Onemav}'");
+            if (existing.Dou != updatedPersonnel.Dou) changements.Add($"Dou : '{existing.Dou}' ➡️ '{updatedPersonnel.Dou}'");
+            if (existing.Trei != updatedPersonnel.Trei) changements.Add($"Trei : '{existing.Trei}' ➡️ '{updatedPersonnel.Trei}'");
+            if (existing.Quat != updatedPersonnel.Quat) changements.Add($"Quat : '{existing.Quat}' ➡️ '{updatedPersonnel.Quat}'");
+            if (existing.Quin != updatedPersonnel.Quin) changements.Add($"Quin : '{existing.Quin}' ➡️ '{updatedPersonnel.Quin}'");
+            if (existing.Seiz != updatedPersonnel.Seiz) changements.Add($"Seiz : '{existing.Seiz}' ➡️ '{updatedPersonnel.Seiz}'");
+            if (existing.Fonction != updatedPersonnel.Fonction) changements.Add($"Fonction : '{existing.Fonction}' ➡️ '{updatedPersonnel.Fonction}'");
+            
+            if (PhotoFile != null && PhotoFile.Length > 0)
+                changements.Add("Nouvelle photo de profil téléversée");
+
+            if (changements.Count > 0)
+            {
+                // Identification dynamique de l'auteur et de son titre
+                string nomUtilisateur = User.Identity?.Name ?? (isAdmin ? "Un administrateur" : "Un enseignant");
+                string titreUser = isAdmin ? "L'administrateur" : "L'enseignant";
+                string detailsTexte = string.Join(", ", changements);
+
+                var notification = new Notification
+                {
+                    Message = $"{titreUser} **{nomUtilisateur}** a modifié la fiche de **{existing.NomEtPrenoms ?? existing.Matricule}** [{detailsTexte}].",
+                    DateCreation = DateTime.Now,
+                    IsRead = false,
+                    ModifiePar = nomUtilisateur
+                };
+
+                _context.Notifications.Add(notification);
+            }
+
+            // Mise à jour automatique de toutes les propriétés converties
+            _context.Entry(existing).CurrentValues.SetValues(updatedPersonnel);
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                return Ok(new { 
+                    success = true, 
+                    message = "Modification réussie", 
+                    photoUrl = updatedPersonnel.Photo 
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = ex.Message });
+            }
         }
-        catch (Exception ex)
+
+        // =================================================================
+        // 4. SUPPRESSION ET ARCHIVAGE AUTOMATIQUE
+        // =================================================================
+        [HttpPost]
+        public async Task<IActionResult> DeletePersonnel(int id)
         {
-            return StatusCode(500, new { success = false, message = "Erreur lors de l'enregistrement de l'image : " + ex.Message });
+            var personnel = await _context.Personnels.FindAsync(id);
+            if (personnel == null) 
+                return Json(new { success = false, message = "Personnel non trouvé." });
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                var archive = new Base1();
+                _context.Entry(archive).CurrentValues.SetValues(personnel);
+                _context.Base1s.Add(archive);
+
+                _context.Personnels.Remove(personnel);
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return Json(new { success = true, message = "Archivé avec succès." });
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                var message = ex.Message;
+                if (ex.InnerException != null)
+                {
+                    message = ex.InnerException.Message;
+                }
+                return Json(new { success = false, message = "Erreur SQL : " + message });
+            }
         }
-    }
-    else
-    {
-        updatedPersonnel.Photo = existing.Photo;
-    }
 
-    // --- ENREGISTREMENT DES DATES AU FORMAT FR (JJ/MM/AAAA) ---
-    if (!string.IsNullOrEmpty(updatedPersonnel.Datenaiss) && updatedPersonnel.Datenaiss.Contains("-"))
-    {
-        var parts = updatedPersonnel.Datenaiss.Split('-');
-        if (parts.Length == 3)
-        {
-            updatedPersonnel.Datenaiss = $"{parts[2]}/{parts[1]}/{parts[0]}";
-        }
-    }
-
-    if (!string.IsNullOrEmpty(updatedPersonnel.Datedentre) && updatedPersonnel.Datedentre.Contains("-"))
-    {
-        var parts = updatedPersonnel.Datedentre.Split('-');
-        if (parts.Length == 3)
-        {
-            updatedPersonnel.Datedentre = $"{parts[2]}/{parts[1]}/{parts[0]}";
-        }
-    }
-
-    if (!string.IsNullOrEmpty(updatedPersonnel.Datedeprise) && updatedPersonnel.Datedeprise.Contains("-"))
-    {
-        var parts = updatedPersonnel.Datedeprise.Split('-');
-        if (parts.Length == 3)
-        {
-            updatedPersonnel.Datedeprise = $"{parts[2]}/{parts[1]}/{parts[0]}";
-        }
-    }
-
-    // Mise à jour automatique de toutes les propriétés converties
-    _context.Entry(existing).CurrentValues.SetValues(updatedPersonnel);
-
-    try
-    {
-        await _context.SaveChangesAsync();
-        
-        // CORRECTION ICI : On renvoie "photoUrl" au JavaScript
-        return Ok(new { 
-            success = true, 
-            message = "Modification réussie", 
-            photoUrl = updatedPersonnel.Photo 
-        });
-    }
-    catch (Exception ex)
-    {
-        return StatusCode(500, new { success = false, message = ex.Message });
-    }
-}
-       [HttpPost]
-public async Task<IActionResult> DeletePersonnel(int id) // Pas besoin de [FromBody] ici
-{
-    var personnel = await _context.Personnels.FindAsync(id);
-    if (personnel == null) 
-        return Json(new { success = false, message = "Personnel non trouvé." });
-
-    using var transaction = await _context.Database.BeginTransactionAsync();
-    try
-    {
-        var archive = new Base1();
-        _context.Entry(archive).CurrentValues.SetValues(personnel);
-        _context.Base1s.Add(archive);
-
-        _context.Personnels.Remove(personnel);
-
-        await _context.SaveChangesAsync();
-        await transaction.CommitAsync();
-
-        return Json(new { success = true, message = "Archivé avec succès." });
-        
-    }
-   catch (Exception ex)
-{
-    await transaction.RollbackAsync();
-    
-    // Ajout de ceci pour voir l'erreur réelle dans la console
-    var message = ex.Message;
-    if (ex.InnerException != null)
-    {
-        message = ex.InnerException.Message;
-    }
-    
-    return Json(new { success = false, message = "Erreur SQL : " + message });
-}
-}
-        // 5. Upload Photo
+        // =================================================================
+        // 5. UPLOAD DE PHOTO ISOLÉ
+        // =================================================================
         [HttpPost]
         public async Task<IActionResult> UploadPhoto(int num, IFormFile photoFile)
         {
@@ -222,7 +281,6 @@ public async Task<IActionResult> DeletePersonnel(int id) // Pas besoin de [FromB
             return NotFound(new { success = false, message = "Personnel introuvable." });
         }
 
-        // --- HELPER D'UPLOAD ---
         private async Task<string> UploadPersonnelPhoto(int num, IFormFile photoFile)
         {
             try
@@ -250,54 +308,55 @@ public async Task<IActionResult> DeletePersonnel(int id) // Pas besoin de [FromB
                 return null;
             }
         }
-        // Vérifiez bien que le nom est SearchPersonnel et qu'il est public
-[HttpGet]
-public IActionResult SearchPersonnel(string search)
-{
-    // Sécurité : si search est null, on retourne une liste vide
-    if (string.IsNullOrWhiteSpace(search)) return Json(new List<object>());
 
-    // On convertit le terme cherché en minuscules
-    string term = search.ToLower();
-
-    var resultats = _context.Personnels
-        // On convertit chaque donnée de la base en minuscules avant de comparer
-        .Where(p => p.NomEtPrenoms.ToLower().Contains(term) || 
-                    p.Matricule.ToLower().Contains(term))
-        .Take(10)
-        .Select(p => new {
-            nom = p.NomEtPrenoms,
-            matricule = p.Matricule
-        })
-        .ToList();
-
-    return Json(resultats);
-}
+        // =================================================================
+        // 6. AUTO-COMPLÉTION BARRE DE RECHERCHE (JSON)
+        // =================================================================
         [HttpGet]
-        [Authorize] // Bloque l'accès aux utilisateurs non connectés
+        public IActionResult SearchPersonnel(string search)
+        {
+            if (string.IsNullOrWhiteSpace(search)) return Json(new List<object>());
+
+            string term = search.ToLower();
+
+            var resultats = _context.Personnels
+                .AsNoTracking() // Gain de performance pour l'auto-complétion
+                .Where(p => p.NomEtPrenoms.ToLower().Contains(term) || 
+                            p.Matricule.ToLower().Contains(term))
+                .Take(10)
+                .Select(p => new {
+                    nom = p.NomEtPrenoms,
+                    matricule = p.Matricule
+                })
+                .ToList();
+
+            return Json(resultats);
+        }
+
+        // =================================================================
+        // 7. RECHERCHE ASYNCHRONE DYNAMIQUE (RENVOIE DU JSON DIRECT)
+        // =================================================================
+        [HttpGet]
+        [Authorize] 
         public IActionResult SearchResultsPartial(string searchTerm)
         {
-            // 1. SÉCURITÉ : Si l'utilisateur connecté n'est pas l'administrateur (Enseignant/Agent)
             if (!User.IsInRole("Admin"))
             {
-                // On extrait le CIN de l'utilisateur depuis son cookie de connexion
                 var userCin = User.FindFirst("UserCin")?.Value;
 
                 if (string.IsNullOrEmpty(userCin))
                 {
-                    return Challenge(); // Redirige vers la page de login si le claim est corrompu
+                    return Challenge(); 
                 }
 
-                // On ignore totalement le mot-clé tapé (searchTerm) et on force l'affichage de sa propre ligne uniquement
                 var monRenseignement = _context.Personnels
                     .AsNoTracking()
                     .Where(p => p.Cin == userCin)
                     .ToList();
 
-                return PartialView("_PersonnelList", monRenseignement);
+                return Json(monRenseignement);
             }
 
-            // 2. LOGIQUE POUR L'ADMINISTRATEUR (L'admin peut chercher n'importe qui)
             var queryable = _context.Personnels.AsNoTracking().AsQueryable();
 
             if (!string.IsNullOrEmpty(searchTerm))
@@ -306,15 +365,101 @@ public IActionResult SearchPersonnel(string search)
             }
 
             var model = queryable.ToList();
+            return Json(model);
+        }
 
-            // On retourne la liste filtrée complète pour l'administrateur
-            return PartialView("_PersonnelList", model);
-        } // <-- L'accolade manquante a été ajoutée ici
-public IActionResult Archive()
-{
-    // Récupère tous les éléments de la table d'archives
-    var archives = _context.Base1s.ToList();
-    return View(archives);
-}
+        // =================================================================
+        // 8. VUE DE L'ARCHIVE (Base1) - Optimisé AsNoTracking
+        // =================================================================
+        public IActionResult Archive()
+        {
+            var archives = _context.Base1s.AsNoTracking().ToList();
+            return View(archives);
+        }
+
+        // =================================================================
+        // 9. APIS : TEMPS RÉEL OPTIMISÉES (DASHBOARD & LIVE ATTENDANCE) 🚀
+        // =================================================================
+
+        /// <summary>
+        /// 👑 NOUVELLE MÉTHODE UNIQUE ET ULTRA-LÉGÈRE POUR LE SERVEUR
+        /// Regroupe les notifications de la DB et les profs connectés en mémoire vive en une seule requête HTTP.
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> GetLiveDashboardData()
+        {
+            var limiteInactivite = DateTime.Now.AddSeconds(-90);
+            var currentUserName = User.Identity?.Name;
+
+            // 1. Un seul accès ciblé à la base de données (optimisé AsNoTracking)
+            var notifications = await _context.Notifications
+                                              .AsNoTracking()
+                                              .Where(n => !n.IsRead)
+                                              .OrderByDescending(n => n.DateCreation)
+                                              .ToListAsync();
+
+            // 2. Lecture ultra-rapide depuis la mémoire RAM (sans toucher à SQL)
+            var connectes = UtilisateursEnLigne
+                .Where(u => u.Value >= limiteInactivite)
+                .Select(u => u.Key)
+                .Where(name => name != currentUserName) 
+                .ToList();
+
+            // Renvoie le pack de données groupé
+            return Json(new {
+                notifications = notifications,
+                teachers = connectes
+            });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> MarkAsRead(int id)
+        {
+            var notification = await _context.Notifications.FindAsync(id);
+            if (notification == null) return NotFound();
+
+            notification.IsRead = true;
+            await _context.SaveChangesAsync();
+            return Ok(new { success = true });
+        }
+
+        [HttpPost]
+        public IActionResult Heartbeat()
+        {
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                UtilisateursEnLigne[User.Identity.Name] = DateTime.Now;
+                return Ok();
+            }
+            return BadRequest();
+        }
+
+        // Conservé pour la rétrocompatibilité (au cas où d'autres composants l'utilisent en dehors du layout)
+        [HttpGet]
+        public async Task<IActionResult> GetUnreadNotifications()
+        {
+            var notifications = await _context.Notifications
+                                              .AsNoTracking()
+                                              .Where(n => !n.IsRead)
+                                              .OrderByDescending(n => n.DateCreation)
+                                              .ToListAsync();
+            return Json(notifications);
+        }
+
+        // Conservé pour la rétrocompatibilité
+        [HttpGet]
+        public IActionResult GetConnectedTeachers()
+        {
+            var limiteInactivite = DateTime.Now.AddSeconds(-90);
+            var currentUserName = User.Identity?.Name;
+
+            var connectes = UtilisateursEnLigne
+                .Where(u => u.Value >= limiteInactivite)
+                .Select(u => u.Key)
+                .Where(name => name != currentUserName) 
+                .ToList();
+
+            return Json(connectes);
+        }
     }
 }
