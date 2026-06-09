@@ -1,27 +1,235 @@
 @model PROJLRR.ViewModels.LoginViewModel
 @{
     Layout = "/Views/Shared/Layout.cshtml";
-    ViewData["Title"] = "Login";
+    ViewData["Title"] = "Connexion";
 }
 
-<form asp-action="Login" method="post">
-    @Html.AntiForgeryToken()
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <h2>Se connecter</h2>
+            <p>Accédez pour commencer</p>
+        </div>
 
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="login-info-box">
+            <p>
+                💡 <strong>Note :</strong> Utilisez votre numéro de <strong>CIN</strong> à la fois comme <em>Nom d'utilisateur</em> et comme <em>Mot de passe</em>.
+            </p>
+        </div>
 
-    <div class="form-group">
-        <label asp-for="Username"></label>
-        <input asp-for="Username" class="form-control" placeholder="Nom d'utilisateur" />
-        <span asp-validation-for="Username" class="text-danger"></span>
+        <form asp-action="Login" method="post">
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3 text-center small"></div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Username" class="form-label">Nom d'utilisateur</label>
+                <div class="input-wrapper">
+                    <input asp-for="Username" class="form-control custom-input" placeholder="Votre numéro CIN" autocomplete="off" />
+                </div>
+                <span asp-validation-for="Username" class="text-danger small"></span>
+            </div>
+
+            <div class="form-group mb-4">
+                <label asp-for="Password" class="form-label">Mot de passe</label>
+                <div class="password-group">
+                    <input asp-for="Password" type="password" id="passwordInput" class="form-control custom-input password-input" placeholder="••••••••" />
+                    <button type="button" id="togglePassword" class="eye-btn" title="Afficher/Masquer le mot de passe">
+                        <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </button>
+                </div>
+                <span asp-validation-for="Password" class="text-danger small"></span>
+            </div>
+
+            <div class="text-center">
+                <button type="submit" class="btn btn-login">Se connecter</button>
+            </div>
+        </form>
     </div>
+</div>
 
-    <div class="form-group">
-        <label asp-for="Password"></label>
-        <input asp-for="Password" class="form-control" placeholder="Mot de passe" />
-        <span asp-validation-for="Password" class="text-danger"></span>
-    </div>
+<style>
+    /* Conteneur principal centré au milieu de l'écran */
+    .login-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 75vh;
+        padding: 20px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
-    <div class="form-group" style="margin-top: 15px;">
-        <button type="submit" class="btn btn-primary">Se connecter</button>
-    </div>
-</form>
+    /* Carte de connexion élégante */
+    .login-card {
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        padding: 40px;
+        width: 100%;
+        max-width: 420px;
+        border: 1px solid rgba(0, 0, 0, 0.03);
+        transition: transform 0.3s ease;
+    }
+
+    /* En-tête de la carte */
+    .login-header {
+        text-align: center;
+        margin-bottom: 24px; /* Légèrement réduit pour équilibrer avec la boîte info */
+    }
+
+    .login-header h2 {
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 8px;
+        font-size: 28px;
+    }
+
+    .login-header p {
+        color: #7a7a7a;
+        font-size: 14px;
+        margin: 0;
+    }
+
+    /* --- Nouvelle zone d'information CIN harmonisée --- */
+    .login-info-box {
+        background-color: #eff6ff; /* Bleu très clair assorti au bouton */
+        border-left: 4px solid #3b82f6; /* Même bleu que votre bouton principal */
+        padding: 12px 16px;
+        border-radius: 10px;
+        margin-bottom: 24px;
+        text-align: left;
+    }
+
+    .login-info-box p {
+        margin: 0;
+        font-size: 13.5px;
+        color: #1e40af; /* Bleu foncé pour un excellent contraste de lecture */
+        line-height: 1.5;
+    }
+
+    .login-info-box strong {
+        color: #1d4ed8;
+    }
+
+    /* Style des labels */
+    .form-label {
+        font-weight: 600;
+        color: #4a4a4a;
+        font-size: 14px;
+        margin-bottom: 6px;
+        display: block;
+    }
+
+    /* Inputs personnalisés et épurés */
+    .custom-input {
+        background-color: #f9fbfd;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 12px 16px;
+        font-size: 15px;
+        color: #333;
+        transition: all 0.2s ease-in-out;
+        width: 100%;
+        box-shadow: none !important;
+    }
+
+    .custom-input:focus {
+        background-color: #fff;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+    }
+
+    /* Structure pour le champ mot de passe + oeil */
+    .password-group {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .password-input {
+        padding-right: 48px; /* Laisse la place pour l'œil */
+    }
+
+    /* Bouton œil transparent */
+    .eye-btn {
+        position: absolute;
+        right: 14px;
+        background: none;
+        border: none;
+        padding: 0;
+        color: #94a3b8;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: color 0.2s ease;
+    }
+
+    .eye-btn:hover {
+        color: #3b82f6;
+    }
+
+    .eye-btn:focus {
+        outline: none;
+    }
+
+    /* Bouton Se connecter moderne et centré */
+    .btn-login {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        color: white;
+        font-weight: 600;
+        font-size: 16px;
+        padding: 12px 35px;
+        border-radius: 10px;
+        border: none;
+        width: 100%;
+        margin-top: 10px;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+    .btn-login:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+        color: white;
+    }
+
+    .btn-login:active {
+        transform: translateY(1px);
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const passwordInput = document.getElementById("passwordInput");
+        const togglePasswordButton = document.getElementById("togglePassword");
+        const eyeIcon = document.getElementById("eyeIcon");
+
+        // Les deux états SVG de l'œil (Ouvert / Barré)
+        const eyeOpenSvg = `
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+        `;
+        
+        const eyeClosedSvg = `
+            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+            <line x1="1" y1="1" x2="23" y2="23"></line>
+        `;
+
+        togglePasswordButton.addEventListener("click", function () {
+            // Basculer le type d'input
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                eyeIcon.innerHTML = eyeClosedSvg; // Devient l'œil barré
+            } else {
+                passwordInput.type = "password";
+                eyeIcon.innerHTML = eyeOpenSvg; // Devient l'œil ouvert
+            }
+        });
+    });
+</script>

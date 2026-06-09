@@ -9,103 +9,345 @@
 }
 
 <style>
-    /* CSS pour ordonner le formulaire de modification en grille */
-    #editPersonnelForm {
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    /* --- Design Global & Modernisation --- */
+    body {
+        background-color: #f8f9fa;
+        color: #333;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
+
+    .page-title {
+        font-weight: 700;
+        letter-spacing: 1px;
+        color: #2c3e50;
+        margin: 30px 0;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    /* --- Formulaire de recherche --- */
+    .search-container {
+        background: #fff;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        max-width: 600px;
+        margin: 0 auto 40px auto;
+        text-align: center;
+    }
+
+    .search-group {
+        position: relative;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        justify-content: center;
+        margin-top: 10px;
+    }
+
+    .search-group label {
+        font-weight: 600;
+        display: block;
+        text-align: left;
+        margin-bottom: 5px;
+    }
+
+    .search-input {
+        flex: 1;
+        padding: 10px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        outline: none;
+        transition: border-color 0.3s;
+    }
+
+    .search-input:focus {
+        border-color: #2da44e;
+    }
+
+    /* --- Liste des Résultats & Cartes --- */
+    #resultsContainer {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 30px;
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .personnel-card {
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        padding: 25px;
+        width: 100%;
+        transition: transform 0.3s;
+        border: 1px solid #eaeaea;
+    }
+
+    .personnel-card:hover {
+        transform: translateY(-2px);
+    }
+
+    .photo-personnel {
+        border-radius: 8px;
+        object-fit: cover;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        display: block;
+        margin: 0 auto;
+    }
+
+    .card-actions {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-top: 20px;
+    }
+
+    /* --- Style des Tableaux de présentation --- */
+    .table-custom {
+        width: 100%;
+        margin-bottom: 0;
+    }
+
+    .table-custom th {
+        width: 35%;
+        text-align: left;
+        color: #7f8c8d;
+        font-weight: 600;
+        padding: 10px;
+    }
+
+    .table-custom td {
+        color: #2c3e50;
+        font-weight: 500;
+        padding: 10px;
+    }
+
+    /* --- Fenêtre Popup (Modal) de Modification --- */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(5px);
+        z-index: 1040;
+    }
+
+    #editPersonnelForm {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1050;
+        background: #ffffff;
+        width: 90%;
+        max-width: 750px;
+        max-height: 85vh;
+        overflow-y: auto;
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        border: none;
+    }
+
     #updateForm {
         display: grid;
-        grid-template-columns: 1fr 1fr; /* 2 colonnes */
-        gap: 15px;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
     }
+
     .form-group {
         display: flex;
         flex-direction: column;
+        text-align: left; /* Aligne les labels à gauche */
     }
+
     .form-group label {
-        font-weight: bold;
-        margin-bottom: 5px;
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: #4a5568;
+        font-size: 0.9rem;
     }
+
     .form-group input, .form-group select {
-        padding: 8px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
+        padding: 10px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        outline: none;
+        background-color: #f8fafc;
+        transition: all 0.3s;
     }
+
+    .form-group input:focus, .form-group select:focus {
+        border-color: #3b82f6;
+        background-color: #fff;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
     .full-width {
         grid-column: span 2;
     }
+
+    .section-divider {
+        grid-column: span 2;
+        border-top: 2px dashed #e2e8f0;
+        margin: 15px 0 5px 0;
+        padding-top: 15px;
+        color: #1e293b;
+    }
+
     .photo-upload-container {
         grid-column: span 2;
         text-align: center;
-        margin-bottom: 15px;
-        padding: 15px;
-        background: #fff;
-        border: 1px dashed #999;
-        border-radius: 8px;
+        padding: 20px;
+        background: #f8fafc;
+        border: 2px dashed #cbd5e1;
+        border-radius: 12px;
+        margin-bottom: 10px;
     }
+
     .form-actions {
         grid-column: span 2;
         text-align: center;
-        margin-top: 20px;
+        margin-top: 25px;
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+    }
+
+    /* --- Boutons (Conservation stricte des couleurs demandées) --- */
+    .btn-search {
+        background-color: green !important;
+        color: black !important;
+        border: none;
+        padding: 10px 20px;
+        font-weight: bold;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: opacity 0.2s;
+    }
+
+    .btn-edit-card {
+        background-color: yellow !important;
+        color: black !important;
+        border: none;
+        padding: 10px 20px;
+        font-weight: bold;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+    .btn-delete-card {
+        background-color: red !important;
+        color: black !important;
+        border: none;
+        padding: 10px 20px;
+        font-weight: bold;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+    .btn-save-modal {
+        background-color: green !important;
+        color: white !important;
+        padding: 12px 30px;
+        border: none;
+        font-weight: bold;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+    .btn-cancel-modal {
+        background-color: #888 !important;
+        color: white !important;
+        padding: 12px 30px;
+        border: none;
+        font-weight: bold;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+    .btn-search:hover, .btn-edit-card:hover, .btn-delete-card:hover, .btn-save-modal:hover, .btn-cancel-modal:hover {
+        opacity: 0.9;
+    }
+
+    /* Suggestions de recherche */
+    #suggestions {
+        position: absolute;
+        z-index: 1000;
+        left: 0;
+        top: 100%;
+        width: 100%;
+        background: white;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        text-align: left;
+        max-height: 200px;
+        overflow-y: auto;
     }
 </style>
 
-<h5 align="center">RECHERCHE DE PERSONNEL DU LYCEE RAHERIVELO RAMAMONJY</h5>
+<h5 class="page-title">Recherche de Personnel du Lycée Raherivelo Ramamonjy</h5>
 
-<form id="searchForm" onsubmit="return false;">
-    <div align="center" style="position: relative; display: inline-block;">
-        <label for="searchTerm">Rechercher par Matricule ou Nom :</label>
-        
-        @if (isAdmin)
-        {
-            <input type="text" id="PersonnelNom" name="searchTerm" required autocomplete="off" value="@ViewBag.SearchTerm" />
-            <button type="button" id="btnSubmitSearch" style="background-color: green; color: black; border: none; padding: 10px 15px; cursor: pointer;">
-                🔍 Rechercher
-            </button>
-        }
-        else
-        {
-            <input type="text" id="PersonnelNom" name="searchTerm" required autocomplete="off" value="@userNom" readonly 
-                   style="background-color: #e9ecef; color: #6c757d; cursor: not-allowed; border: 1px solid #ced4da;" />
-            <button type="button" id="btnSubmitSearch" disabled style="background-color: #d3d3d3; color: #777; border: none; padding: 10px 15px; cursor: not-allowed; opacity: 0.6;">
-                🔍 Rechercher
-            </button>
-        }
-        
-        <div id="suggestions" class="list-group" style="position: absolute; z-index: 1000; left: 0; top: 100%; width: 100%; background: white; border: 1px solid #ccc; text-align: left;"></div>
-    </div>
-</form>
+<div class="search-container">
+    <form id="searchForm" onsubmit="return false;">
+        <div style="text-align: left; margin-bottom: 8px;">
+            <label for="PersonnelNom" style="font-weight: 600;">Rechercher par Matricule ou Nom :</label>
+        </div>
+        <div class="search-group">
+            @if (isAdmin)
+            {
+                <input type="text" id="PersonnelNom" class="search-input" name="searchTerm" required autocomplete="off" value="@ViewBag.SearchTerm" />
+                <button type="button" id="btnSubmitSearch" class="btn-search">
+                    🔍 Rechercher
+                </button>
+            }
+            else
+            {
+                <input type="text" id="PersonnelNom" class="search-input" name="searchTerm" required autocomplete="off" value="@userNom" readonly 
+                       style="background-color: #e9ecef; color: #6c757d; cursor: not-allowed; border: 1px solid #ced4da;" />
+                <button type="button" id="btnSubmitSearch" disabled class="btn-search" style="background-color: #d3d3d3 !important; color: #777 !important; cursor: not-allowed; opacity: 0.6;">
+                    🔍 Rechercher
+                </button>
+            }
+            <div id="suggestions" class="list-group"></div>
+        </div>
+    </form>
+</div>
 
 <div id="resultsContainer">
     @if (Model != null && Model.Any())
     {
         @foreach (var p in Model)
         {
-            <div class="personnel-card mb-4" id="card-@p.Num" style="border-bottom: 2px dashed #ccc; padding-bottom: 15px;">
-                <table class="table table-striped">
+            <div class="personnel-card" id="card-@p.Num">
+                <table class="table table-striped table-custom">
                     <tbody>
-                        <tr><td><img src="@Url.Content(p.Photo)" class="photo-personnel" alt="Photo de @p.NomEtPrenoms" width="150" height="200" /></td></tr>
+                        <tr>
+                            <td colspan="2" class="text-center" style="border-bottom: none; padding-bottom: 20px;">
+                                <img src="@Url.Content(p.Photo)" class="photo-personnel" alt="Photo de @p.NomEtPrenoms" width="150" height="200" />
+                            </td>
+                        </tr>
                         <tr><th>Matricule :</th> <td class="Matricule">@p.Matricule</td></tr>
                         <tr><th>NOM ET PRÉNOMS :</th> <td class="nom_prenoms">@p.NomEtPrenoms</td></tr>
                         <tr><th>Cin :</th> <td class="Cin">@p.Cin</td></tr>
                         <tr><th>DÉCISION :</th> <td>@p.Dec</td></tr>
                         <tr><th>Corps :</th> <td class="Corps">@p.Corps</td></tr>
-                        
                         <tr><th>Matiere OU BUREAU :</th> <td class="Matiere">@p.Matiere</td></tr>
-                        
                         <tr><th>DATE DE NAISSANCE :</th> <td class="Datenaiss">@p.Datenaiss</td></tr>
                         <tr><th>LIEU DE NAISSANCE :</th> <td class="lieunaiss">@p.Lieudenaiss</td></tr>
                         <tr><th>Sexe :</th> <td>@p.Sexe</td></tr>
                         <tr><th>Statut :</th> <td>@p.Statut</td></tr>
                         <tr><th>DATE D'ENTRÉE :</th> <td class="Datedentre">@p.Datedentre</td></tr>
                         <tr><th>DATE PRISE :</th> <td class="Datedeprise">@p.Datedeprise</td></tr>
-                        
                         <tr><th>DIPLÔME ACADÉMIQUE :</th> <td class="Diplomeac">@p.Diplomeac</td></tr>
-                        
                         <tr><th>DIPLÔME PÉDAGOGIQUE :</th> <td class="Diplomeped">@p.Diplomeped</td></tr>
-                        
                         <tr><th>Contact :</th> <td class="Contact">@p.Contact</td></tr>
                         <tr><th>Fonction :</th> <td class="Fonction">@p.Fonction</td></tr>
                         <tr><th>1°AVANCEMENT:</th> <td class="Perav">@p.Perav</td></tr>
@@ -126,19 +368,16 @@
                         <tr><th>16°AVANCEMENT:</th> <td class="Seiz">@p.Seiz</td></tr>
                     </tbody>
                 </table>
-                <div>
+                <div class="card-actions">
                     @if (isAdmin)
                     {
-                        <button type="button" class="btn-edit" data-id="@p.Num" style="background-color: yellow; color: Black; border: none; padding: 10px 15px; cursor: pointer;">Modifier</button>
-                        <button type="button" class="btn-delete" data-id="@p.Num" style="background-color: red; color: Black; border: none; padding: 10px 15px; cursor: pointer;">🗑 Archiver</button>
-                        <button type="button" class="REMPLIR" style="padding: 10px 15px; cursor: pointer;">GENERER UN CERTIFICAT ADMINISTRATIF</button>
+                        <button type="button" class="btn-edit btn-edit-card" data-id="@p.Num">Modifier</button>
+                        <button type="button" class="btn-delete btn-delete-card" data-id="@p.Num">🗑 Archiver</button>
                     }
                     else
                     {
-                        <!-- Modifier disponible et cliquable sans restriction -->
-                        <button type="button" class="btn-edit" data-id="@p.Num" style="background-color: yellow; color: Black; border: none; padding: 10px 15px; cursor: pointer;">Modifier</button>
-                        <button type="button" class="btn-delete" disabled style="background-color: #e9ecef; color: #777; border: none; padding: 10px 15px; cursor: not-allowed; opacity: 0.6;">🗑 Archiver</button>
-                        <button type="button" class="REMPLIR" disabled style="background-color: #e9ecef; color: #777; border: none; padding: 10px 15px; cursor: not-allowed; opacity: 0.6;">GENERER UN CERTIFICAT ADMINISTRATIF</button>
+                        <button type="button" class="btn-edit btn-edit-card" data-id="@p.Num">Modifier</button>
+                        <button type="button" class="btn-delete" disabled style="background-color: #e9ecef; color: #777; border: none; padding: 10px 15px; cursor: not-allowed; opacity: 0.6; border-radius: 8px;">🗑 Archiver</button>
                     }
                 </div>
             </div>
@@ -146,49 +385,20 @@
     }
 </div>
 
-<div id="lieu" style="display: none; border: 1px solid black; padding: 20px; margin-top: 20px; width: 350px; background: #f9f9f9; border-radius: 8px;">
-    <label for="inputLieu">Lieu de délivrance du Cin :</label>
-    <input type="text" id="inputLieu" placeholder="Entrez le lieu" /><br>
-    <label for="inputdateCin">Date de la Cin :</label><br>
-    <input type="date" id="inputdateCin" /><br>
-    <label for="inputchapitre">CHAPITRE:</label><br>
-    <select id="inputchapitre" name="Chapitre">
-        <option value="" disabled selected>Selectionnez ici</option>
-        <option value="00 810 110">00 810 110</option>
-        <option value="00 811 130">00 811 130</option>
-    </select>
-    <button id="generateCertificate" style="display:block; margin-top:10px; width:100%;">Créer Certificat</button>
-</div>
+<div class="modal-overlay" id="modalOverlay"></div>
 
-<div id="certificate" style="display: none; font-family: 'Times New Roman'; padding: 20px;">
-    <div style="text-align: center;">
-        <p>MINISTERE DE L’EDUCATION NATIONALE<br>SECRETARIAT GENERAL<br>DIRECTION REGIONALE DE L’EDUCATION NATIONALE HAUTE MATSIATRA<br>CIRCONSCRIPTION SCOLAIRE DE FIANARANTSOA</p>
-        <h4>CERTIFICAT ADMINISTRATIF</h4>
-    </div>
-    <p>Je soussigné, CHEF DE LA CISCO DE FIANARANTSOA, certifie que le nommé : <span id="cert_nom"></span></p>
-    <p>Matricule : <span id="cert_Matricule"></span> | Corps: <span id="cert_Corps"></span></p>
-    <p>CHAPITRE: <span id="cert_chapitre"></span></p>
-    <p>Né(e) le <span id="cert_Datenaiss"></span> à <span id="cert_lieunaiss"></span></p>
-    <p>Cin n° <span id="cert_Cin"></span> du <span id="cert_dateCin"></span> à <span id="cert_lieu"></span></p>
-    <p>Continue à servir le MEN depuis le <span id="cert_Datedentre"></span>, actuellement au Lycée RAHERIVELO RAMAMONJY depuis le <span id="cert_Datedeprise"></span>.</p>
-    <p>En foi de quoi, ce certificat est délivré pour servir et valoir ce que de droit.</p>
-    <p style="text-align: right;">Fianarantsoa, le <span id="cert_date"></span></p>
-    <button onclick="window.print()">Imprimer</button>
-</div>
-
-<!-- Formulaire accessible à tous -->
-<div id="editPersonnelForm" style="display:none; padding: 20px; background: #eee; margin-top: 20px;">
-    <h3 style="text-align:center; margin-bottom:20px;">Modifier le personnel</h3>
+<div id="editPersonnelForm">
+    <h3 style="text-align:center; margin-bottom:25px; font-weight: 700; color: #1e293b;">Modifier le personnel</h3>
     
     <form id="updateForm" enctype="multipart/form-data">
         <input type="hidden" name="Num" id="editNum" />
         
         <div class="photo-upload-container">
             <label style="display:block; font-weight:bold; margin-bottom:10px;">Photo du personnel :</label>
-            <img id="editPhotoPreview" src="" alt="Aperçu" style="width:120px; height:150px; object-fit:cover; border:2px solid #333; margin-bottom:10px; display:inline-block;" />
+            <img id="editPhotoPreview" src="" alt="Aperçu" style="width:120px; height:150px; object-fit:cover; border:2px solid #cbd5e1; border-radius: 8px; margin-bottom:10px; display:inline-block;" />
             <br/>
             <input type="file" id="editPhotoFile" name="PhotoFile" accept="image/*" style="display: none;" />
-            <button type="button" id="btnTriggerUpload" style="background-color: #007bff; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">
+            <button type="button" id="btnTriggerUpload" style="background-color: #007bff; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;">
                 📁 Choisir une photo
             </button>
         </div>
@@ -249,7 +459,7 @@
         <div class="form-group"><label>Date Prise Service:</label> <input type="date" id="editDatedeprise" name="Datedeprise" /></div>
         
         <div class="form-group mb-3">
-            <label for="editDiplomeac" class="custom-label">Diplôme Académique le plus élevé</label>
+            <label for="editDiplomeac">Diplôme Académique le plus élevé</label>
             <select id="editDiplomeac" name="Diplomeac" class="form-control">
                 <option value="" disabled selected>Sélectionner le diplôme Académique le plus élevé</option>
                 <option value="BEPC">BEPC</option>
@@ -261,7 +471,7 @@
             </select>
         </div>
         <div class="form-group mb-3">
-            <label for="editDiplomeped" class="custom-label">Diplôme Pédagogique le plus élevé</label>
+            <label for="editDiplomeped">Diplôme Pédagogique le plus élevé</label>
             <select id="editDiplomeped" name="Diplomeped" class="form-control">
                 <option value="" disabled selected>Sélectionner le diplôme Pédagogique le plus élevé</option>
                 <option value="LAPEN">LAPEN</option>
@@ -273,7 +483,7 @@
         <div class="form-group"><label>Contact:</label> <input type="text" id="editContact" name="Contact" /></div>
         <div class="form-group"><label>Fonction:</label> <select id="editFonction" name="Fonction"><option value="PA">PA</option><option value="PE">PE</option></select></div>
         
-        <div class="full-width" style="border-top: 1px solid #ccc; margin-top: 10px; padding-top: 10px;"><h4>Détails des Avancements</h4></div>
+        <div class="section-divider"><h4>Détails des Avancements</h4></div>
 
         <div class="form-group"><label>1°Av:</label> <input type="text" id="editPerav" name="Perav" /></div>
         <div class="form-group"><label>2°Av:</label> <input type="text" id="editDemav" name="Demav" /></div>
@@ -293,8 +503,8 @@
         <div class="form-group"><label>16°Av:</label> <input type="text" id="editSeiz" name="Seiz" /></div>
         
         <div class="form-actions">
-            <button type="submit" style="background:green; color:white; padding:10px 25px; border:none; cursor:pointer;">Enregistrer</button>
-            <button type="button" id="cancelEdit" style="background:#888; color:white; padding:10px 25px; border:none; cursor:pointer;">Annuler</button>
+            <button type="submit" class="btn-save-modal">Enregistrer</button>
+            <button type="button" id="cancelEdit" class="btn-cancel-modal">Annuler</button>
         </div>
     </form>
 </div>
@@ -308,6 +518,19 @@
     $(document).ready(function () {
         const IS_ADMIN = @(isAdmin ? "true" : "false");
         var searchUrl = "/Search/SearchPersonnel";
+
+        // Fonctions d'affichage/masquage du Popup
+        function openEditModal() {
+            $("#modalOverlay").fadeIn(300);
+            $("#editPersonnelForm").fadeIn(300);
+            $("body").css("overflow", "hidden"); // Empêche le défilement de la page arrière
+        }
+
+        function closeEditModal() {
+            $("#modalOverlay").fadeOut(200);
+            $("#editPersonnelForm").fadeOut(200);
+            $("body").css("overflow", "auto");
+        }
 
         // Recherche par bouton (AJAX) - Uniquement si admin
         $("#btnSubmitSearch").click(function () {
@@ -330,7 +553,7 @@
                     let s = $("#suggestions");
                     s.empty();
                     data.forEach(p => {
-                        s.append(`<a href="#" class="list-group-item suggestion-item" data-name="${p.nom}">${p.nom}</a>`);
+                        s.append(`<a href="#" class="list-group-item list-group-item-action suggestion-item" data-name="${p.nom}" style="padding: 10px 15px; border-bottom: 1px solid #f1f5f9; display: block; color: #334155; text-decoration: none;">${p.nom}</a>`);
                     });
                 });
             } else {
@@ -362,7 +585,7 @@
             return dateStr.substring(0, 10);
         }
 
-        // Édition : Remplissage des données (Autorisé GLOBALEMENT)
+        // Édition : Remplissage des données et Ouverture du Popup
         $(document).on('click', '.btn-edit', function (e) {
             e.preventDefault();
             let id = $(this).data("id");
@@ -418,14 +641,16 @@
                 }
                 
                 $("#editPhotoFile").val('');
-                $("#editPersonnelForm").slideDown();
+                
+                // Appel de la transition d'ouverture du popup
+                openEditModal();
+
             }).fail(function (xhr, status, error) {
-                // Alerte de diagnostic si le serveur rejette la demande (ex: [Authorize])
                 alert("Sécurité serveur : L'action 'GetPersonnelDetails' a renvoyé une erreur " + xhr.status + " (" + error + "). Si vous êtes connecté en tant que non-admin, l'accès doit être également autorisé dans votre fichier SearchController.cs.");
             });
         });
 
-        // Soumission du formulaire (Autorisé GLOBALEMENT)
+        // Soumission du formulaire
         $("#updateForm").submit(function(e){
             e.preventDefault();
             
@@ -489,7 +714,7 @@
                             $card.find(".Quin").text($("#editQuin").val());
                             $card.find(".Seiz").text($("#editSeiz").val());
                         }
-                        $("#editPersonnelForm").slideUp();
+                        closeEditModal();
                     } else {
                         alert("Erreur : " + res.message);
                     }
@@ -539,38 +764,18 @@
                 }
             });
         });
-
-        // Certificat - Limité à l'admin
-        $(document).on('click', '.REMPLIR', function () {
-            if (!IS_ADMIN) return false; 
-            $("#lieu").show();
-            window.lastClickedRow = $(this).closest('.personnel-card').find('table');
-        });
-
-        $("#generateCertificate").click(function () {
-            let table = window.lastClickedRow;
-            if(!table || table.length === 0) return;
-
-            $("#cert_nom").text(table.find(".nom_prenoms").text());
-            $("#cert_Matricule").text(table.find(".Matricule").text());
-            $("#cert_Corps").text(table.find(".Corps").text());
-            $("#cert_Cin").text(table.find(".Cin").text());
-            $("#cert_Datenaiss").text(table.find(".Datenaiss").text());
-            $("#cert_lieunaiss").text(table.find(".lieunaiss").text());
-            $("#cert_Datedentre").text(table.find(".Datedentre").text());
-            $("#cert_Datedeprise").text(table.find(".Datedeprise").text());
-            $("#cert_dateCin").text($("#inputdateCin").val());
-            $("#cert_lieu").text($("#inputLieu").val());
-            $("#cert_chapitre").text($("#inputchapitre").val());
-            $("#cert_date").text(new Date().toLocaleDateString());
-            $("#certificate").show();
-        });
         
-        $(document).click(e => { if (!$(e.target).closest("#PersonnelNom, #suggestions").length) $("#suggestions").empty(); });
-        $("#cancelEdit").click(() => $("#editPersonnelForm").slideUp());
+        // Fermeture du Popup lors du clic sur l'annulation ou à côté du modal
+        $("#cancelEdit, #modalOverlay").click(function() {
+            closeEditModal();
+        });
+
+        $(document).click(e => { 
+            if (!$(e.target).closest("#PersonnelNom, #suggestions").length) $("#suggestions").empty(); 
+        });
     });
 
-    // Photos
+    // Gestion de l'upload et de l'aperçu photo
     $(document).on('click', '#btnTriggerUpload', function () {
         $("#editPhotoFile").click();
     });
@@ -581,7 +786,7 @@
             let reader = new FileReader();
             reader.onload = function (e) {
                 $('#editPhotoPreview').attr('src', e.target.result);
-            }
+            };
             reader.readAsDataURL(file);
         }
     });
