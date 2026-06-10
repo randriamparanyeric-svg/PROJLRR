@@ -1,7 +1,7 @@
 /* ==========================================================
-   1. AGENCEMENT GLOBAL DE LA PAGE (STYLE DASHBOARD)
+   AGENCEMENT GLOBAL DE LA PAGE (STYLE DASHBOARD)
    ========================================================== */
-   .page-container, .archive-container {
+.page-container {
     padding: 30px;
     background-color: #f8fafc; /* Fond ultra-léger moderne */
     min-height: 100vh;
@@ -9,7 +9,7 @@
 }
 
 /* Bandeau d'en-tête (Titre à gauche, Boutons à droite) */
-.archive-header, .list-header-bar {
+.list-header-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -18,14 +18,14 @@
     gap: 15px;
 }
 
-.archive-header h2, .page-title {
+.page-title {
     color: #1e3a8a; /* Bleu profond professionnel */
     font-weight: 700;
     font-size: 26px;
     margin: 0 0 4px 0;
 }
 
-.archive-header p, .page-subtitle {
+.page-subtitle {
     color: #64748b; /* Gris texte secondaire */
     font-size: 14px;
     margin: 0;
@@ -38,7 +38,7 @@
 }
 
 /* ==========================================================
-   2. TABLEAU - STYLE GÉNÉRAL
+   TABLEAU - STYLE GÉNÉRAL
    ========================================================== */
 
 /* Conteneur style "Carte" blanche */
@@ -50,7 +50,7 @@
     overflow-x: auto;
 }
 
-.table, .custom-table {
+.table {
     width: 100%;
     border-collapse: collapse;
     font-size: 14.5px;
@@ -59,7 +59,7 @@
 }
 
 /* En-têtes du tableau */
-.table thead th, .custom-table thead th {
+.table thead th {
     background-color: #1e3a8a;
     color: #ffffff;
     font-weight: 600;
@@ -72,46 +72,42 @@
 }
 
 /* Lignes (Effet Zebra discret) */
-.table tbody tr, .custom-table tbody tr {
+.table tbody tr {
     border-bottom: 1px solid #f1f5f9;
     transition: background-color 0.2s ease;
 }
 
-.table tbody tr:nth-child(even), .custom-table tbody tr:nth-child(even) {
+.table tbody tr:nth-child(even) {
     background-color: #f8fafc;
 }
 
-.table tbody tr:hover, .custom-table tbody tr:hover {
+.table tbody tr:hover {
     background-color: #f1f5f9;
 }
 
-/* Cellules : Centrées par défaut (Gère le N°, Corps, Matière, Statut) */
-.table td, .custom-table td {
+/* Cellules : Centrées par défaut (Gère automatiquement Fonction et Matière) */
+.table td {
     padding: 14px 16px;
     vertical-align: middle;
     text-align: center; 
 }
 
 /* ----------------------------------------------------------
-   ALIGNEMENTS SPÉCIFIQUES DES COLONNES DE L'ARCHIVE
+   ALIGNEMENTS SPÉCIFIQUES DES COLONNES
    ---------------------------------------------------------- */
 
 /* Colonne 3 : Nom et Prénoms (Doit rester aligné à gauche) */
-.table td:nth-child(3), 
-.custom-table td:nth-child(3), 
-.text-left {
+.table td:nth-child(3), .text-left {
     text-align: left !important;
 }
-
-.text-dark, .text-emphasis {
+.text-dark {
     color: #0f172a !important;
     font-weight: 500;
 }
 
-/* Colonnes 4, 5 et 7 : Date Entrée, CIN et CONTACT (Format Chiffres serrés) */
-.table td:nth-child(4), .custom-table td:nth-child(4),
-.table td:nth-child(5), .custom-table td:nth-child(5),
-.table td:nth-child(7), .custom-table td:nth-child(7),
+/* Colonnes 4 et 5 : CIN et CONTACT (Format Chiffres serrés) */
+.table td:nth-child(4),
+.table td:nth-child(5),
 .text-mono {
     white-space: nowrap;
     width: 1%; 
@@ -119,58 +115,16 @@
     font-size: 13.5px;
 }
 
-.text-bold, .row-index {
+.text-bold {
     font-weight: 600;
     color: #64748b;
 }
 
-/* Badge pour les Matricules */
-.badge-id, .badge-archive {
-    background-color: #f1f5f9;
-    color: #475569;
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 600;
-    border: 1px solid #cbd5e1;
-    display: inline-block;
-}
-
 /* ==========================================================
-   3. GESTION DE L'ÉTAT VIDE (EMPTY STATE)
+   BOUTONS D'ACTIONS (IMPRIMER ET AJOUTER)
    ========================================================== */
-.empty-state, .empty-state-card {
-    background-color: #ffffff;
-    border-radius: 12px;
-    border: 2px dashed #cbd5e1;
-    padding: 60px 20px;
-    text-align: center;
-    max-width: 500px;
-    margin: 40px auto;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
-}
 
-.empty-icon, .empty-state-icon {
-    font-size: 48px;
-    margin-bottom: 16px;
-}
-
-.empty-state h3, .empty-state-title {
-    color: #1e3a8a;
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 8px;
-}
-
-.empty-state p, .empty-state-text {
-    color: #64748b;
-    font-size: 14px;
-    margin: 0;
-}
-
-/* ==========================================================
-   4. BOUTONS D'ACTIONS (SI BESOIN D'ÉVOLUTION)
-   ========================================================== */
+/* Style de base partagé */
 .btn-print, .btn-primary {
     font-family: 'Segoe UI', sans-serif;
     font-weight: 600;
@@ -187,6 +141,7 @@
     text-decoration: none;
 }
 
+/* Bouton Imprimer (Vert) */
 .btn-print {
     background-color: #10b981;
     color: white;
@@ -199,6 +154,7 @@
     transform: translateY(-1px);
 }
 
+/* Bouton Ajouter (Bleu) */
 .btn-primary {
     background-color: #3b82f6;
     color: white;
@@ -209,6 +165,7 @@
     background-color: #2563eb;
     box-shadow: 0 6px 12px rgba(59, 130, 246, 0.25);
     transform: translateY(-1px);
+    color: white;
 }
 
 .btn-print:active, .btn-primary:active {
@@ -216,10 +173,10 @@
 }
 
 /* ==========================================================
-   5. RESPONSIVE DESIGN (MOBILE)
+   RESPONSIVE DESIGN (MOBILE)
    ========================================================== */
 @media screen and (max-width: 768px) {
-    .archive-header, .list-header-bar {
+    .list-header-bar {
         flex-direction: column;
         align-items: flex-start;
     }
@@ -227,14 +184,14 @@
         width: 100%;
         justify-content: space-between;
     }
-    .table, .custom-table {
+    .table {
         font-size: 13px;
-        min-width: 850px; /* Augmenté légèrement pour accueillir les 8 colonnes d'archives sans écrasement */
+        min-width: 750px;
     }
-    .table td, .table th, .custom-table td, .custom-table th {
+    .table td, .table th {
         padding: 10px 12px;
     }
-    .table th, .custom-table th {
+    .table th {
         white-space: nowrap;
     }
 }

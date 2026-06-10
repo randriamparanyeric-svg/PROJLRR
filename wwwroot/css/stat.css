@@ -1,0 +1,201 @@
+/* ==========================================================
+   1. AGENCEMENT GLOBAL DE L'APPLICATION (STYLE DASHBOARD)
+   ========================================================== */
+   .page-container {
+    padding: 30px;
+    background-color: #f8fafc; /* Fond ultra-léger moderne (Slate 50) */
+    min-height: 100vh;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+/* Bandeau supérieur (Titre à gauche, Boutons d'actions à droite) */
+.list-header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.page-title {
+    color: #1e3a8a; /* Bleu Royal profond */
+    font-weight: 700;
+    font-size: 26px;
+    margin: 0 0 4px 0;
+}
+
+.page-subtitle {
+    color: #64748b; /* Gris ardoise secondaire */
+    font-size: 14px;
+    margin: 0;
+}
+
+/* Bloc contenant les boutons alignés */
+.action-group {
+    display: flex;
+    gap: 12px;
+}
+
+/* ==========================================================
+   2. CONTENEUR ET STRUCTURE DES TABLEAUX (CARTE BLANCHE)
+   ========================================================== */
+.table-wrapper {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    border: 1px solid #e2e8f0;
+    overflow-x: auto; /* Anticipe le débordement sur petit écran */
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14.5px;
+    color: #334155;
+    margin-bottom: 0;
+}
+
+/* En-têtes (thead) - Valable pour listes simples et matrices fusionnées */
+.table thead th {
+    background-color: #1e3a8a;
+    color: #ffffff;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    padding: 12px 14px;
+    text-align: center;
+    border: 1px solid #2563eb; /* Frontière subtile entre th fusionnés */
+}
+
+/* Lignes du corps (tbody) */
+.table tbody tr {
+    border-bottom: 1px solid #f1f5f9;
+    transition: background-color 0.2s ease;
+}
+
+/* Effet Zebra discret */
+.table tbody tr:nth-child(even) {
+    background-color: #f8fafc;
+}
+
+/* Effet de survol */
+.table tbody tr:hover {
+    background-color: #f1f5f9;
+}
+
+/* Cellules du tableau - CENTRÉES PAR DÉFAUT */
+.table td {
+    padding: 14px 16px;
+    vertical-align: middle;
+    text-align: center; 
+}
+
+/* ==========================================================
+   3. CLASSES UTILITAIRES ET AJUSTEMENTS DE COLONNES
+   ========================================================== */
+
+/* Alignement forcé à gauche (Ex: Noms et Prénoms) */
+.table td.text-left, .text-left {
+    text-align: left !important;
+}
+
+/* Mise en valeur du texte sombre (Ex: Noms) ou des matières de statistiques */
+.text-dark {
+    color: #0f172a !important;
+    font-weight: 500;
+}
+
+/* Formatage des colonnes numériques (Ex: CIN, Contact, Dates) */
+.text-mono {
+    white-space: nowrap;
+    width: 1%; /* Force la colonne à s'ajuster au contenu serré */
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13.5px;
+}
+
+/* Graisse de texte accentuée (Ex: Index, Totaux, Âges) */
+.text-bold {
+    font-weight: 600;
+}
+
+/* Ciblage de sécurité par position (Optionnel, au cas où la classe est absente) */
+.text-left {
+    text-align: left !important;
+}
+
+/* ==========================================================
+   4. BOUTONS D'ACTIONS (IMPRIMER ET AJOUTER)
+   ========================================================== */
+.btn-print, .btn-primary {
+    font-family: 'Segoe UI', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+    text-decoration: none; /* Évite le soulignement si c'est une balise <a> */
+}
+
+/* Bouton Imprimer (Émeraude Moderne) */
+.btn-print {
+    background-color: #10b981;
+    color: white;
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.15);
+}
+
+.btn-print:hover {
+    background-color: #059669;
+    box-shadow: 0 6px 12px rgba(16, 185, 129, 0.25);
+    transform: translateY(-1px);
+}
+
+/* Bouton Ajouter (Bleu Éclatant) */
+.btn-primary {
+    background-color: #3b82f6;
+    color: white;
+    box-shadow: 0 4px 10px rgba(59, 130, 246, 0.15);
+}
+
+.btn-primary:hover {
+    background-color: #2563eb;
+    box-shadow: 0 6px 12px rgba(59, 130, 246, 0.25);
+    transform: translateY(-1px);
+    color: white;
+}
+
+/* Effet d'enfoncement au clic */
+.btn-print:active, .btn-primary:active {
+    transform: translateY(1px);
+}
+
+/* ==========================================================
+   5. RESPONSIVE DESIGN (S'ADAPTE AUX ÉCRANS MOBILES)
+   ========================================================== */
+@media screen and (max-width: 768px) {
+    .page-container {
+        padding: 15px;
+    }
+    .list-header-bar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .action-group {
+        width: 100%;
+        justify-content: space-between;
+    }
+    .table {
+        font-size: 13px;
+        min-width: 800px; /* Génère un scroll horizontal interne propre sur mobile */
+    }
+    .table td, .table th {
+        padding: 10px 12px;
+    }
+}

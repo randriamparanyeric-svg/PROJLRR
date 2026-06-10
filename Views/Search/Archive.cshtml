@@ -3,46 +3,49 @@
 @{
     Layout = "/Views/Shared/Layout.cshtml";
     ViewData["Title"] = "Historique des Archives";
-    int index = 1; // Initialisation du compteur de lignes
+    int index = 1; 
 }
 
 <link rel="stylesheet" href="~/css/styleArchive.css" />
 
-<div class="container archive-container">
-    <div class="archive-header">
-        <h2>📋 Historique des Archives</h2>
-        <p class="text-muted">Consultez et gérez la liste des personnels archivés</p>
+<div class="page-container">
+    <div class="list-header-bar">
+        <div>
+            <h2 class="page-title">📋 Historique des Archives</h2>
+            <p class="page-subtitle">Consultez et gérez la liste complète des personnels archivés</p>
+        </div>
     </div>
 
     @if (Model != null && Model.Any())
     {
-        <div class="table-wrapper">
-            <table class="table custom-table">
+        <div id="tableau" class="table-wrapper">
+            <table class="table">
                 <thead>
                     <tr>
-                        <th class="col-num">N°</th> @* Nouvelle colonne N° *@
-                        <th class="col-matricule">Matricule</th>
-                        <th class="col-nom">Nom et Prénoms</th>
-                        <th class="col-date">Date d'entrée</th>
-                        <th class="col-cin">CIN</th>
-                        <th class="col-corps">Corps</th>
-                        <th class="col-contact">Contact</th>
-                        <th class="col-matiere">Matière / Fonction</th>
+                        <th style="width: 50px;">N°</th>
+                        <th>Matricule</th>
+                        <th>Nom et Prénoms</th>
+                        <th>Date d'entrée</th>
+                        <th>CIN</th>
+                        <th>Corps</th>
+                        <th>Contact</th>
+                        <th>Matière / Fonction</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var p in Model)
                     {
                         <tr>
-                            <td class="col-num row-index">@(index++)</td> @* Affichage et incrémentation automatique *@
-                            <td class="col-matricule"><span class="badge-id">@p.Matricule</span></td>
-                            <td class="col-nom text-emphasis">@p.NomEtPrenoms</td>
-                            <td class="col-date">@p.Datedentre</td>
-                            <td class="col-cin text-muted">@p.Cin</td>
-                            <td class="col-corps">@p.Corps</td>
-                            <td class="col-contact">@p.Contact</td>
-                            <td class="col-matiere">@p.Matiere</td>
+                            <td class="text-bold">@index</td>
+                            <td><span class="badge-archive">@p.Matricule</span></td>
+                            <td class="text-left text-dark">@p.NomEtPrenoms</td>
+                            <td class="text-mono">@p.Datedentre</td>
+                            <td class="text-mono" style="color: #64748b;">@p.Cin</td>
+                            <td>@p.Corps</td>
+                            <td class="text-mono">@p.Contact</td>
+                            <td class="text-bold">@p.Matiere</td>
                         </tr>
+                        index++;
                     }
                 </tbody>
             </table>
@@ -50,10 +53,10 @@
     }
     else
     {
-        <div class="empty-state">
-            <div class="empty-icon">📂</div>
-            <h3>Aucune donnée archivée</h3>
-            <p>Le registre des archives ne contient aucun enregistrement pour le moment.</p>
+        <div class="empty-state-card">
+            <div class="empty-state-icon">📂</div>
+            <h3 class="empty-state-title">Aucune donnée archivée</h3>
+            <p class="empty-state-text">Le registre des archives ne contient aucun enregistrement pour le moment.</p>
         </div>
     }
 </div>

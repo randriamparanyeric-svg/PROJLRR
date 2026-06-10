@@ -3,77 +3,104 @@
 
 @{
     Layout = "/Views/Shared/Layout.cshtml";
-    ViewData["Title"] = "LISTE DES ARTICLES";
+    ViewData["Title"] = "GESTION DES ARTICLES";
 }
 
-<h1 align="center">@ViewData["Title"]</h1>
-
 <link rel="stylesheet" href="~/css/stylesp.css" />
-<div id="tableau" class="table-wrapper">
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>NUM</th>
-            <th>NOM DE L'ARTICLE</th>
-            <th>QUANTITE <br> RESTANT</th>
-            <th>UNITE</th>
-        </tr>
-    </thead>
-    <tbody>
-        @{
-            var articlesTries = Model.AsEnumerable().OrderBy(a => a.Nom).ToList();  // Assurez-vous de convertir en IEnumerable et trier
-            int index = 1;  // Initialiser l'index
-        }
 
-        @foreach (var article in articlesTries)
-        {
-            <tr>
-                <td>@index</td>
-                <td>@article.Nom</td>
-                <td>@article.Quantite</td>
-                <td>@article.Unite</td>
-            </tr>
-            index++;  // Incrémenter l'index
-        }
-    </tbody>
-</table>
+<div class="dashboard-container">
+    
+    <div class="dashboard-header">
+        <div class="header-text">
+            <h2 class="page-main-title">@ViewData["Title"]</h2>
+            <p class="page-subtitle">Consultez l'état des stocks disponibles et gérez vos références</p>
+        </div>
+        <div class="header-actions no-print">
+            <a href="@Url.Action("AddArticle", "Article")" class="btn-modern btn-primary">
+                <span>➕</span> Ajouter un Article
+            </a>
+            <button onclick="imprimerTableau()" class="btn-modern btn-dark">
+                <span>🖨️</span> Imprimer l'État
+            </button>
+        </div>
+    </div>
+
+    <div id="tableau" class="modern-table-card">
+        <table class="dashboard-data-table">
+            <thead>
+                <tr>
+                    <th class="col-num">NUM</th>
+                    <th class="col-nom">NOM DE L'ARTICLE</th>
+                    <th class="col-quantite">QUANTITÉ RESTANTE</th>
+                    <th class="col-unite">UNITÉ</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    var articlesTries = Model.AsEnumerable().OrderBy(a => a.Nom).ToList();
+                    int index = 1;
+                }
+
+                @foreach (var article in articlesTries)
+                {
+                    <tr>
+                        <td class="col-num font-mono text-muted">@index</td>
+                        <td class="col-nom font-weight-bold text-dark text-left">@article.Nom</td>
+                        <td class="col-quantite font-mono font-weight-bold">
+                            <span class="quantity-value">@article.Quantite</span>
+                        </td>
+                        <td class="col-unite"><span class="unit-badge">@article.Unite</span></td>
+                    </tr>
+                    index++;
+                }
+            </tbody>
+        </table>
+    </div>
 </div>
-<!-- Placer le bouton en dehors de la table pour éviter qu'il ne soit "automatiquement" visible en haut -->
-<div class="text-center mt-3">
-    <button onclick="imprimerTableau()" class="btn btn-secondary">🖨️ Imprimer</button>
-<!-- Ajouter un bouton pour l'ajout d'article -->
-<a href="@Url.Action("AddArticle", "Article")" class="btn btn-primary">Ajouter un Article</a>
-</div>
+
 <script>
 function imprimerTableau() {
-    var contenu = document.getElementById('tableau').innerHTML;
-
-    var pageImpression = window.open('', '_blank', 'width=800,height=600');
+    const contenu = document.getElementById('tableau').innerHTML;
+    const pageImpression = window.open('', '_blank', 'width=950,height=750');
+    
     if (!pageImpression) {
-        alert("Veuillez autoriser les pop-ups pour imprimer.");
+        alert("Veuillez autoriser les fenêtres pop-ups pour pouvoir imprimer l'état.");
         return;
     }
     
     pageImpression.document.write(`
-        <html>
+        <!DOCTYPE html>
+        <html lang="fr">
         <head>
-            <title>Impression</title>
+            <meta charset="UTF-8">
+            <title>Impression - Liste des Articles</title>
             <style>
-                body { font-family: Arial, sans-serif; }
-                table { width: 100%; border-collapse: collapse; }
-                th, td { border: 1px solid black; padding: 8px; text-align: left; } /* Centrer le texte dans les cellules */
-                th { background-color: #f2f2f2; }
-                .table-wrapper { margin-top: 20px; }
+                body { font-family: 'Segoe UI', Arial, sans-serif; margin: 40px; color: #0f172a; background: #fff; }
+                h2 { text-align: center; font-size: 20px; margin-bottom: 25px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #0f172a; padding-bottom: 10px; }
+                table { width: 100%; border-collapse: collapse; margin-top: 15px; table-layout: fixed; }
+                th, td { border: 1px solid #cbd5e1; padding: 10px 12px; text-align: center; font-size: 13px; vertical-align: middle; word-wrap: break-word; }
+                th { background-color: #f8fafc; font-weight: bold; color: #334155; }
+                .text-left { text-align: left; }
+                .col-num { width: 10%; }
+                .col-nom { width: 55%; text-align: left; font-weight: 600; }
+                .col-quantite { width: 20%; font-family: monospace; }
+                .col-unite { width: 15%; }
+                .unit-badge { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; }
             </style>
         </head>
         <body>
-            <h2 align="center">LISTE DES ARTICLES</h2>
+            <h2>LISTE INVENTAIRE DES ARTICLES</h2>
             ${contenu}
         </body>
-        </html>`);
+        </html>
+    `);
 
     pageImpression.document.close();
     pageImpression.focus();
-    setTimeout(() => { pageImpression.print(); pageImpression.close(); }, 500);
+    
+    setTimeout(() => { 
+        pageImpression.print(); 
+        pageImpression.close(); 
+    }, 350);
 }
 </script>

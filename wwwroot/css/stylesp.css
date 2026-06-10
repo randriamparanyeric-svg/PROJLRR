@@ -1,136 +1,211 @@
-/* ==========================
-   TABLEAU - LISTE PERSONNELS
-   ========================== */
-
-/* Style général du tableau */
-.table-wrapper {
-    margin-top: 20px;
-    overflow-x: auto; /* Permet le défilement horizontal si nécessaire */
+/* ==========================================================
+   CHARTE GRAPHIQUE & VARIABLES GLOBAL (Premium Dashboard)
+   ========================================================== */
+   :root {
+    --bg-main: #f8fafc;          /* Fond de page gris/bleu ultra-doux */
+    --bg-card: #ffffff;          /* Fond du tableau et des cartes */
+    --text-main: #0f172a;        /* Texte principal presque noir (Slate 900) */
+    --text-body: #334155;        /* Texte secondaire (Slate 700) */
+    --text-muted: #64748b;       /* Texte atténué pour les index/numéros */
+    --color-primary: #0284c7;    /* Bleu moderne pour les boutons principaux */
+    --color-primary-hover: #0369a1;
+    --color-dark: #1e293b;       /* Slate foncé pour l'en-tête du tableau */
+    --color-dark-hover: #0f172a;
+    --grid-color: #cbd5e1;       /* Couleur des lignes de la grille style Excel */
+    --radius-md: 6px;            /* Angles légèrement arrondis pour les cartes */
+    --radius-sm: 4px;            /* Angles pour les boutons et badges */
 }
 
-.table {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: #fff;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+/* Conteneur principal de la page */
+.dashboard-container {
+    background-color: var(--bg-main);
+    padding: 30px 20px;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    color: var(--text-body);
+    min-height: 100vh;
+    box-sizing: border-box;
 }
 
-/* En-têtes du tableau */
-.table thead th {
-    background-color: #007BFF;
-    color: white;
-    text-align: center;
-    padding: 10px;
-    border: 1px solid #ddd;
+/* ==========================================================
+   EN-TÊTE DE LA PAGE (Titre + Boutons d'action)
+   ========================================================== */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1000px;           /* Aligné sur la largeur max du tableau */
+    margin: 0 auto 25px auto;    /* Centré horizontalement */
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--grid-color);
+    flex-wrap: wrap;
+    gap: 15px;
 }
 
-/* Lignes du tableau */
-.table tbody tr:nth-child(even) {
-    background-color: #f8f9fa; /* Gris clair */
+.page-main-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text-main);
+    margin: 0;
+    letter-spacing: -0.5px;
 }
 
-.table tbody tr:hover {
-    background-color: #e9ecef; /* Gris légèrement plus foncé */
+.page-subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin: 4px 0 0 0;
 }
 
-/* Cellules */
-.table td {
-    padding: 8px;
-    border: 1px solid #ddd;
-    text-align: center;
+.header-actions {
+    display: flex;
+    gap: 10px;
 }
 
-/* ------------------------------
-   AJUSTEMENTS POUR CHAQUE COLONNE
-   ------------------------------ */
-
-/* Nom et Prénoms - Forcer un retour à la ligne */
-.table td:nth-child(3) {
-    text-align: center;
-    white-space: normal;
-    max-width: 50px; /* Ajuste selon ton affichage */
-}
-
-.table td:nth-child(1) {
-    text-align:center;
-    white-space: normal;
-    max-width: 50px; /* Ajuste selon ton affichage */
-}
-.table td:nth-child(2) {
-    text-align:left;
-    white-space: normal;
-    max-width: 50px; /* Ajuste selon ton affichage */
-}
-
-/* CIN et CONTACT - Éviter trop de largeur */
-.table td:nth-child(1)
-.table td:nth-child(2)
-.table td:nth-child(3),
-.table td:nth-child(5) {
-    white-space: nowrap;
-    width: 1px; /* Ajuste automatiquement à la taille du contenu */
-}
-
-/* Ajustement pour la colonne Fonction et Matière */
-.table td:nth-child(6),
-.table td:nth-child(7) {
-    text-align: left;
-}
-
-/* ======================
-   BOUTON D'IMPRESSION
-   ====================== */
-
-button {
-    background-color: #28a745;
-    color: white;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 5px;
+/* Boutons Modernes */
+.btn-modern {
+    padding: 9px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
     cursor: pointer;
-    font-size: 16px;
-    margin-top: 10px;
-}
-
-button:hover {
-    background-color: #218838;
-}
-
-/* ======================
-   LIEN AJOUT PERSONNEL
-   ====================== */
-
-.btn-primary {
-    display: inline-block;
-    padding: 10px 15px;
-    margin-top: 10px;
-    background-color: #007BFF;
-    color: white;
-    border-radius: 5px;
+    border: none;
     text-decoration: none;
-    font-size: 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.15s, transform 0.1s;
 }
 
-.btn-primary:hover {
-    background-color: #0056b3;
+.btn-modern:active {
+    transform: scale(0.98);
 }
 
-/* Table responsive */
-.table-wrapper {
+.btn-primary { background-color: var(--color-primary); color: #ffffff !important; }
+.btn-primary:hover { background-color: var(--color-primary-hover); }
+.btn-dark { background-color: var(--color-dark); color: #ffffff !important; }
+.btn-dark:hover { background-color: var(--color-dark-hover); }
+
+/* ==========================================================
+   STRUCTURE DU TABLEAU : CENTRÉ ET GRILLE EXCEL
+   ========================================================== */
+.modern-table-card {
+    background-color: var(--bg-card);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--grid-color);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    overflow: hidden;
+    
+    /* 🎯 CENTRAGE HORIZONTAL DU TABLEAU */
+    max-width: 1000px;           /* Largeur maximale idéale pour la lisibilité */
+    margin: 0 auto;              /* Centre automatiquement le bloc sur l'écran */
+}
+
+.dashboard-data-table {
     width: 100%;
-    overflow-x: auto; /* Permet le défilement horizontal sur mobile */
+    border-collapse: collapse;   /* Fusionne les bordures pour l'effet Excel */
+    font-size: 13.5px;
+    table-layout: fixed;         /* Respect strict des largeurs de colonnes */
 }
 
-/* Table compacte sur mobile */
-@media screen and (max-width: 768px) {
-    .table {
-        font-size: 12px; /* Réduit la taille de la police */
-        min-width: 600px; /* Évite que les colonnes soient trop écrasées */
+/* 📊 EN-TÊTES DU TABLEAU (Style Excel Premium) */
+.dashboard-data-table thead th {
+    background-color: #e2e8f0;   /* Fond gris clair type tableur professionnel */
+    color: var(--text-main);
+    font-weight: 700;
+    font-size: 11.5px;
+    letter-spacing: 0.5px;
+    padding: 12px 14px;
+    text-transform: uppercase;
+    text-align: center;
+    vertical-align: middle;
+    
+    /* 🏁 Maillage de la grille sur les en-têtes */
+    border: 1px solid var(--grid-color) !important; 
+}
+
+/* 🏁 MAILLAGE DE LA GRILLE DES CELLULES (Style Excel) */
+.dashboard-data-table td {
+    padding: 12px 14px;
+    vertical-align: middle;
+    text-align: center;          /* Centrage général du texte */
+    overflow: hidden;
+    word-wrap: break-word;
+    
+    /* 🎯 Lignes fines de séparation sur les 4 côtés de chaque cellule */
+    border: 1px solid var(--grid-color) !important; 
+}
+
+/* Alternance douce des lignes */
+.dashboard-data-table tbody tr:nth-child(even) {
+    background-color: #f8fafc;
+}
+
+/* Effet de survol sur la ligne */
+.dashboard-data-table tbody tr:hover {
+    background-color: #f1f5f9;   /* Surlignage discret au survol */
+}
+
+/* ==========================================================
+   GESTION PROPORTIONNELLE DES 4 COLONNES (Vue Articles)
+   ========================================================== */
+.col-num      { width: 10%; }
+.col-nom      { width: 55%; }
+.col-quantite { width: 20%; }
+.col-unite    { width: 15%; }
+
+/* Classes utilitaires d'alignement et typographie */
+.text-left { text-align: left !important; }
+.font-weight-bold { font-weight: 600; }
+.text-dark { color: var(--text-main); }
+.font-mono { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 13px; }
+
+/* ==========================================================
+   BADGES & STYLISATION DES DONNÉES INTERNES
+   ========================================================== */
+.quantity-value {
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.unit-badge {
+    background-color: #f1f5f9;
+    color: var(--text-body);
+    padding: 3px 8px;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 11px;
+    display: inline-block;
+    border: 1px solid #cbd5e1;
+}
+
+/* ==========================================================
+   RESPONSIVE & IMPRESSION SÉCURISÉE (AVEC GRILLE)
+   ========================================================== */
+@media screen and (max-width: 850px) {
+    .modern-table-card { 
+        overflow-x: auto; 
     }
-    .table td, .table th {
-        padding: 6px; /* Réduit l’espace pour éviter les débordements */
+    .dashboard-data-table { 
+        min-width: 750px;       /* Évite l'écrasement des cellules sur mobile */
     }
-    .table th {
-        white-space: nowrap; /* Évite que les titres de colonnes se cassent */
+}
+
+@media print {
+    .no-print {
+        display: none !important; /* Masque boutons et actions à l'impression */
+    }
+    .dashboard-container {
+        padding: 0;
+        background-color: #ffffff;
+    }
+    .modern-table-card {
+        border: none;
+        box-shadow: none;
+        max-width: 100%;
+    }
+    /* Force l'apparition de la grille Excel sur le papier */
+    .dashboard-data-table th, 
+    .dashboard-data-table td {
+        border: 1px solid #94a3b8 !important;
+        font-size: 12px;
     }
 }

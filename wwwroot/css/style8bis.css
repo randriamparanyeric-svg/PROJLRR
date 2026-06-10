@@ -1,96 +1,247 @@
-/* ==========================
-   TABLEAU - DÉCHARGE PERSONNEL
-   ========================== */
-
-.table-wrapper {
-    margin-top: 20px;
-    overflow-x: auto;
+/* ==========================================================
+   CHARTE GRAPHIQUE COMPLÈTE - VERSION 5 COLONNES (style8bis.css)
+   ========================================================== */
+   :root {
+    --bg-main: #f8fafc;
+    --bg-card: #ffffff;
+    --text-main: #0f172a;
+    --text-body: #334155;
+    --text-muted: #64748b;
+    --color-primary: #0284c7;
+    --color-primary-hover: #0369a1;
+    --color-dark: #334155;
+    --color-dark-hover: #1e293b;
+    --grid-color: #cbd5e1; /* Quadrillage type tableur */
 }
 
-.table {
+/* Base Container */
+.dashboard-container {
+    background-color: var(--bg-main);
+    padding: 30px 20px;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    color: var(--text-body);
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+/* En-tête */
+.dashboard-header {
+    max-width: 1100px;
+    margin: 0 auto 20px auto;
+}
+.page-main-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text-main);
+    letter-spacing: -0.5px;
+    margin: 0;
+}
+.page-subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin: 4px 0 0 0;
+}
+
+/* ==========================================================
+   PANNEAU DE RECHERCHE ET ACTIONS RE-STYLISÉ
+   ========================================================== */
+.control-panel {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    max-width: 1100px;
+    margin: 0 auto 25px auto;
+    background: #ffffff;
+    padding: 16px 20px;
+    border-radius: 6px;
+    border: 1px solid var(--grid-color);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.search-box-container {
+    flex: 1;
+    min-width: 280px;
+    max-width: 450px;
+}
+
+.search-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-body);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.input-relative-wrapper {
+    position: relative;
+}
+
+.search-input {
     width: 100%;
-    border-collapse: collapse;
+    padding: 10px 14px;
+    font-size: 13.5px;
+    border: 1px solid var(--grid-color);
+    border-radius: 4px;
+    color: var(--text-main);
+    background-color: #f8fafc;
+    box-sizing: border-box;
+    transition: all 0.15s ease-in-out;
+}
+
+.search-input:focus {
     background-color: #fff;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+    outline: none;
 }
 
-/* En-têtes (restent centrés) */
-.table thead th {
-    background-color: #007BFF;
-    color: white;
-    text-align: center;
-    padding: 10px;
-    border: 1px solid #ddd;
-    white-space: nowrap;
+/* Dropdown flottante des suggestions */
+.suggestions-dropdown-card {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1050;
+    background-color: #ffffff;
+    border: 1px solid #b4c6ef;
+    border-radius: 4px;
+    margin-top: 5px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    max-height: 220px;
+    overflow-y: auto;
+    display: none;
 }
 
-/* Lignes */
-.table tbody tr:nth-child(even) {
-    background-color: #f8f9fa;
+.suggestion-item {
+    display: block;
+    padding: 10px 14px;
+    color: var(--text-body);
+    text-decoration: none;
+    font-size: 13px;
+    border-bottom: 1px solid #f1f5f9;
+    transition: background-color 0.1s;
+}
+.suggestion-item:last-child { border-bottom: none; }
+.suggestion-item:hover { background-color: #f0f7ff; color: var(--color-primary); font-weight: 500; }
+
+.action-buttons-group {
+    display: flex;
+    gap: 10px;
 }
 
-.table tbody tr:hover {
-    background-color: #e9ecef;
+/* Boutons Modernes */
+.btn-modern {
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 4px;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: transform 0.1s, background-color 0.15s;
+}
+.btn-modern:active { transform: scale(0.98); }
+.btn-primary { background-color: var(--color-primary); color: #ffffff !important; }
+.btn-primary:hover { background-color: var(--color-primary-hover); }
+.btn-dark { background-color: var(--color-dark); color: #ffffff !important; }
+.btn-dark:hover { background-color: var(--color-dark-hover); }
+
+/* Alerts Modifiées */
+.alert-modern {
+    max-width: 1100px;
+    margin: 0 auto 15px auto;
+    padding: 12px 16px;
+    border-radius: 4px;
+    font-size: 13.5px;
+    font-weight: 500;
+}
+.success-alert { background-color: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+
+/* ==========================================================
+   TABLEAU CENTRAL (5 COLONNES - EFFET GRILLE EXCEL FINE)
+   ========================================================== */
+.modern-table-card {
+    background-color: var(--bg-card);
+    border-radius: 4px;
+    border: 1px solid var(--grid-color);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    
+    /* Centrage Automatique */
+    max-width: 1100px;
+    margin: 0 auto;
 }
 
-/* Cellules générales */
-.table td {
-    padding: 10px;
-    border: 1px solid #ddd;
-    text-align: center;
+.dashboard-data-table {
+    width: 100%;
+    border-collapse: collapse; /* Permet le raccordement parfait des cellules */
+    font-size: 13px;
+    table-layout: fixed;
+}
+
+/* Th Header Excel */
+.dashboard-data-table thead th {
+    background-color: #e2e8f0; /* Fond gris clair classique de tableur */
+    color: var(--text-main);
+    font-weight: 700;
+    padding: 14px 10px;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.5px;
     vertical-align: middle;
-}
-
-/* ================
-   Colonnes ciblées
-   ================ */
-
-/* 1 - NOM DU PERSONNEL */
-.table td:nth-child(1) {
-    text-align: left;
-    white-space: normal;
-    max-width: 250px;
-    word-wrap: break-word;
-}
-
-/* 2 - MATIÈRE OU BUREAU */
-.table td:nth-child(2) {
     text-align: center;
-    white-space: normal;
-    max-width: 250px;
-    word-wrap: break-word;
+    border: 1px solid var(--grid-color) !important; /* Maillage complet */
 }
 
-/* 3 - ARTICLES DÉCHARGÉS */
-.table td:nth-child(3) {
-    text-align: left; /* Correction ici */
-    white-space: normal;
-    max-width: 400px;
-    word-wrap: break-word;
-}
-
-/* 4 - DATE ET HEURE DE DÉCHARGE */
-.table td:nth-child(4) {
+/* Td Cellules */
+.dashboard-data-table td {
+    padding: 13px 10px;
+    vertical-align: middle;
     text-align: center;
-    white-space: normal;
-    max-width: 250px;
-    word-wrap: break-word;
+    border: 1px solid var(--grid-color) !important; /* Lignes fines sur les 4 côtés */
 }
 
-/* Responsive mobile */
-@media screen and (max-width: 768px) {
-    .table {
-        font-size: 12px;
-        min-width: 600px;
-    }
+.dashboard-data-table tbody tr:nth-child(even) { background-color: #f8fafc; }
+.dashboard-data-table tbody tr:hover { background-color: #f1f5f9; }
 
-    .table td, .table th {
-        padding: 6px;
-    }
+/* Répartition Proportionnelle Spécifique (5 Colonnes = Total 100%) */
+.col-perso    { width: 25%; }
+    .col-bureau   { width: 18%; }
+.col-articles { width: 32%; }
+.col-datetime { width: 13%; }
+.col-sign     { width: 12%; }
 
-    @media print {
-        .no-print {
-            display: none !important;
-        }
-    }
+/* Classes Utilitaires */
+.text-left { text-align: left !important; }
+.font-weight-bold { font-weight: 600; }
+.text-dark { color: var(--text-main); }
+.font-mono { font-family: ui-monospace, monospace; font-size: 12.5px; }
+.line-height-spaced { line-height: 1.5; }
+
+/* Éléments Visuels Internes */
+.table-signature-img {
+    max-height: 45px;
+    max-width: 100%;
+    object-fit: contain;
+    mix-blend-mode: multiply; /* Enlève le voile blanc des signatures scannées */
+}
+.badge-unsigned {
+    color: var(--text-muted);
+    font-style: italic;
+    font-size: 11px;
+}
+
+/* Mobile responsive fallback */
+@media screen and (max-width: 900px) {
+    .modern-table-card { overflow-x: auto; }
+    .dashboard-data-table { min-width: 850px; }
+    .control-panel { flex-direction: column; align-items: stretch; }
+    .search-box-container { max-width: 100%; }
 }

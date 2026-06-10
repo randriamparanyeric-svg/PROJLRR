@@ -4,145 +4,139 @@
     ViewData["Title"] = "DÉCHARGES PAR PERSONNEL";
 }
 
-<h2 align="center">@ViewData["Title"]</h2>
-
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
-}
-
 <link rel="stylesheet" href="~/css/style8.css" />
 
-<!-- Zone de texte pour rechercher un personnel -->
-<div class="form-group">
-    <label for="PersonnelNom">Nom du Personnel</label>
-    <input type="text" class="form-control" id="PersonnelNom" name="PersonnelNom"
-           required autocomplete="off" value="@ViewBag.LastPersonnelNom" />
-    <div id="suggestions" class="list-group" style="position: absolute; z-index: 1000;"></div>
-</div>
-
-<a href="@Url.Action("Add", "Decharge")" class="btn btn-primary">Nouvelle Décharge</a>
-
-<div id="tableau" class="table-wrapper">
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>NOM DU PERSONNEL</th>
-                <th>MATIERE <br> OU <br>  BUREAU</th>
-                <th>MATRICULE</th>
-                <th>ARTICLES DÉCHARGÉS</th>
-                <th>DATE DE DECHARGE</th>
-                <th>SIGNATURE</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var decharge in Model)
-            {
-                <tr class="dechargeRow" data-personnel="@decharge.PersonnelNom.ToLower().Trim()">
-                    <td>@decharge.PersonnelNom</td>
-                    <td>@decharge.MATIERE</td>
-                    <td>@decharge.MATRICULE</td>
-                    <td>@Html.Raw(decharge.ArticlesFusionnes)</td>
-                    <td>@decharge.DateDecharge.ToString("dd/MM/yyyy")</td>
-                     <td> <!-- Colonne signature -->
-                @if (!string.IsNullOrEmpty(decharge.SignaturePath))
-                {
-                    <img src="@decharge.SignaturePath" alt="Signature" style="height: 60px;" />
-                }
-                else
-                {
-                    <span>Non signée</span>
-                }
-            </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</div>
-
-<!-- Bouton d'impression -->
-<button onclick="imprimerTableau()" class="no-print">🖨️ Imprimer</button>
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-<script>
-   function imprimerTableau() {
-         const contenu = document.getElementById('tableau').innerHTML;
-
-    const pageImpression = window.open('', '_blank', 'width=800,height=600');
-    if (!pageImpression) {
-        alert("Veuillez autoriser les pop-ups pour imprimer.");
-        return;
+<div class="dashboard-container">
+    
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert-modern success-alert">
+            <span class="alert-icon">✓</span> @TempData["SuccessMessage"]
+        </div>
     }
 
-    const html = `
-        <!DOCTYPE html>
-        <html lang="fr">
-        <head>
-            <meta charset="UTF-8">
-            <title>Impression</title>
-            <style>
-                body {
-                    font-family: Arial, sans-serif;
-                    margin: 20px;
-                    margin-left: 0px;
-                    color: #000;
-                }
-                h2 {
-                    text-align: center;
-                    margin-bottom: 20px;
-                }
-                table {
-                    width: 100%;
-                    border-collapse: collapse;
-                    margin-top: 10px;
-                }
-                th, td {
-                    border: 1px solid #000;
-                    padding: 8px;
-                    text-align: center;
-                }
-                th {
-                    background-color: #f2f2f2;
-                }
-                td:first-child {
-                    text-align: left;
-                }
-                /* Élargir la 3ᵉ colonne */
-                td:nth-child(4), th:nth-child(3) {
-                    width: 200px; /* Ajustez cette valeur si nécessaire */
-                    white-space: nowrap; /* Empêche les coupures de mots */
-                    text-align:left;
-                }
+    <div class="dashboard-header">
+        <div class="header-text">
+            <h2 class="page-main-title">@ViewData["Title"]</h2>
+            <p class="page-subtitle">Recherchez, consultez et imprimez les fiches d'affectation du personnel</p>
+        </div>
+    </div>
 
-            </style>
-        </head>
-        <body>
-            <h2>LISTE DE VOTRE DECHARGE</h2>
-            <div class="table-wrapper">
-                ${contenu}
+    <div class="control-panel no-print">
+        <div class="search-box-container">
+            <label for="PersonnelNom" class="search-label">Filtrer par Nom / Matricule</label>
+            <div class="input-relative-wrapper">
+                <input type="text" class="search-input" id="PersonnelNom" name="PersonnelNom"
+                       placeholder="Commencez à saisir un nom..." required autocomplete="off" value="@ViewBag.LastPersonnelNom" />
+                <div id="suggestions" class="suggestions-dropdown-card"></div>
             </div>
-        </body>
-        </html>
-    `;
+        </div>
+        
+        <div class="action-buttons-group">
+            <a href="@Url.Action("Add", "Decharge")" class="btn-modern btn-primary">
+                <span>➕</span> Nouvelle Décharge
+            </a>
+            <button onclick="imprimerTableau()" class="btn-modern btn-dark">
+                <span>🖨️</span> Imprimer Registre
+            </button>
+        </div>
+    </div>
 
-    pageImpression.document.open();
-    pageImpression.document.write(html);
-    pageImpression.document.close();
+    <div id="tableau" class="modern-table-card">
+        <table class="dashboard-data-table">
+            <thead>
+                <tr>
+                    <th class="col-perso">NOM DU PERSONNEL</th>
+                    <th class="col-bureau">MATIÈRE OU BUREAU</th>
+                    <th class="col-matr">MATRICULE</th>
+                    <th class="col-articles">ARTICLES DÉCHARGÉS</th>
+                    <th class="col-date">DATE DE DÉCHARGE</th>
+                    <th class="col-sign">SIGNATURE</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var decharge in Model)
+                {
+                    <tr class="dechargeRow" data-personnel="@decharge.PersonnelNom.ToLower().Trim()">
+                        <td class="col-perso text-left font-weight-bold text-dark">@decharge.PersonnelNom</td>
+                        <td class="col-bureau">@decharge.MATIERE</td>
+                        <td class="col-matr font-mono text-muted">@decharge.MATRICULE</td>
+                        <td class="col-articles text-left line-height-spaced">@Html.Raw(decharge.ArticlesFusionnes)</td>
+                        <td class="col-date font-mono">@decharge.DateDecharge.ToString("dd/MM/yyyy")</td>
+                        <td class="col-sign">
+                            @if (!string.IsNullOrEmpty(decharge.SignaturePath))
+                            {
+                                <img src="@decharge.SignaturePath" alt="Signature" class="table-signature-img" />
+                            }
+                            else
+                            {
+                                <span class="badge-unsigned">Non signée</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
 
-    pageImpression.onload = function () {
-        pageImpression.focus();
-        pageImpression.print();
-        pageImpression.close();
-    };
+<script src="~/js/jquery-3.6.0.min.js"></script>
+
+<script>
+    function imprimerTableau() {
+        const contenu = document.getElementById('tableau').innerHTML;
+        const pageImpression = window.open('', '_blank', 'width=1000,height=750');
+        
+        if (!pageImpression) {
+            alert("Veuillez autoriser les fenêtres pop-ups pour imprimer.");
+            return;
+        }
+
+        const html = `
+            <!DOCTYPE html>
+            <html lang="fr">
+            <head>
+                <meta charset="UTF-8">
+                <title>Registre des Décharges</title>
+                <style>
+                    body { font-family: 'Segoe UI', Arial, sans-serif; margin: 30px; color: #0f172a; background: #fff; }
+                    h2 { text-align: center; font-size: 18px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #0f172a; padding-bottom: 8px; margin-bottom: 20px; }
+                    table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+                    th, td { border: 1px solid #94a3b8; padding: 10px; font-size: 12px; vertical-align: middle; text-align: center; word-wrap: break-word; }
+                    th { background-color: #f1f5f9; font-weight: bold; color: #334155; }
+                    .text-left { text-align: left !important; }
+                    .col-perso { width: 22%; font-weight: 600; }
+                    .col-bureau { width: 15%; }
+                    .col-matr { width: 11%; font-family: monospace; }
+                    .col-articles { width: 28%; text-align: left; }
+                    .col-date { width: 12%; font-family: monospace; }
+                    .col-sign { width: 12%; }
+                    img { max-height: 40px; max-width: 100%; object-fit: contain; }
+                    .badge-unsigned { color: #94a3b8; font-style: italic; font-size: 11px; }
+                </style>
+            </head>
+            <body>
+                <h2>REGISTRE DES DÉCHARGES MATÉRIELS PAR PERSONNEL</h2>
+                ${contenu}
+            </body>
+            </html>
+        `;
+
+        pageImpression.document.open();
+        pageImpression.document.write(html);
+        pageImpression.document.close();
+
+        pageImpression.onload = function () {
+            pageImpression.focus();
+            pageImpression.print();
+            pageImpression.close();
+        };
     }
 
     function filtrerListe(nom) {
         let searchValue = nom.toLowerCase().trim();
-
         $(".dechargeRow").each(function () {
             let personnelName = $(this).data("personnel");
-
             if (personnelName.includes(searchValue) || searchValue === "") {
                 $(this).show();
             } else {
@@ -152,9 +146,8 @@
     }
 
     $(document).ready(function () {
-        $("#PersonnelNom").focus(); // focus auto
+        $("#PersonnelNom").focus();
 
-        // Appliquer le filtre si le champ contient déjà une valeur (ex. après un retour)
         const initialNom = $("#PersonnelNom").val().trim();
         if (initialNom !== "") filtrerListe(initialNom);
 
@@ -172,6 +165,7 @@
                         let matchExact = false;
 
                         if (data.length > 0) {
+                            suggestions.show();
                             data.forEach(function (personnel) {
                                 let affichage = $.isNumeric(query) ? personnel.matricule : personnel.nom;
 
@@ -180,36 +174,37 @@
                                 }
 
                                 suggestions.append(
-                                    '<a href="#" class="list-group-item list-group-item-action suggestion-item" ' +
-                                    'data-name="' + personnel.nom + '">' + affichage + '</a>'
+                                    '<a href="#" class="suggestion-item" data-name="' + personnel.nom + '">' + affichage + '</a>'
                                 );
                             });
                         } else {
-                            suggestions.append('<div class="list-group-item">Aucun résultat</div>');
+                            suggestions.show();
+                            suggestions.append('<div class="suggestion-empty">Aucun personnel trouvé</div>');
                         }
 
                         if (matchExact) {
-                            suggestions.empty(); // ne pas afficher si match exact
-                            filtrerListe(query); // filtrage automatique
+                            suggestions.hide().empty();
+                            filtrerListe(query);
                         }
                     }
                 });
             } else {
-                $("#suggestions").empty();
+                $("#suggestions").hide().empty();
                 filtrerListe(query);
             }
         });
 
-        $(document).on("click", ".suggestion-item", function () {
+        $(document).on("click", ".suggestion-item", function (e) {
+            e.preventDefault();
             let selectedName = $(this).data("name");
             $("#PersonnelNom").val(selectedName);
-            $("#suggestions").empty();
+            $("#suggestions").hide().empty();
             filtrerListe(selectedName);
         });
 
         $(document).click(function (e) {
             if (!$(e.target).closest("#PersonnelNom, #suggestions").length) {
-                $("#suggestions").empty();
+                $("#suggestions").hide().empty();
             }
         });
     });

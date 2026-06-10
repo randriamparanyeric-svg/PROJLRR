@@ -4,98 +4,160 @@
     ViewData["Title"] = "Liste des personnels";
 }
 
+<link rel="stylesheet" href="~/css/styleindex.css" />
+
+<div class="page-container">
+    <div class="list-header-bar">
+        <div>
+            <h2 class="page-title">Liste des personnels</h2>
+            <p class="page-subtitle">Gestion, tri et suivi des membres de l'établissement</p>
+        </div>
+        <div class="action-group">
+            <button class="btn-print" onclick="imprimerTableau()">
+                <i class="fas fa-print"></i> 🖨️ Imprimer la liste
+            </button>
+            <a href="@Url.Action("Create", "Personnels")" class="btn-primary">
+                <i class="fas fa-plus"></i> ➕ Ajouter un personnel
+            </a>
+        </div>
+    </div>
+
+    <div id="tableau" class="table-wrapper">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Num</th>
+                    <th>Matricule</th>
+                    <th>Nom et Prénoms</th>
+                    <th>CIN</th>
+                    <th class="col-contact">Contact</th>
+                    <th>Fonction</th>
+                    <th>Matière</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    var personnelsFiltres = Model.OrderBy(p => p.Matiere).ToList();
+                    int index = 1; 
+                }
+
+                @foreach (var personnel in personnelsFiltres)
+                {
+                    <tr>
+                        <td class="text-bold">@index</td>
+                        <td>@personnel.Matricule</td>
+                        <td class="text-left text-dark">@personnel.NomEtPrenoms</td>
+                        <td class="text-mono">@personnel.Cin</td>
+                        <td class="col-contact text-mono">@personnel.Contact</td>
+                        <td>@personnel.Fonction</td>
+                        <td>@personnel.Matiere</td>
+                    </tr>  
+                    index++; 
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="~/js/sweetalert2.all.min.js"></script>
+
 <script>
+// 1. FONCTION D'IMPRESSION OPTIMISÉE
 function imprimerTableau() {
     var contenu = document.getElementById('tableau').innerHTML;
+    var pageImpression = window.open('', '_blank', 'width=900,height=700');
     
-    var pageImpression = window.open('', '_blank', 'width=800,height=600');
     if (!pageImpression) {
-        alert("Veuillez autoriser les pop-ups pour imprimer.");
+        alert("Veuillez autoriser les pop-ups pour pouvoir imprimer.");
         return;
     }
     
     pageImpression.document.write(`
         <html>
         <head>
-            <title>Impression</title>
+            <title>Impression - Liste des personnels</title>
             <style>
-                body { font-family: Arial, sans-serif; }
-                table { width: 100%; border-collapse: collapse; }
-                th, td { border: 1px solid black; padding: 8px; text-align: center; } 
-                th { background-color: #f2f2f2; }
-                td:nth-child(3){ text-align: left; } 
-                td:nth-child(5), td:nth-child(4) { width: 1px; white-space: nowrap; } 
-                .table-wrapper { margin-top: 20px; }
+                body { font-family: 'Segoe UI', Arial, sans-serif; color: #333; padding: 20px; }
+                h2 { color: #1e3a8a; margin-bottom: 20px; font-size: 22px; border-bottom: 2px solid #1e3a8a; padding-bottom: 8px; }
+                table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+                th, td { border: 1px solid #cbd5e1; padding: 10px 12px; font-size: 13px; text-align: center; } 
+                th { background-color: #f8fafc; color: #1e3a8a; font-weight: bold; text-transform: uppercase; font-size: 11px; }
+                td:nth-child(3) { text-align: left; font-weight: 500; } 
+                td:nth-child(5), td:nth-child(4) { width: 1px; white-space: nowrap; font-family: monospace; } 
+                tr:nth-child(even) { background-color: #f8fafc; }
             </style>
         </head>
         <body>
             <h2>Liste des personnels</h2>
             ${contenu}
         </body>
-        </html>`);
+        </html>
+    `);
 
     pageImpression.document.close();
     pageImpression.focus();
-    setTimeout(() => { pageImpression.print(); pageImpression.close(); }, 500);
+    
+    // Lancement de l'impression après un léger délai pour le rendu
+    setTimeout(() => { 
+        pageImpression.print(); 
+        pageImpression.close(); 
+    }, 400);
 }
+
+// 2. GESTION DES NOTIFICATIONS DE SUCCÈS (SweetAlert2)
+document.addEventListener("DOMContentLoaded", function () {
+    var successMsg = "@Html.Raw(TempData["Success"] ?? "")";
+
+    if (successMsg.trim() !== "") {
+        Swal.fire({
+            icon: 'success',
+            title: 'Opération réussie !',
+            text: successMsg,
+            timer: 3000,
+            showConfirmButton: false,
+            timerProgressBar: true,
+            confirmButtonColor: '#10b981'
+        });
+    }
+});
 </script>
 
-<h2>Liste des personnels</h2>
-
-<link rel="stylesheet" href="~/css/style3.css" />
-<div id="tableau" class="table-wrapper table-responsive">
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Num</th>
-                <th>MATRICULE</th>
-                <th>NOM ET PRÉNOMS</th>
-                <th>CIN</th>
-                <th class="col-contact">CONTACT</th>
-                <th>FONCTION</th>
-                <th>MATIERE</th>
-            </tr>
-        </thead>
-        <tbody>
-            @{
-                // Utilisation des nouveaux noms de propriétés (PascalCase)
-                var personnelsFiltres = Model.OrderBy(p => p.Matiere).ToList();
-                int index = 1; 
-            }
-
-            @foreach (var personnel in personnelsFiltres)
-            {
-                <tr>
-                    <td>@index</td>
-                    <td>@personnel.Matricule</td>
-                    <td>@personnel.NomEtPrenoms</td>
-                    <td>@personnel.Cin</td>
-                    <td class="col-contact">@personnel.Contact</td>
-                    <td>@personnel.Fonction</td>
-                    <td>@personnel.Matiere</td>
-                </tr>  
-                index++; 
-            }
-        </tbody>
-    </table>
-</div>
-
-<button class="btn btn-secondary" onclick="imprimerTableau()">🖨️ Imprimer</button>
-<a href="@Url.Action("Create", "Personnels")" class="btn btn-primary">Ajouter un personnel</a>
- 
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            var successMsg = "@Html.Raw(TempData["Success"])";
-
-            if (successMsg && successMsg.trim() !== "") {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Réussi !',
-                    text: successMsg,
-                    timer: 3000,
-                    showConfirmButton: false,
-                    timerProgressBar: true
-                });
-            }
-        });
-    </script>
+<style>
+    .page-container {
+        padding: 30px;
+        background-color: #f8fafc;
+        min-height: 100vh;
+        font-family: 'Segoe UI', system-ui, sans-serif;
+    }
+    .list-header-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+    .page-title {
+        color: #1e3a8a;
+        font-weight: 700;
+        font-size: 26px;
+        margin: 0 0 4px 0;
+    }
+    .page-subtitle {
+        color: #64748b;
+        font-size: 14px;
+        margin: 0;
+    }
+    .action-group {
+        display: flex;
+        gap: 12px;
+    }
+    /* Classe de pontage pour conserver le bouton d'impression vert du style3.css */
+    .btn-print {
+        composes: button; /* Utilise le style général du bouton configuré précédemment */
+    }
+    .text-bold { font-weight: 600; color: #64748b; }
+    .text-dark { color: #0f172a !important; }
+    .text-left { text-align: left !important; }
+    .text-mono { font-family: monospace; font-size: 13.5px; }
+</style>

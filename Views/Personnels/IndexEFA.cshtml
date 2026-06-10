@@ -1,85 +1,109 @@
 @model IEnumerable<PROJLRR.Models.Personnel>
-
 @{
     Layout = "/Views/Shared/Layout.cshtml";
-    ViewData["Title"] = "Liste des personnels administratif";
+    ViewData["Title"] = "Liste des personnels administratifs";
 }
-<h2>Liste des personnels administratif</h2>
-<link rel="stylesheet" href="~/css/style3.css" />
-<script>
 
-    function imprimerTableau() {
-        var contenu = document.getElementById('tableau').innerHTML;
-        var pageImpression = window.open('', '_blank', 'width=800,height=600');
-        if (!pageImpression) {
-            alert("Veuillez autoriser les pop-ups pour imprimer.");
-            return;
-        }
-        pageImpression.document.write(`
-            <html>
-            <head>
-                <title>Impression</title>
-                <style>
-                    body { font-family: Arial, sans-serif; }
-                    table { width: 100%; border-collapse: collapse; }
-                    th, td { border: 1px solid black; padding: 8px; text-align: center; } 
-                    th { background-color: #f2f2f2; }
-                    td:nth-child(3){ text-align: left; } 
-                    td:nth-child(5), td:nth-child(4) { width: 1px; white-space: nowrap; } 
-                    .table-wrapper { margin-top: 20px; }
-                </style>
-            </head>
-            <body>
-                <h2 align="center">LISTE DES PERSONNELS ADMINISTRATIF</h2>
-                ${contenu}
-            </body>
-            </html>`);
-        pageImpression.document.close();
-        pageImpression.focus();
-        setTimeout(() => { pageImpression.print(); pageImpression.close(); }, 500);
-    }
-</script>
+<link rel="stylesheet" href="~/css/indexEfa.css" />
 
-<div id="tableau" class="table-wrapper table-responsive">
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Num</th>
-                <th>MATRICULE</th>
-                <th>NOM ET PRÉNOMS</th>
-                <th>CIN</th>
-                <th class="col-contact">CONTACT</th>
-                <th>FONCTION</th>
-                <th>BUREAU</th>
-            </tr>
-        </thead>
-        <tbody>
-            @{
-                // Filtrage côté vue (ou via le contrôleur si possible)
-                var personnelsFiltres = Model
-                    .Where(p => p.Fonction != null && p.Fonction.ToUpper() == "PA")
-                    .OrderBy(p => p.Matiere)
-                    .ToList();
+<div class="page-container">
+    <div class="list-header-bar">
+        <div>
+            <h2 class="page-title">Liste des personnels administratifs</h2>
+            <p class="page-subtitle">Gestion, tri et suivi des membres du corps administratif</p>
+        </div>
+        <div class="action-group">
+            <button class="btn-print" onclick="imprimerTableau()">
+                🖨️ Imprimer la liste
+            </button>
+            <a href="@Url.Action("Create", "Personnels")" class="btn-primary">
+                ➕ Ajouter un personnel
+            </a>
+        </div>
+    </div>
 
-                int index = 1;
-            }
-
-            @foreach (var personnel in personnelsFiltres)
-            {
+    <div id="tableau" class="table-wrapper">
+        <table class="table">
+            <thead>
                 <tr>
-                    <td>@index</td>
-                    <td>@personnel.Matricule</td>
-                    <td>@personnel.NomEtPrenoms</td>
-                    <td>@personnel.Cin</td>
-                    <td class="col-contact">@personnel.Contact</td>
-                    <td>@personnel.Fonction</td>
-                    <td>@personnel.Matiere</td>
+                    <th>Num</th>
+                    <th>Matricule</th>
+                    <th>Nom et Prénoms</th>
+                    <th>CIN</th>
+                    <th class="col-contact">Contact</th>
+                    <th>Fonction</th>
+                    <th>Bureau</th>
                 </tr>
-                index++;
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @{
+                    // Filtrage et tri d'origine conservés strictement
+                    var personnelsFiltres = Model
+                        .Where(p => p.Fonction != null && p.Fonction.ToUpper() == "PA")
+                        .OrderBy(p => p.Matiere)
+                        .ToList();
+                        
+                    int index = 1;
+                }
+
+                @foreach (var personnel in personnelsFiltres)
+                {
+                    <tr>
+                        <td class="text-bold">@index</td>
+                        <td>@personnel.Matricule</td>
+                        <td class="text-left text-dark">@personnel.NomEtPrenoms</td>
+                        <td class="text-mono">@personnel.Cin</td>
+                        <td class="col-contact text-mono">@personnel.Contact</td>
+                        
+                        <td>@personnel.Fonction</td>
+                        <td>@personnel.Matiere</td>
+                    </tr>
+                    index++;
+                }
+            </tbody>
+        </table>
+    </div>
 </div>
 
-<button class="btn btn-secondary" onclick="imprimerTableau()">🖨️ Imprimer</button>
-<a href="@Url.Action("Create", "Personnels")" class="btn btn-primary">Ajouter un personnel</a>
+<script>
+// FONCTION D'IMPRESSION OPTIMISÉE (Rendu premium sur papier)
+function imprimerTableau() {
+    var contenu = document.getElementById('tableau').innerHTML;
+    var pageImpression = window.open('', '_blank', 'width=900,height=700');
+    
+    if (!pageImpression) {
+        alert("Veuillez autoriser les pop-ups pour pouvoir imprimer.");
+        return;
+    }
+    
+    pageImpression.document.write(`
+        <html>
+        <head>
+            <title>Impression - Personnels Administratifs</title>
+            <style>
+                body { font-family: 'Segoe UI', Arial, sans-serif; color: #333; padding: 20px; }
+                h2 { color: #1e3a8a; margin-bottom: 20px; font-size: 22px; border-bottom: 2px solid #1e3a8a; padding-bottom: 8px; text-transform: uppercase; }
+                table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+                th, td { border: 1px solid #cbd5e1; padding: 10px 12px; font-size: 13px; text-align: center; } 
+                th { background-color: #f8fafc; color: #1e3a8a; font-weight: bold; text-transform: uppercase; font-size: 11px; }
+                td:nth-child(3) { text-align: left; font-weight: 500; } 
+                td:nth-child(5), td:nth-child(4) { width: 1px; white-space: nowrap; font-family: monospace; } 
+                tr:nth-child(even) { background-color: #f8fafc; }
+            </style>
+        </head>
+        <body>
+            <h2 align="center">LISTE DES PERSONNELS ADMINISTRATIFS</h2>
+            ${contenu}
+        </body>
+        </html>
+    `);
+
+    pageImpression.document.close();
+    pageImpression.focus();
+    
+    setTimeout(() => { 
+        pageImpression.print(); 
+        pageImpression.close(); 
+    }, 400);
+}
+</script>
