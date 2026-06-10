@@ -83,7 +83,7 @@
 <script src="~/js/jquery-3.6.0.min.js"></script>
 
 <script>
-    function imprimerTableau() {
+   function imprimerTableau() {
         const contenu = document.getElementById('tableau').innerHTML;
         const pageImpression = window.open('', '_blank', 'width=1000,height=750');
         
@@ -99,8 +99,20 @@
                 <meta charset="UTF-8">
                 <title>Registre des Décharges</title>
                 <style>
-                    body { font-family: 'Segoe UI', Arial, sans-serif; margin: 30px; color: #0f172a; background: #fff; }
-                    h2 { text-align: center; font-size: 18px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #0f172a; padding-bottom: 8px; margin-bottom: 20px; }
+                    /* L'échappement @@ gère la confusion avec le moteur Razor */
+                    @@page { 
+                        margin: 0; 
+                    }
+                    
+                    body { 
+                        font-family: 'Segoe UI', Arial, sans-serif; 
+                        margin: 0; 
+                        padding: 0; 
+                        color: #0f172a; 
+                        background: #fff; 
+                    }
+                    
+                    h2 { text-align: center; font-size: 18px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #0f172a; padding-bottom: 8px; margin-top: 20px; margin-bottom: 20px; }
                     table { width: 100%; border-collapse: collapse; table-layout: fixed; }
                     th, td { border: 1px solid #94a3b8; padding: 10px; font-size: 12px; vertical-align: middle; text-align: center; word-wrap: break-word; }
                     th { background-color: #f1f5f9; font-weight: bold; color: #334155; }

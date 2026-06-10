@@ -9,7 +9,17 @@
 <link rel="stylesheet" href="~/css/select2.min.css" />
 
 <style>
-    /* Ajustement pour que Select2 ressemble aux inputs Bootstrap */
+    /* 1. FORCE LE MASQUAGE DE L'INPUT D'ORIGINE (Anti-doublon Bootstrap) */
+    select.select2-hidden-accessible {
+        display: none !important;
+        opacity: 0 !important;
+        position: absolute !important;
+        width: 1px !important;
+        height: 1px !important;
+        overflow: hidden !important;
+    }
+
+    /* 2. Ajustement design Select2 pour coller à Bootstrap */
     .select2-container--default .select2-selection--single {
         height: 38px;
         border: 1px solid #ced4da;
@@ -66,7 +76,7 @@
                 <div id="articles-container">
                     <div class="article-row row g-2 align-items-center mb-2">
                         <div class="col-12 col-sm-6">
-                            <select class="form-select article-select" name="Articles[0].ArticleNom" required>
+                            <select class="form-control article-select" name="Articles[0].ArticleNom" required>
                                 <option value="">Chargement des articles...</option>
                             </select>
                         </div>
@@ -125,7 +135,7 @@
 <script>
 $(document).ready(function () {
     
-    // --- 1. NOTIFICATIONS SWEETALERT2 AU CHARGEMENT ---
+    // --- 1. NOTIFICATIONS SWEETALERT2 ---
     @if (TempData["SuccessMessage"] != null)
     {
         <text>
@@ -138,9 +148,7 @@ $(document).ready(function () {
             timer: 2000,
             timerProgressBar: true,
             showConfirmButton: false,
-            customClass: { 
-                popup: 'rounded-4 shadow border border-success' 
-            }
+            customClass: { popup: 'rounded-4 shadow border border-success' }
         });
         </text>
     }
@@ -161,8 +169,9 @@ $(document).ready(function () {
         </text>
     }
 
-    // --- 2. LOGIQUE MÉTIER ---
+    // --- 2. LOGIQUE ARTICLES ---
     let articleData = []; 
+    $("#add-article").prop('disabled', true).text("Chargement des articles...");
 
     function chargerHistorique(nom) {
         if (!nom || nom.length < 2) { 
@@ -187,16 +196,25 @@ $(document).ready(function () {
         });
     }
 
+    // Nettoyage radical et initialisation propre
     function populateSelect(selectElement) {
+        if (selectElement.hasClass("select2-hidden-accessible")) {
+            selectElement.select2("destroy");
+        }
+        
+        // Supprime TOUS les doublons visuels générés juste à côté
+        selectElement.nextAll('.select2-container').remove();
+
         selectElement.empty().append('<option value="">Rechercher un article...</option>');
         articleData.forEach(function (article) {
             let label = article.nom + ' (' + article.quantite + ' ' + article.unite + ')';
             selectElement.append(`<option value="${article.nom}" data-unite="${article.unite}">${label}</option>`);
         });
         
+        // Initialisation standard
         selectElement.select2({
             width: '100%',
-            dropdownParent: $('#articles-container') 
+            placeholder: "Rechercher un article..."
         });
     }
 
@@ -207,6 +225,10 @@ $(document).ready(function () {
             success: function (data) {
                 articleData = data;
                 populateSelect($(".article-select").first());
+                $("#add-article").prop('disabled', false).text("+ Ajouter un article");
+            },
+            error: function() {
+                $("#add-article").text("Erreur de chargement");
             }
         });
     }
@@ -218,7 +240,7 @@ $(document).ready(function () {
         let newRow = `
         <div class="article-row row g-2 align-items-center mb-2">
             <div class="col-12 col-sm-6">
-                <select class="form-select article-select" name="Articles[${articleIndex}].ArticleNom" required></select>
+                <select class="form-control article-select" name="Articles[${articleIndex}].ArticleNom" required></select>
             </div>
             <div class="col-4 col-sm-2">
                 <input type="number" class="form-control" name="Articles[${articleIndex}].Quantite" value="1" min="1" required />
@@ -246,6 +268,7 @@ $(document).ready(function () {
         $(this).closest(".article-row").find("input[name$='.Unite']").val(unite);
     });
 
+    // --- 3. RECHERCHE PERSONNEL ---
     $("#PersonnelNom").keyup(function () {
         let query = $(this).val().trim();
         if (query.length >= 2) {  
@@ -280,7 +303,7 @@ $(document).ready(function () {
         chargerHistorique(checkName);
     }
 
-    // --- 3. SIGNATURE ET VALIDATION FORMULAIRE ---
+    // --- 4. SIGNATURE ---
     var canvas = document.getElementById("signature-pad");
     var signaturePad = new SignaturePad(canvas);
 

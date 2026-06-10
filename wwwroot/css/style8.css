@@ -176,7 +176,7 @@
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04);
     overflow: hidden;
     
-    /* 🎯 Centrage automatique et controle dimensionnel */
+    /* Centrage automatique et controle dimensionnel */
     max-width: 1100px;
     margin: 0 auto;
 }
@@ -214,8 +214,8 @@
 .dashboard-data-table tbody tr:hover { background-color: #f1f5f9; }
 
 /* Config Colonnes (Total 100%) */
-.col-perso    { width: 22%; }
-.col-bureau   { width: 15%; }
+.col-perso     { width: 22%; }
+.col-bureau    { width: 15%; }
 .col-matr     { width: 11%; }
 .col-articles { width: 28%; }
 .col-date     { width: 12%; }
@@ -242,11 +242,46 @@
 }
 
 /* ==========================================================
-   RESPONSIVE MODES
+   RESPONSIVE MODES (MIS À JOUR & SÉCURISÉ POUR MOBILE)
    ========================================================== */
 @media screen and (max-width: 900px) {
-    .modern-table-card { overflow-x: auto; }
-    .dashboard-data-table { min-width: 850px; }
-    .control-panel { flex-direction: column; align-items: stretch; }
-    .search-box-container { max-width: 100%; }
+    .modern-table-card { 
+        overflow-x: auto; 
+        -webkit-overflow-scrolling: touch; 
+    }
+    .dashboard-data-table { 
+        min-width: 850px; /* Conserve la structure Excel sans écraser le texte */
+    }
+    .control-panel { 
+        flex-direction: column; 
+        align-items: stretch; 
+        gap: 16px; /* Espace vertical garanti entre la recherche et les boutons */
+    }
+    .search-box-container { 
+        max-width: 100%; 
+        width: 100%;
+    }
+}
+
+@media screen and (max-width: 576px) {
+    .dashboard-container {
+        padding: 15px 10px; /* Moins de marges perdues sur petit écran */
+    }
+    .control-panel {
+        padding: 14px 16px;
+    }
+    .action-buttons-group {
+        flex-direction: column; /* Aligne les boutons l'un en dessous de l'autre */
+        gap: 10px;
+        width: 100%;
+    }
+    .btn-modern {
+        width: 100%; /* Les boutons occupent toute la largeur pour éviter le rognage du texte */
+        justify-content: center;
+        box-sizing: border-box;
+        padding: 12px 14px; /* Plus confortable pour le clic tactile */
+    }
+    .page-main-title {
+        font-size: 19px;
+    }
 }
