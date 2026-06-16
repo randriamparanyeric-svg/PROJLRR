@@ -134,7 +134,7 @@
     border: 1px solid var(--grid-color) !important; 
 }
 
-/* Alternance douce des lignes */
+/* Alternance douce des lignes standard */
 .dashboard-data-table tbody tr:nth-child(even) {
     background-color: #f8fafc;
 }
@@ -145,12 +145,13 @@
 }
 
 /* ==========================================================
-   GESTION PROPORTIONNELLE DES 4 COLONNES (Vue Articles)
+   GESTION PROPORTIONNELLE DES 5 COLONNES (Vue Articles)
    ========================================================== */
-.col-num      { width: 10%; }
-.col-nom      { width: 55%; }
-.col-quantite { width: 20%; }
-.col-unite    { width: 15%; }
+.col-num      { width: 8%; }
+.col-nom      { width: 44%; }
+.col-quantite { width: 18%; }
+.col-stocksec { width: 18%; }
+.col-unite    { width: 12%; }
 
 /* Classes utilitaires d'alignement et typographie */
 .text-left { text-align: left !important; }
@@ -177,6 +178,20 @@
     border: 1px solid #cbd5e1;
 }
 
+/* 🚨 STYLE GESTION DES ALERTES STOCKS (Nouveau) */
+.row-stock-alert {
+    background-color: #fef2f2 !important; /* Teinte pastel rouge très douce */
+}
+
+.row-stock-alert:hover {
+    background-color: #fee2e2 !important; /* Légèrement plus foncé au survol */
+}
+
+.text-danger {
+    color: #dc2626 !important;           /* Rouge pro pour le texte critique */
+    font-weight: 700;
+}
+
 /* ==========================================================
    RESPONSIVE & IMPRESSION SÉCURISÉE (AVEC GRILLE)
    ========================================================== */
@@ -185,7 +200,7 @@
         overflow-x: auto; 
     }
     .dashboard-data-table { 
-        min-width: 750px;       /* Évite l'écrasement des cellules sur mobile */
+        min-width: 800px;       /* Ajusté à 800px pour accueillir confortablement les 5 colonnes */
     }
 }
 

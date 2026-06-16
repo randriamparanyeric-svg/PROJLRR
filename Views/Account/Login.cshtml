@@ -11,12 +11,29 @@
             <p>Accédez pour commencer</p>
         </div>
 
-        <div class="login-info-box">
-            <p>
-                💡 <strong>Note :</strong> Utilisez votre numéro de <strong>CIN</strong> à la fois comme <em>Nom d'utilisateur</em> et comme <em>Mot de passe</em>.
-            </p>
-        </div>
+     <style>
+    @@keyframes loginBoxPulse {
+        0%, 100% { 
+            opacity: 1; 
+            transform: scale(1);
+        }
+        50% { 
+            opacity: 0.75; 
+            transform: scale(0.98); /* Accentuation légère du recul pour s'adapter à la vitesse */
+        }
+    }
 
+    .login-info-box {
+        /* Vitesse passée à 0.2 seconde (au lieu de 1.5s) */
+        animation: loginBoxPulse 0.4s infinite ease-in-out;
+    }
+</style>
+
+<div class="login-info-box">
+    <p>
+        💡 <strong>Note :</strong> Utilisez votre numéro de <strong>CIN</strong> à la fois comme <em>Nom d'utilisateur</em> et comme <em>Mot de passe</em>.
+    </p>
+</div>
         <form asp-action="Login" method="post">
             @Html.AntiForgeryToken()
 

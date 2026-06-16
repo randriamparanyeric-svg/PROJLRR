@@ -320,7 +320,50 @@
         </div>
     </form>
 </div>
+<style>
+    @@keyframes modernPulse {
+        0%, 100% { 
+            opacity: 1; 
+            transform: scale(1); 
+        }
+        50% { 
+            opacity: 0.70; 
+            transform: scale(0.98); 
+        }
+    }
+    .animated-banner-modern {
+        /* ⏱️ Vitesse augmentée au maximum (0.6 seconde) */
+        animation: modernPulse 0.4s infinite ease-in-out; 
+    }
+</style>
 
+<div class="info-banner-modern animated-banner-modern" style="
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    background-color: #fffbeb;
+    border: 1px solid #fef08a;
+    border-left: 4px solid #eab308;
+    padding: 14px 18px;
+    border-radius: 8px;
+    margin: 20px auto;
+    max-width: 750px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+">
+    <svg style="width: 22px; height: 22px; color: #ca8a04; flex-shrink: 0;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 111.063.852l-.708 2.836a.75.75 0 001.063.852l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+    </svg>
+    
+    <span style="color: #713f12; font-size: 14px; font-weight: 500; line-height: 1.5; text-align: center;">
+        Pour toute modification ou mise à jour de vos renseignements, veuillez cliquer sur le bouton jaune 
+        <strong style="background-color: #fef08a; padding: 3px 8px; border-radius: 5px; color: #854d0e; font-size: 13px; border: 1px solid #fde047; font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,0.05); display: inline-block; margin: 0 3px;">
+            ✏️ Modifier
+        </strong> 
+        situé en bas de la page.
+    </span>
+</div>
 <div id="resultsContainer">
     @if (Model != null && Model.Any())
     {
@@ -334,49 +377,49 @@
                                 <img src="@Url.Content(p.Photo)" class="photo-personnel" alt="Photo de @p.NomEtPrenoms" width="150" height="200" />
                             </td>
                         </tr>
-                        <tr><th>Matricule :</th> <td class="Matricule">@p.Matricule</td></tr>
+                        <tr><th>MATRICULE :</th> <td class="Matricule">@p.Matricule</td></tr>
                         <tr><th>NOM ET PRÉNOMS :</th> <td class="nom_prenoms">@p.NomEtPrenoms</td></tr>
-                        <tr><th>Cin :</th> <td class="Cin">@p.Cin</td></tr>
-                        <tr><th>DÉCISION :</th> <td>@p.Dec</td></tr>
-                        <tr><th>Corps :</th> <td class="Corps">@p.Corps</td></tr>
-                        <tr><th>Matiere OU BUREAU :</th> <td class="Matiere">@p.Matiere</td></tr>
+                        <tr><th>CIN :</th> <td class="Cin">@p.Cin</td></tr>
+                        <tr><th>DÉCISION ou NOTE DE SERVICE :</th> <td>@p.Dec</td></tr>
+                        <tr><th>CORPS ET GRADE :</th> <td class="Corps">@p.Corps</td></tr>
+                        <tr><th>MATIRE OU BUREAU :</th> <td class="Matiere">@p.Matiere</td></tr>
                         <tr><th>DATE DE NAISSANCE :</th> <td class="Datenaiss">@p.Datenaiss</td></tr>
                         <tr><th>LIEU DE NAISSANCE :</th> <td class="lieunaiss">@p.Lieudenaiss</td></tr>
-                        <tr><th>Sexe :</th> <td>@p.Sexe</td></tr>
-                        <tr><th>Statut :</th> <td>@p.Statut</td></tr>
-                        <tr><th>DATE D'ENTRÉE :</th> <td class="Datedentre">@p.Datedentre</td></tr>
-                        <tr><th>DATE PRISE :</th> <td class="Datedeprise">@p.Datedeprise</td></tr>
+                        <tr><th>SEXE :</th> <td>@p.Sexe</td></tr>
+                        <tr><th>STATUT :</th> <td>@p.Statut</td></tr>
+                        <tr><th>DATE D'ENTRÉE DANS L'ADMINISTRATION  :</th> <td class="Datedentre">@p.Datedentre</td></tr>
+                        <tr><th>DATE DE PRISE DE SERVICE AU LYCEE RAHERIVELO RAMAMONJY :</th> <td class="Datedeprise">@p.Datedeprise</td></tr>
                         <tr><th>DIPLÔME ACADÉMIQUE :</th> <td class="Diplomeac">@p.Diplomeac</td></tr>
                         <tr><th>DIPLÔME PÉDAGOGIQUE :</th> <td class="Diplomeped">@p.Diplomeped</td></tr>
-                        <tr><th>Contact :</th> <td class="Contact">@p.Contact</td></tr>
-                        <tr><th>Fonction :</th> <td class="Fonction">@p.Fonction</td></tr>
-                        <tr><th>1°AVANCEMENT:</th> <td class="Perav">@p.Perav</td></tr>
-                        <tr><th>2°AVANCEMENT:</th> <td class="Demav">@p.Demav</td></tr>
-                        <tr><th>3°AVANCEMENT:</th> <td class="Temav">@p.Temav</td></tr>
-                        <tr><th>4°AVANCEMENT:</th> <td class="Qemav">@p.Qemav</td></tr>
-                        <tr><th>5°AVANCEMENT:</th> <td class="Cemav">@p.Cemav</td></tr>
-                        <tr><th>6°AVANCEMENT:</th> <td class="Semav">@p.Semav</td></tr>
-                        <tr><th>7°AVANCEMENT:</th> <td class="Sepmav">@p.Sepmav</td></tr>
-                        <tr><th>8°AVANCEMENT:</th> <td class="Hemav">@p.Hemav</td></tr>
-                        <tr><th>9°AVANCEMENT:</th> <td class="Nemav">@p.Nemav</td></tr>
-                        <tr><th>10°AVANCEMENT:</th> <td class="Dxemav">@p.Dxemav</td></tr>
-                        <tr><th>11°AVANCEMENT:</th> <td class="Onemav">@p.Onemav</td></tr>
-                        <tr><th>12°AVANCEMENT:</th> <td class="Dou">@p.Dou</td></tr>
-                        <tr><th>13°AVANCEMENT:</th> <td class="Trei">@p.Trei</td></tr>
-                        <tr><th>14°AVANCEMENT:</th> <td class="Quat">@p.Quat</td></tr>
-                        <tr><th>15°AVANCEMENT:</th> <td class="Quin">@p.Quin</td></tr>
-                        <tr><th>16°AVANCEMENT:</th> <td class="Seiz">@p.Seiz</td></tr>
+                        <tr><th>CONTACT :</th> <td class="Contact">@p.Contact</td></tr>
+                        <tr><th>FONCTION :</th> <td class="Fonction">@p.Fonction</td></tr>
+                        <tr><th>N° DE L'ACTE DU 1°AVANCEMENT:</th> <td class="Perav">@p.Perav</td></tr>
+                        <tr><th>N° DE L'ACTE DU 2°AVANCEMENT:</th> <td class="Demav">@p.Demav</td></tr>
+                        <tr><th>N° DE L'ACTE DU 3°AVANCEMENT:</th> <td class="Temav">@p.Temav</td></tr>
+                        <tr><th>N° DE L'ACTE DU 4°AVANCEMENT:</th> <td class="Qemav">@p.Qemav</td></tr>
+                        <tr><th>N° DE L'ACTE DU 5°AVANCEMENT:</th> <td class="Cemav">@p.Cemav</td></tr>
+                        <tr><th>N° DE L'ACTE DU 6°AVANCEMENT:</th> <td class="Semav">@p.Semav</td></tr>
+                        <tr><th>N° DE L'ACTE DU 7°AVANCEMENT:</th> <td class="Sepmav">@p.Sepmav</td></tr>
+                        <tr><th>N° DE L'ACTE DU 8°AVANCEMENT:</th> <td class="Hemav">@p.Hemav</td></tr>
+                        <tr><th>N° DE L'ACTE DU 9°AVANCEMENT:</th> <td class="Nemav">@p.Nemav</td></tr>
+                        <tr><th>N° DE L'ACTE DU 10°AVANCEMENT:</th> <td class="Dxemav">@p.Dxemav</td></tr>
+                        <tr><th>N° DE L'ACTE DU 11°AVANCEMENT:</th> <td class="Onemav">@p.Onemav</td></tr>
+                        <tr><th>N° DE L'ACTE DU 12°AVANCEMENT:</th> <td class="Dou">@p.Dou</td></tr>
+                        <tr><th>N° DE L'ACTE DU 13°AVANCEMENT:</th> <td class="Trei">@p.Trei</td></tr>
+                        <tr><th>N° DE L'ACTE DU 14°AVANCEMENT:</th> <td class="Quat">@p.Quat</td></tr>
+                        <tr><th>N° DE L'ACTE DU 15°AVANCEMENT:</th> <td class="Quin">@p.Quin</td></tr>
+                        <tr><th>N° DE L'ACTE DU 16°AVANCEMENT:</th> <td class="Seiz">@p.Seiz</td></tr>
                     </tbody>
                 </table>
                 <div class="card-actions">
                     @if (isAdmin)
                     {
-                        <button type="button" class="btn-edit btn-edit-card" data-id="@p.Num">Modifier</button>
+                        <button type="button" class="btn-edit btn-edit-card" data-id="@p.Num">✏️Modifier</button>
                         <button type="button" class="btn-delete btn-delete-card" data-id="@p.Num">🗑 Archiver</button>
                     }
                     else
                     {
-                        <button type="button" class="btn-edit btn-edit-card" data-id="@p.Num">Modifier</button>
+                        <button type="button" class="btn-edit btn-edit-card" data-id="@p.Num">✏️Modifier</button>
                         <button type="button" class="btn-delete" disabled style="background-color: #e9ecef; color: #777; border: none; padding: 10px 15px; cursor: not-allowed; opacity: 0.6; border-radius: 8px;">🗑 Archiver</button>
                     }
                 </div>
@@ -388,7 +431,7 @@
 <div class="modal-overlay" id="modalOverlay"></div>
 
 <div id="editPersonnelForm">
-    <h3 style="text-align:center; margin-bottom:25px; font-weight: 700; color: #1e293b;">Modifier le personnel</h3>
+    <h3 style="text-align:center; margin-bottom:25px; font-weight: 700; color: #1e293b;">Modifier renseignement du personnel</h3>
     
     <form id="updateForm" enctype="multipart/form-data">
         <input type="hidden" name="Num" id="editNum" />
@@ -407,11 +450,11 @@
         <div class="form-group"><label>Nom & Prénoms:</label> <input type="text" id="editNomEtPrenoms" name="NomEtPrenoms" required /></div>
         
         <div class="form-group"><label>Cin:</label> <input type="text" id="editCin" name="Cin" /></div>
-        <div class="form-group"><label>Décision:</label> <input type="text" id="editDec" name="Dec" /></div>
+        <div class="form-group"><label>Décision ou Note de Service:</label> <input type="text" id="editDec" name="Dec" /></div>
         
-        <div class="form-group"><label>Corps:</label> <input type="text" id="editCorps" name="Corps" /></div>
+        <div class="form-group"><label>Corps et Grade:</label> <input type="text" id="editCorps" name="Corps" /></div>
         <div class="form-group">
-            <label>Matière:</label> 
+            <label>Matière ou Bureau:</label> 
             <select id="editMatiere" name="Matiere" class="form-control">
                 <option value="ALL">ALLEMAND</option>
                 <option value="ANG">ANGLAIS</option>
@@ -455,8 +498,8 @@
         <div class="form-group"><label>Sexe:</label> <select id="editSexe" name="Sexe"><option value="H">HOMME</option><option value="F">FEMME</option></select></div>
         <div class="form-group"><label>Statut:</label> <select id="editStatut" name="Statut"><option value="EFA">EFA</option><option value="FONCTIONNAIRE">FONCTIONNAIRE</option></select></div>
         
-        <div class="form-group"><label>Date Entrée:</label> <input type="date" id="editDatedentre" name="Datedentre" /></div>
-        <div class="form-group"><label>Date Prise Service:</label> <input type="date" id="editDatedeprise" name="Datedeprise" /></div>
+        <div class="form-group"><label>Date d'Entrée dans l'administration:</label> <input type="date" id="editDatedentre" name="Datedentre" /></div>
+        <div class="form-group"><label>Date de Prise de Service au Lycee Raherivelo R.:</label> <input type="date" id="editDatedeprise" name="Datedeprise" /></div>
         
         <div class="form-group mb-3">
             <label for="editDiplomeac">Diplôme Académique le plus élevé</label>
@@ -468,6 +511,7 @@
                 <option value="LICENCE">LICENCE(BACC+3)</option>
                 <option value="MAITRISE">MAITRISE(BACC+4)</option>
                 <option value="MASTER">MASTER(BACC+5)</option>
+                <option value="DOCTORAT">DOCTORAT</option>
             </select>
         </div>
         <div class="form-group mb-3">
@@ -485,22 +529,22 @@
         
         <div class="section-divider"><h4>Détails des Avancements</h4></div>
 
-        <div class="form-group"><label>1°Av:</label> <input type="text" id="editPerav" name="Perav" /></div>
-        <div class="form-group"><label>2°Av:</label> <input type="text" id="editDemav" name="Demav" /></div>
-        <div class="form-group"><label>3°Av:</label> <input type="text" id="editTemav" name="Temav" /></div>
-        <div class="form-group"><label>4°Av:</label> <input type="text" id="editQemav" name="Qemav" /></div>
-        <div class="form-group"><label>5°Av:</label> <input type="text" id="editCemav" name="Cemav" /></div>
-        <div class="form-group"><label>6°Av:</label> <input type="text" id="editSemav" name="Semav" /></div>
-        <div class="form-group"><label>7°Av:</label> <input type="text" id="editSepmav" name="Sepmav" /></div>
-        <div class="form-group"><label>8°Av:</label> <input type="text" id="editHemav" name="Hemav" /></div>
-        <div class="form-group"><label>9°Av:</label> <input type="text" id="editNemav" name="Nemav" /></div>
-        <div class="form-group"><label>10°Av:</label> <input type="text" id="editDxemav" name="Dxemav" /></div>
-        <div class="form-group"><label>11°Av:</label> <input type="text" id="editOnemav" name="Onemav" /></div>
-        <div class="form-group"><label>12°Av:</label> <input type="text" id="editDou" name="Dou" /></div>
-        <div class="form-group"><label>13°Av:</label> <input type="text" id="editTrei" name="Trei" /></div>
-        <div class="form-group"><label>14°Av:</label> <input type="text" id="editQuat" name="Quat" /></div>
-        <div class="form-group"><label>15°Av:</label> <input type="text" id="editQuin" name="Quin" /></div>
-        <div class="form-group"><label>16°Av:</label> <input type="text" id="editSeiz" name="Seiz" /></div>
+        <div class="form-group"><label>N° de l'acte du 1°Av:</label> <input type="text" id="editPerav" name="Perav" /></div>
+        <div class="form-group"><label>N° de l'acte du 2°Av:</label> <input type="text" id="editDemav" name="Demav" /></div>
+        <div class="form-group"><label>N° de l'acte du 3°Av:</label> <input type="text" id="editTemav" name="Temav" /></div>
+        <div class="form-group"><label>N° de l'acte du 4°Av:</label> <input type="text" id="editQemav" name="Qemav" /></div>
+        <div class="form-group"><label>N° de l'acte du 5°Av:</label> <input type="text" id="editCemav" name="Cemav" /></div>
+        <div class="form-group"><label>N° de l'acte du 6°Av:</label> <input type="text" id="editSemav" name="Semav" /></div>
+        <div class="form-group"><label>N° de l'acte du 7°Av:</label> <input type="text" id="editSepmav" name="Sepmav" /></div>
+        <div class="form-group"><label>N° de l'acte du 8°Av:</label> <input type="text" id="editHemav" name="Hemav" /></div>
+        <div class="form-group"><label>N° de l'acte du 9°Av:</label> <input type="text" id="editNemav" name="Nemav" /></div>
+        <div class="form-group"><label>N° de l'acte du 10°Av:</label> <input type="text" id="editDxemav" name="Dxemav" /></div>
+        <div class="form-group"><label>N° de l'acte du 11°Av:</label> <input type="text" id="editOnemav" name="Onemav" /></div>
+        <div class="form-group"><label>N° de l'acte du 12°Av:</label> <input type="text" id="editDou" name="Dou" /></div>
+        <div class="form-group"><label>N° de l'acte du 13°Av:</label> <input type="text" id="editTrei" name="Trei" /></div>
+        <div class="form-group"><label>N° de l'acte du 14°Av:</label> <input type="text" id="editQuat" name="Quat" /></div>
+        <div class="form-group"><label>N° de l'acte du 15°Av:</label> <input type="text" id="editQuin" name="Quin" /></div>
+        <div class="form-group"><label>N° de l'acte du 16°Av:</label> <input type="text" id="editSeiz" name="Seiz" /></div>
         
         <div class="form-actions">
             <button type="submit" class="btn-save-modal">Enregistrer</button>

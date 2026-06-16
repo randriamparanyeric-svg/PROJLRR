@@ -1,12 +1,14 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations; // 1. Ajoutez cet import
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema; // Ajouté pour l'attribut Table
 
 namespace PROJLRR.Models;
 
+[Table("BASE")] // Indique à EF Core que ce modèle correspond à la table BASE de SQLite
 public partial class Personnel
 {
-    [Key] // 2. Ajoutez cet attribut pour indiquer la clé primaire
+    [Key] 
     public int Num { get; set; }
 
     public string? Matricule { get; set; }
@@ -74,4 +76,9 @@ public partial class Personnel
     public string? Fonction { get; set; }
 
     public string? Photo { get; set; }
+
+    // ==========================================================================
+    // COLONNE DE SYNCHRONISATION : Capture la date et l'heure de modification
+    // ==========================================================================
+    public DateTime? DateModif { get; set; }
 }

@@ -8,6 +8,64 @@
 
 <link rel="stylesheet" href="~/css/stylesp.css" />
 
+<style>
+    .search-wrapper {
+        position: relative;
+        margin-bottom: 20px;
+        max-width: 1000px;
+        margin: 0 auto 20px auto;
+    }
+    .search-input {
+        width: 100%;
+        padding: 12px 16px 12px 45px;
+        font-size: 14px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        background-color: #ffffff;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        outline: none;
+        transition: all 0.2s ease;
+    }
+    .search-input:focus {
+        border-color: #0284c7;
+        box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+    }
+    .search-icon {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 16px;
+    }
+    .btn-action-edit {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #0284c7;
+        background-color: #f0f9ff;
+        border: 1px solid #bae6fd;
+        border-radius: 4px;
+        text-decoration: none;
+        transition: all 0.15s ease;
+    }
+    .btn-action-edit:hover {
+        color: #ffffff;
+        background-color: #0284c7;
+        border-color: #0284c7;
+    }
+    /* Ajustement des 6 colonnes pour l'écran */
+    .col-num { width: 6%; }
+    .col-nom { width: 38%; }
+    .col-quantite { width: 16%; }
+    .col-stocksec { width: 16%; }
+    .col-unite { width: 10%; }
+    .col-actions { width: 14%; }
+</style>
+
 <div class="dashboard-container">
     
     <div class="dashboard-header">
@@ -25,14 +83,21 @@
         </div>
     </div>
 
+    <div class="search-wrapper no-print">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="tableSearch" onkeyup="filtrerArticles()" placeholder="Rechercher un article par son nom..." class="search-input" />
+    </div>
+
     <div id="tableau" class="modern-table-card">
-        <table class="dashboard-data-table">
+        <table class="dashboard-data-table" id="articleTable">
             <thead>
                 <tr>
                     <th class="col-num">NUM</th>
                     <th class="col-nom">NOM DE L'ARTICLE</th>
                     <th class="col-quantite">QUANTITÉ RESTANTE</th>
+                    <th class="col-stocksec">STOCK SÉCURITÉ</th>
                     <th class="col-unite">UNITÉ</th>
+                    <th class="col-actions no-print">ACTIONS</th>
                 </tr>
             </thead>
             <tbody>
@@ -43,13 +108,23 @@
 
                 @foreach (var article in articlesTries)
                 {
-                    <tr>
+                    bool estEnAlerte = article.Quantite <= article.StockSec;
+                    
+                    <tr class="@(estEnAlerte ? "row-stock-alert" : "")">
                         <td class="col-num font-mono text-muted">@index</td>
-                        <td class="col-nom font-weight-bold text-dark text-left">@article.Nom</td>
+                        <td class="col-nom font-weight-bold text-dark text-left search-target">@article.Nom</td>
                         <td class="col-quantite font-mono font-weight-bold">
-                            <span class="quantity-value">@article.Quantite</span>
+                            <span class="quantity-value @(estEnAlerte ? "text-danger" : "")">@article.Quantite</span>
+                        </td>
+                        <td class="col-stocksec font-mono text-muted font-weight-bold">
+                            <span class="stocksec-value">@article.StockSec</span>
                         </td>
                         <td class="col-unite"><span class="unit-badge">@article.Unite</span></td>
+                        <td class="col-actions no-print">
+                            <a href="@Url.Action("ModifArticle", "Article", new { id = article.Id })" class="btn-action-edit">
+                                ✏️ Modifier
+                            </a>
+                        </td>
                     </tr>
                     index++;
                 }
@@ -58,9 +133,74 @@
     </div>
 </div>
 
+<script src="~/js/sweetalert2.all.min.js"></script>
 <script>
+// 🔍 Filtrage dynamique en JavaScript (Instant et Fluide)
+function filtrerArticles() {
+    const input = document.getElementById("tableSearch");
+    const filter = input.value.toUpperCase();
+    const table = document.getElementById("articleTable");
+    const tr = table.getElementsByTagName("tr");
+
+    for (let i = 1; i < tr.length; i++) {
+        const td = tr[i].getElementsByClassName("search-target")[0];
+        if (td) {
+            const txtValue = td.textContent || td.innerText;
+            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                tr[i].style.display = "";
+            } else {
+                tr[i].style.display = "none";
+            }
+        }
+    }
+}
+
+// 🖨️ Impression rectifiée : Uniquement Nom, Quantité Restante et Unité
 function imprimerTableau() {
-    const contenu = document.getElementById('tableau').innerHTML;
+    const table = document.getElementById("articleTable");
+    const tr = table.getElementsByTagName("tr");
+    
+    // Construction d'un tableau HTML propre à la volée pour l'impression
+    let htmlImpression = `
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 50%; text-align: left;">NOM DE L'ARTICLE</th>
+                    <th style="width: 25%;">QUANTITÉ RESTANTE</th>
+                    <th style="width: 25%;">UNITÉ</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    // Parcourt les lignes du tableau original (saute l'en-tête de l'index 0)
+    for (let i = 1; i < tr.length; i++) {
+        // Condition critique : On n'imprime que les lignes visibles (qui respectent la recherche actuelle)
+        if (tr[i].style.display !== "none") {
+            const nom = tr[i].querySelector(".col-nom").innerText;
+            const quantiteSpan = tr[i].querySelector(".quantity-value");
+            const quantite = quantiteSpan.innerText;
+            const unite = tr[i].querySelector(".unit-badge").innerText;
+            
+            // On vérifie si l'élément était en alerte rouge pour appliquer le style à l'impression
+            const estAlerte = quantiteSpan.classList.contains("text-danger");
+            const classeAlerte = estAlerte ? 'class="text-danger"' : '';
+
+            htmlImpression += `
+                <tr>
+                    <td class="text-left" style="font-weight: 600;">${nom}</td>
+                    <td ${classeAlerte} style="font-family: monospace; font-weight: bold;">${quantite}</td>
+                    <td><span class="unit-badge">${unite}</span></td>
+                </tr>
+            `;
+        }
+    }
+
+    htmlImpression += `
+            </tbody>
+        </table>
+    `;
+    
     const pageImpression = window.open('', '_blank', 'width=950,height=750');
     
     if (!pageImpression) {
@@ -73,7 +213,7 @@ function imprimerTableau() {
         <html lang="fr">
         <head>
             <meta charset="UTF-8">
-            <title>Impression - Liste des Articles</title>
+            <title>Impression - État de l'Inventaire</title>
             <style>
                 body { font-family: 'Segoe UI', Arial, sans-serif; margin: 40px; color: #0f172a; background: #fff; }
                 h2 { text-align: center; font-size: 20px; margin-bottom: 25px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #0f172a; padding-bottom: 10px; }
@@ -81,16 +221,13 @@ function imprimerTableau() {
                 th, td { border: 1px solid #cbd5e1; padding: 10px 12px; text-align: center; font-size: 13px; vertical-align: middle; word-wrap: break-word; }
                 th { background-color: #f8fafc; font-weight: bold; color: #334155; }
                 .text-left { text-align: left; }
-                .col-num { width: 10%; }
-                .col-nom { width: 55%; text-align: left; font-weight: 600; }
-                .col-quantite { width: 20%; font-family: monospace; }
-                .col-unite { width: 15%; }
-                .unit-badge { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+                .unit-badge { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; border: 1px solid #cbd5e1; }
+                .text-danger { color: #dc2626; font-weight: bold; }
             </style>
         </head>
         <body>
             <h2>LISTE INVENTAIRE DES ARTICLES</h2>
-            ${contenu}
+            ${htmlImpression}
         </body>
         </html>
     `);
@@ -104,3 +241,19 @@ function imprimerTableau() {
     }, 350);
 }
 </script>
+
+@if (TempData["Message"] != null)
+{
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            Swal.fire({
+                title: 'Opération réussie !',
+                text: '@Html.Raw(TempData["Message"])',
+                icon: 'success',
+                confirmButtonColor: '#0284c7',
+                timer: 3000,
+                timerProgressBar: true
+            });
+        });
+    </script>
+}

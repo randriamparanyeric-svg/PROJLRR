@@ -118,12 +118,12 @@
                 </div>
 
                 <div class="form-group mb-4">
-                    <label for="CORPS" class="custom-label">Corps</label>
-                    <input type="text" id="CORPS" name="CORPS" class="form-control custom-input" value="@Model.Corps" placeholder="Ex: CONCEPTEURS" />
+                    <label for="CORPS" class="custom-label">Corps et Grade</label>
+                    <input type="text" id="CORPS" name="CORPS" class="form-control custom-input" value="@Model.Corps" placeholder="Ex: CONCEPTEURS 2/1" />
                 </div>
 
                 <div class="form-group mb-4">
-                    <label for="DEC" class="custom-label">Décision</label>
+                    <label for="DEC" class="custom-label">N°Décision ou Note de Service(à préciser)</label>
                     <input type="text" id="DEC" name="DEC" class="form-control custom-input" value="@Model.Dec" />
                 </div>
 
@@ -134,7 +134,7 @@
 </div>
 
                 <div class="form-group mb-4">
-    <label for="DATEDEPRISE" class="custom-label">Date de prise de service au Lycée</label>
+    <label for="DATEDEPRISE" class="custom-label">Date de prise de service au Lycée Raherivelo Ramamonjy</label>
     <input type="date" id="DATEDEPRISE" name="DATEDEPRISE" class="form-control custom-input"
            value="@(DateTime.TryParse(Model.Datedeprise, out var d3) ? d3.ToString("yyyy-MM-dd") : "")" />
 </div>
@@ -152,6 +152,7 @@
                         <option value="LICENCE" selected="@(Model.Diplomeac == "LICENCE" ? "selected" : null)">LICENCE(BACC+3)</option>
                         <option value="MAITRISE" selected="@(Model.Diplomeac == "MAITRISE" ? "selected" : null)">MAITRISE(BACC+4)</option>
                         <option value="MASTER" selected="@(Model.Diplomeac == "MASTER" ? "selected" : null)">MASTER(BACC+5)</option>
+                        <option value="DOCTORAT" selected="@(Model.Diplomeac == "DOCTORAT" ? "selected" : null)">DOCTORAT</option>
                     </select>
                 </div>
 
@@ -168,22 +169,22 @@
 
             <div class="form-section-title">Historique des Avancements d'Échelon</div>
             <div class="form-section advancement-grid">
-                <div class="form-group mb-3"><label for="PERAV" class="custom-label">1° AVANCEMENT</label><input type="text" id="PERAV" name="PERAV" class="form-control custom-input" value="@Model.Perav" /></div>
-                <div class="form-group mb-3"><label for="DEMAV" class="custom-label">2° AVANCEMENT</label><input type="text" id="DEMAV" name="DEMAV" class="form-control custom-input" value="@Model.Demav" /></div>
-                <div class="form-group mb-3"><label for="TEMAV" class="custom-label">3° AVANCEMENT</label><input type="text" id="TEMAV" name="TEMAV" class="form-control custom-input" value="@Model.Temav" /></div>
-                <div class="form-group mb-3"><label for="QEMAV" class="custom-label">4° AVANCEMENT</label><input type="text" id="QEMAV" name="QEMAV" class="form-control custom-input" value="@Model.Qemav" /></div>
-                <div class="form-group mb-3"><label for="CEMAV" class="custom-label">5° AVANCEMENT</label><input type="text" id="CEMAV" name="CEMAV" class="form-control custom-input" value="@Model.Cemav" /></div>
-                <div class="form-group mb-3"><label for="SEMAV" class="custom-label">6° AVANCEMENT</label><input type="text" id="SEMAV" name="SEMAV" class="form-control custom-input" value="@Model.Semav" /></div>
-                <div class="form-group mb-3"><label for="SEPMAV" class="custom-label">7° AVANCEMENT</label><input type="text" id="SEPMAV" name="SEPMAV" class="form-control custom-input" value="@Model.Sepmav" /></div>
-                <div class="form-group mb-3"><label for="HEMAV" class="custom-label">8° AVANCEMENT</label><input type="text" id="HEMAV" name="HEMAV" class="form-control custom-input" value="@Model.Hemav" /></div>
-                <div class="form-group mb-3"><label for="NEMAV" class="custom-label">9° AVANCEMENT</label><input type="text" id="NEMAV" name="NEMAV" class="form-control custom-input" value="@Model.Nemav" /></div>
-                <div class="form-group mb-3"><label for="DXEMAV" class="custom-label">10° AVANCEMENT</label><input type="text" id="DXEMAV" name="DXEMAV" class="form-control custom-input" value="@Model.Dxemav" /></div>
-                <div class="form-group mb-3"><label for="ONEMAV" class="custom-label">11° AVANCEMENT</label><input type="text" id="ONEMAV" name="ONEMAV" class="form-control custom-input" value="@Model.Onemav" /></div>
-                <div class="form-group mb-3"><label for="DOU" class="custom-label">12° AVANCEMENT</label><input type="text" id="DOU" name="DOU" class="form-control custom-input" value="@Model.Dou" /></div>
-                <div class="form-group mb-3"><label for="TREI" class="custom-label">13° AVANCEMENT</label><input type="text" id="TREI" name="TREI" class="form-control custom-input" value="@Model.Trei" /></div>
-                <div class="form-group mb-3"><label for="QUAT" class="custom-label">14° AVANCEMENT</label><input type="text" id="QUAT" name="QUAT" class="form-control custom-input" value="@Model.Quat" /></div>
-                <div class="form-group mb-3"><label for="QUIN" class="custom-label">15° AVANCEMENT</label><input type="text" id="QUIN" name="QUIN" class="form-control custom-input" value="@Model.Quin" /></div>
-                <div class="form-group mb-3"><label for="SEIZ" class="custom-label">16° AVANCEMENT</label><input type="text" id="SEIZ" name="SEIZ" class="form-control custom-input" value="@Model.Seiz" /></div>
+                <div class="form-group mb-3"><label for="PERAV" class="custom-label">N° de l'acte du 1° AVANCEMENT</label><input type="text" id="PERAV" name="PERAV" class="form-control custom-input" value="@Model.Perav" /></div>
+                <div class="form-group mb-3"><label for="DEMAV" class="custom-label">N°de l'acte du 2° AVANCEMENT</label><input type="text" id="DEMAV" name="DEMAV" class="form-control custom-input" value="@Model.Demav" /></div>
+                <div class="form-group mb-3"><label for="TEMAV" class="custom-label">N° de l'acte du 3° AVANCEMENT</label><input type="text" id="TEMAV" name="TEMAV" class="form-control custom-input" value="@Model.Temav" /></div>
+                <div class="form-group mb-3"><label for="QEMAV" class="custom-label">N° de l'acte du 4° AVANCEMENT</label><input type="text" id="QEMAV" name="QEMAV" class="form-control custom-input" value="@Model.Qemav" /></div>
+                <div class="form-group mb-3"><label for="CEMAV" class="custom-label">N° de l'acte du 5° AVANCEMENT</label><input type="text" id="CEMAV" name="CEMAV" class="form-control custom-input" value="@Model.Cemav" /></div>
+                <div class="form-group mb-3"><label for="SEMAV" class="custom-label">N° de l'acte du 6° AVANCEMENT</label><input type="text" id="SEMAV" name="SEMAV" class="form-control custom-input" value="@Model.Semav" /></div>
+                <div class="form-group mb-3"><label for="SEPMAV" class="custom-label">N° de l'acte du 7° AVANCEMENT</label><input type="text" id="SEPMAV" name="SEPMAV" class="form-control custom-input" value="@Model.Sepmav" /></div>
+                <div class="form-group mb-3"><label for="HEMAV" class="custom-label">N° de l'acte du 8° AVANCEMENT</label><input type="text" id="HEMAV" name="HEMAV" class="form-control custom-input" value="@Model.Hemav" /></div>
+                <div class="form-group mb-3"><label for="NEMAV" class="custom-label">N° de l'acte du 9° AVANCEMENT</label><input type="text" id="NEMAV" name="NEMAV" class="form-control custom-input" value="@Model.Nemav" /></div>
+                <div class="form-group mb-3"><label for="DXEMAV" class="custom-label">N° de l'acte du 10° AVANCEMENT</label><input type="text" id="DXEMAV" name="DXEMAV" class="form-control custom-input" value="@Model.Dxemav" /></div>
+                <div class="form-group mb-3"><label for="ONEMAV" class="custom-label">N° de l'acte du 11° AVANCEMENT</label><input type="text" id="ONEMAV" name="ONEMAV" class="form-control custom-input" value="@Model.Onemav" /></div>
+                <div class="form-group mb-3"><label for="DOU" class="custom-label">N° de l'acte du 12° AVANCEMENT</label><input type="text" id="DOU" name="DOU" class="form-control custom-input" value="@Model.Dou" /></div>
+                <div class="form-group mb-3"><label for="TREI" class="custom-label">N° de l'acte du 13° AVANCEMENT</label><input type="text" id="TREI" name="TREI" class="form-control custom-input" value="@Model.Trei" /></div>
+                <div class="form-group mb-3"><label for="QUAT" class="custom-label">N° de l'acte du 14° AVANCEMENT</label><input type="text" id="QUAT" name="QUAT" class="form-control custom-input" value="@Model.Quat" /></div>
+                <div class="form-group mb-3"><label for="QUIN" class="custom-label">N° de l'acte du 15° AVANCEMENT</label><input type="text" id="QUIN" name="QUIN" class="form-control custom-input" value="@Model.Quin" /></div>
+                <div class="form-group mb-3"><label for="SEIZ" class="custom-label">N° de l'acte du 16° AVANCEMENT</label><input type="text" id="SEIZ" name="SEIZ"  class="form-control custom-input" value="@Model.Seiz" /></div>
             </div>
 
             <div class="form-actions mt-5">

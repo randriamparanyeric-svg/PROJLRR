@@ -14,4 +14,8 @@ public partial class Article
     public string? Unite { get; set; }
 
     public int? StockSec { get; set; }
+
+    // 📅 ─── DERNIÈRE MODIFICATION (Last Write Time) ───
+    // Cette propriété sera interceptée automatiquement par SaveChangesAsync()
+    public DateTime? DateModif { get; set; }
 }

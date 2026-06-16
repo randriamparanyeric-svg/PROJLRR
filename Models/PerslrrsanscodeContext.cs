@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq; 
+using System.Threading; 
+using System.Threading.Tasks; 
 using Microsoft.EntityFrameworkCore;
 
 namespace PROJLRR.Models;
@@ -20,12 +23,11 @@ public partial class PerslrrsanscodeContext : DbContext
     public virtual DbSet<Personnel> Personnels { get; set; }
     public virtual DbSet<Base1> Base1s { get; set; }
     public virtual DbSet<Decharge> Decharges { get; set; }
-    public virtual DbSet<Notification> Notifications { get; set; } // 🔔 Placé correctement au niveau de la classe
+    public virtual DbSet<Notification> Notifications { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         // Ne pas configurer ici - laisser Program.cs gérer le chemin
-        // C'est Program.cs qui détermine le chemin selon l'environnement (LOCAL ou PRODUCTION)
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -43,6 +45,9 @@ public partial class PerslrrsanscodeContext : DbContext
             entity.Property(e => e.Quantite).HasColumnName("Quantite");
             entity.Property(e => e.Unite).HasColumnType("TEXT").HasColumnName("Unite");
             entity.Property(e => e.StockSec).HasColumnName("StockSec");
+
+            // 📅 ─── NOUVELLE COLONNE DE SYNCHRONISATION (LAST WRITE ARTICLES) ───
+            entity.Property(e => e.DateModif).HasColumnType("TEXT").HasColumnName("DateModif");
         });
 
         // 2. Configuration de la table PERSONNEL (BASE)
@@ -86,6 +91,9 @@ public partial class PerslrrsanscodeContext : DbContext
             entity.Property(e => e.Statut).HasColumnType("TEXT").HasColumnName("STATUT");
             entity.Property(e => e.Temav).HasColumnType("TEXT").HasColumnName("TEMAV");
             entity.Property(e => e.Trei).HasColumnType("TEXT").HasColumnName("TREI");
+
+            // ─── NOUVELLE COLONNE DE SYNCHRONISATION (LAST WRITE PERSONNEL) ───
+            entity.Property(e => e.DateModif).HasColumnType("TEXT").HasColumnName("DateModif");
         });
 
         // 3. Configuration de la table BASE1
@@ -145,7 +153,7 @@ public partial class PerslrrsanscodeContext : DbContext
             entity.Property(e => e.Unite).HasColumnType("TEXT").HasColumnName("Unite");
         });
 
-        // 5. 🔔 Configuration de la table NOTIFICATION (Intégrée proprement)
+        // 5. Configuration de la table NOTIFICATION
         modelBuilder.Entity<Notification>(entity =>
         {
             entity.HasKey(e => e.Id);
@@ -157,4 +165,41 @@ public partial class PerslrrsanscodeContext : DbContext
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+
+    // ─── INTERCEPTION AUTOMATIQUE DE LA DATE DE MODIFICATION ──────────────────
+
+    public override int SaveChanges()
+    {
+        MettreAJourDatesModification();
+        return base.SaveChanges();
+    }
+
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        MettreAJourDatesModification();
+        return base.SaveChangesAsync(cancellationToken);
+    }
+
+    private void MettreAJourDatesModification()
+    {
+        var entries = ChangeTracker.Entries()
+            .Where(e => e.State == Microsoft.EntityFrameworkCore.EntityState.Added 
+                     || e.State == Microsoft.EntityFrameworkCore.EntityState.Modified);
+
+        var maintenant = DateTime.UtcNow;
+        DateTime dateUtcSansMillisecondes = new DateTime(
+            maintenant.Year, maintenant.Month, maintenant.Day, 
+            maintenant.Hour, maintenant.Minute, maintenant.Second, 
+            DateTimeKind.Utc
+        );
+
+        foreach (var entry in entries)
+        {
+            var dateModifProp = entry.Entity.GetType().GetProperty("DateModif");
+            if (dateModifProp != null)
+            {
+                dateModifProp.SetValue(entry.Entity, dateUtcSansMillisecondes);
+            }
+        }
+    }
 }

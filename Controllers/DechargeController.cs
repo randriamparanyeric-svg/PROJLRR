@@ -210,7 +210,7 @@ var dechargesFusionnees = decharges
             return View(model);
         }
 
-        [HttpPost("Decharge/Add")]
+       [HttpPost("Decharge/Add")]
 public IActionResult Add(MultiDechargeViewModel model)
 {
     // 1. Gestion et enregistrement de la signature
@@ -239,7 +239,6 @@ public IActionResult Add(MultiDechargeViewModel model)
         ModelState.AddModelError("SignatureData", "Veuillez fournir une signature.");
     }
 
-    // Arrêt immédiat si la signature ou le modèle de base est invalide
     if (!ModelState.IsValid)
     {
         ViewBag.Personnel = GetPersonnel();
@@ -247,8 +246,8 @@ public IActionResult Add(MultiDechargeViewModel model)
         return View(model);
     }
 
-    // 2. PREMIÈRE BOUCLE : Validation stricte de TOUS les articles (sécurité anti-doublon)
-    var articlesAValider = new List<(PROJLRR.Models.Article ArticleData, PROJLRR.Models.DechargeArticle Item, int NewQty)>();
+    // 2. PREMIÈRE BOUCLE : Validation (On garde la validation de sécurité, mais on ne stocke plus NewQty)
+    var articlesAValider = new List<(PROJLRR.Models.Article ArticleData, PROJLRR.Models.DechargeArticle Item)>();
 
     foreach (var article in model.Articles)
     {
@@ -278,11 +277,10 @@ public IActionResult Add(MultiDechargeViewModel model)
             continue;
         }
 
-        // Si l'article est valide, on le garde en mémoire pour l'étape suivante
-        articlesAValider.Add((articleData, article, newQuantity));
+        // On mémorise uniquement pour l'insertion
+        articlesAValider.Add((articleData, article));
     }
 
-    // Si un seul article a échoué aux validations, on réaffiche la vue sans rien toucher en BDD
     if (!ModelState.IsValid)
     {
         ViewBag.Personnel = GetPersonnel();
@@ -290,25 +288,20 @@ public IActionResult Add(MultiDechargeViewModel model)
         return View(model);
     }
 
-    // 3. DEUXIÈME BOUCLE : Application et Sauvegarde (Tout est OK)
+    // 3. DEUXIÈME BOUCLE : Enregistrement (Le Trigger SQLite va s'occuper du stock tout seul !)
     try
     {
-        // 🔥 SOLUTION ANTY-CRASH SQLITE : On calcule le prochain ID disponible manuellement
         int prochainId = _dbContext.Decharges.Any() ? _dbContext.Decharges.Max(d => d.Id) : 0;
 
         foreach (var specs in articlesAValider)
         {
-            // Mise à jour du stock de l'article
-            specs.ArticleData.Quantite = specs.NewQty;
-            _dbContext.Articles.Update(specs.ArticleData);
-
-            // Incrémentation manuelle de l'ID pour contourner le manque d'autoincrement de SQLite
+            // ✂️ SUPPRIMÉ : On ne met plus à jour specs.ArticleData ici !
             prochainId++;
 
-            // Création de la décharge
+            // Création de la décharge pure
             var decharge = new Decharge
             {
-                Id = prochainId, // 🔥 On force l'ID ici
+                Id = prochainId,
                 PersonnelNom = model.PersonnelNom,
                 ArticleNom = specs.Item.ArticleNom,
                 Quantite = specs.Item.Quantite,
@@ -320,7 +313,7 @@ public IActionResult Add(MultiDechargeViewModel model)
             _dbContext.Decharges.Add(decharge);
         }
 
-        // Sauvegarde finale de toutes les modifications d'un coup
+        // Sauvegarde de la décharge -> Déclenche instantanément le Trigger SQLite de manière propre
         _dbContext.SaveChanges();
 
         TempData["SuccessMessage"] = "Décharge enregistrée avec succès !";

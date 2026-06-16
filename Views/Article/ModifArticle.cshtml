@@ -1,18 +1,18 @@
 @model PROJLRR.Models.Article
 @{
     Layout="/Views/Shared/Layout.cshtml";
-    ViewData["Title"] = "Ajouter un Article";
+    ViewData["Title"] = "Modifier l'Article";
 }
 
 <style>
     :root {
-        --primary-gradient: linear-gradient(135deg, #6366f1, #4f46e5);
-        --accent-color: #4f46e5;
+        --primary-gradient: linear-gradient(135deg, #0284c7, #0369a1);
+        --accent-color: #0284c7;
         --bg-card: #ffffff;
         --text-main: #1f2937;
         --text-muted: #6b7280;
         --border-color: #e5e7eb;
-        --focus-ring: rgba(79, 70, 229, 0.15);
+        --focus-ring: rgba(2, 132, 199, 0.15);
     }
 
     .form-container {
@@ -24,11 +24,6 @@
         box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
         border: 1px solid var(--border-color);
         transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .form-container:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.07);
     }
 
     .form-header {
@@ -69,7 +64,6 @@
         font-size: 0.88rem;
         font-weight: 600;
         color: var(--text-main);
-        letter-spacing: 0.01em;
     }
 
     .custom-input, .custom-select {
@@ -90,13 +84,15 @@
         box-shadow: 0 0 0 4px var(--focus-ring);
     }
 
-    .btn-submit {
+    .btn-actions-group {
         display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
-        padding: 14px;
+        gap: 12px;
         margin-top: 15px;
+    }
+
+    .btn-submit {
+        flex: 2;
+        padding: 14px;
         background: var(--primary-gradient);
         color: #ffffff;
         font-size: 1rem;
@@ -105,77 +101,82 @@
         border-radius: 10px;
         cursor: pointer;
         transition: all 0.2s ease;
-        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
     }
 
     .btn-submit:hover {
-        background: linear-gradient(135deg, #4f46e5, #4338ca);
-        box-shadow: 0 6px 20px rgba(79, 70, 229, 0.35);
+        background: #0369a1;
         transform: translateY(-1px);
     }
 
-    .btn-submit:active {
-        transform: translateY(1px);
+    .btn-cancel {
+        flex: 1;
+        padding: 14px;
+        background-color: #f1f5f9;
+        color: #475569;
+        font-size: 1rem;
+        font-weight: 600;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        text-align: center;
+        text-decoration: none;
+        transition: all 0.2s ease;
     }
 
-    /* Responsive adjustment */
+    .btn-cancel:hover {
+        background-color: #e2e8f0;
+    }
+
     @@media (max-width: 600px) {
-        .form-grid {
-            grid-template-columns: 1fr;
-        }
-        .full-width {
-            grid-column: span 1;
-        }
-        .form-container {
-            padding: 25px;
-            margin: 20px;
-        }
+        .form-grid { grid-template-columns: 1fr; }
+        .full-width { grid-column: span 1; }
+        .btn-actions-group { flex-direction: column; }
     }
 </style>
 
 <div class="form-container">
     <div class="form-header">
         <h1>@ViewData["Title"]</h1>
-        <p>Enregistrez un nouvel élément dans votre inventaire en renseignant les détails ci-dessous.</p>
+        <p>Modifiez les informations de la référence sélectionnée puis enregistrez.</p>
     </div>
 
-    <form method="post" action="AddArticle">
+   <form method="post" asp-action="ModifArticle">
+        <input type="hidden" name="Id" value="@Model.Id" />
+
         <div class="form-grid">
             
             <div class="field-group full-width">
                 <label for="Nom">Nom de l'Article</label>
-                <input type="text" class="custom-input" id="Nom" name="Nom" placeholder="Ex: Rame de papier A4 80g" required />
+                <input type="text" class="custom-input" id="Nom" name="Nom" value="@Model.Nom" required />
             </div>
 
-            <div class="field-group">
-                <label for="Quantite">Quantité Initiale</label>
-                <input type="number" class="custom-input" id="Quantite" name="Quantite" min="0" placeholder="0" required />
+            <div class="field-group full-width">
+                <label for="Quantite">Stock Restant (Quantité)</label>
+                <input type="number" class="custom-input" id="Quantite" name="Quantite" value="@Model.Quantite" min="0" required />
             </div>
 
             <div class="field-group">
                 <label for="StockSec">Stock de Sécurité</label>
-                <input type="number" class="custom-input" id="StockSec" name="StockSec" min="0" placeholder="Seuil d'alerte" required />
+                <input type="number" class="custom-input" id="StockSec" name="StockSec" value="@Model.StockSec" min="0" required />
             </div>
 
-            <div class="field-group full-width">
+            <div class="field-group">
                 <label for="Unite">Unité de mesure</label>
                 <select id="Unite" name="Unite" class="custom-select" required>
-                    <option value="" disabled selected>Sélectionner l'unité</option>
-                    <option value="PIECE">PIECE</option>
-                    <option value="BOITE">BOITE</option>
-                    <option value="RAM">RAM</option>
-                    <option value="CARTON">CARTON</option>
-                    <option value="ROULEAU">ROULEAU</option>
-                    <option value="KILO">KILO</option>
-                    <option value="Litre">LITRE</option>
-                    <option value="Mètre">METRE</option>
+                    <option value="PIECE" selected="@(Model.Unite == "PIECE")">PIECE</option>
+                    <option value="BOITE" selected="@(Model.Unite == "BOITE")">BOITE</option>
+                    <option value="RAM" selected="@(Model.Unite == "RAM")">RAM</option>
+                    <option value="CARTON" selected="@(Model.Unite == "CARTON")">CARTON</option>
+                    <option value="ROULEAU" selected="@(Model.Unite == "ROULEAU")">ROULEAU</option>
+                    <option value="KILO" selected="@(Model.Unite == "KILO")">KILO</option>
+                    <option value="LITRE" selected="@(Model.Unite == "LITRE")">LITRE</option>
+                    <option value="METRE" selected="@(Model.Unite == "METRE")">METRE</option>
                 </select>
             </div>
 
-            <div class="field-group full-width">
-                <button type="submit" class="btn-submit">
-                    Valider et ajouter l'article
-                </button>
+            <div class="field-group full-width btn-actions-group">
+                <a href="@Url.Action("Index", "Article")" class="btn-cancel">Annuler</a>
+                <button type="submit" class="btn-submit">Enregistrer les modifications</button>
             </div>
 
         </div>
