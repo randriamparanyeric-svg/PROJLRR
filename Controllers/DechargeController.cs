@@ -18,178 +18,175 @@ namespace PROJLRR.Controllers
         }
 
         [HttpGet("Decharge/Index")]
-public IActionResult Index()
-{
-    // 1. Récupération des données brutes triées par Ticks (long?) -> Traduisible en SQL
-    var dechargesRaw = _dbContext.Decharges
-        .Join(_dbContext.Personnels,
-            d => d.PersonnelNom,
-            p => p.NomEtPrenoms,
-            (d, p) => new
-            {
-                d.Id,
-                d.PersonnelNom,
-                d.ArticleNom,
-                d.Quantite,
-                d.SignaturePath,
-                d.Unite,
-                d.DateDecharge, // On garde le long? brut ici
-                p.Matricule,
-                p.Matiere
-            })
-        .OrderBy(x => x.DateDecharge) // Tri sur un type numérique basique (Parfait pour SQL)
-        .ToList(); // On bascule les données en mémoire vive (évaluation côté client)
-
-    // 2. Conversion SÉCURISÉE et INTELLIGENTE en DateTime côté C#
-    var decharges = dechargesRaw
-        .Select(x => new
+        public IActionResult Index()
         {
-            x.Id,
-            x.PersonnelNom,
-            x.ArticleNom,
-            x.Quantite,
-            x.SignaturePath,
-            x.Unite,
-            
-            // 🔥 LE CORRECTIF : On détecte le format du nombre avant de convertir
-            DateDechargeReal = x.DateDecharge.HasValue && x.DateDecharge.Value > 0
-                ? (x.DateDecharge.Value > 600000000000000000 
-                    ? new DateTime(x.DateDecharge.Value) // Format Ticks (Nouvelles dates)
-                    : DateTimeOffset.FromUnixTimeMilliseconds(x.DateDecharge.Value).DateTime.ToLocalTime()) // Format Millisecondes (Anciennes dates)
-                : DateTime.MinValue,
-                
-            x.Matricule,
-            x.Matiere
-        })
-        .ToList();
+            // 1. Récupération des données brutes triées par Ticks (long?)
+            var dechargesRaw = _dbContext.Decharges
+                .Join(_dbContext.Personnels,
+                    d => d.PersonnelNom,
+                    p => p.NomEtPrenoms,
+                    (d, p) => new
+                    {
+                        d.Id,
+                        d.PersonnelNom,
+                        d.ArticleNom,
+                        d.Quantite,
+                        d.SignaturePath,
+                        d.Unite,
+                        d.DateDecharge,
+                        p.Matricule,
+                        p.Matiere
+                    })
+                .OrderBy(x => x.DateDecharge)
+                .ToList();
 
-   // 3. Groupement et fusion (Version blindée contre les espaces et la casse)
-var dechargesFusionnees = decharges
-    .GroupBy(d => new { d.PersonnelNom, d.Matricule, d.Matiere, Date = d.DateDechargeReal.Date })
-    .Select(g => new DechargeFusionnee
-    {
-        SignaturePath = g.First().SignaturePath,
-        PersonnelNom = g.Key.PersonnelNom,
-        MATRICULE = g.Key.Matricule,
-        MATIERE = g.Key.Matiere,
-        DateDecharge = g.Key.Date, 
-        
-        // Fonctionnalité de fusion et cumul des quantités
-        ArticlesFusionnes = string.Join("<br/>", g
-            .GroupBy(a => new { 
-                NomNettoye = a.ArticleNom?.Trim().ToLower() ?? "", 
-                UniteNettoye = a.Unite?.Trim().ToLower() ?? "" 
-            })
-            .Select((groupArticle, index) => {
-                var premierArticle = groupArticle.First();
-                var totalQuantite = groupArticle.Sum(d => d.Quantite); // Somme automatique des lignes identiques
-                
-                return $"{index + 1}- {premierArticle.ArticleNom} ({totalQuantite} {premierArticle.Unite})";
-            }))
-    })
-    .OrderBy(df => df.DateDecharge)
-    .ToList();
+            // 2. Conversion SÉCURISÉE et INTELLIGENTE en DateTime côté C#
+            var decharges = dechargesRaw
+                .Select(x => new
+                {
+                    x.Id,
+                    x.PersonnelNom,
+                    x.ArticleNom,
+                    x.Quantite,
+                    x.SignaturePath,
+                    x.Unite,
+                    
+                    DateDechargeReal = x.DateDecharge.HasValue && x.DateDecharge.Value > 0
+                        ? (x.DateDecharge.Value > 600000000000000000 
+                            ? new DateTime(x.DateDecharge.Value) 
+                            : DateTimeOffset.FromUnixTimeMilliseconds(x.DateDecharge.Value).DateTime.ToLocalTime()) 
+                        : DateTime.MinValue,
+                        
+                    x.Matricule,
+                    x.Matiere
+                })
+                .ToList();
 
-    var lastDecharge = _dbContext.Decharges
-        .OrderByDescending(d => d.DateDecharge)
-        .ThenByDescending(d => d.Id)
-        .FirstOrDefault();
+            // 3. Groupement et fusion (Version blindée contre les espaces et la casse)
+            var dechargesFusionnees = decharges
+                .GroupBy(d => new { d.PersonnelNom, d.Matricule, d.Matiere, Date = d.DateDechargeReal.Date })
+                .Select(g => new DechargeFusionnee
+                {
+                    SignaturePath = g.First().SignaturePath,
+                    PersonnelNom = g.Key.PersonnelNom,
+                    MATRICULE = g.Key.Matricule,
+                    MATIERE = g.Key.Matiere,
+                    DateDecharge = g.Key.Date, 
+                    
+                    ArticlesFusionnes = string.Join("<br/>", g
+                        .GroupBy(a => new { 
+                            NomNettoye = a.ArticleNom?.Trim().ToLower() ?? "", 
+                            UniteNettoye = a.Unite?.Trim().ToLower() ?? "" 
+                        })
+                        .Select((groupArticle, index) => {
+                            var premierArticle = groupArticle.First();
+                            var totalQuantite = groupArticle.Sum(d => d.Quantite);
+                            
+                            return $"{index + 1}- {premierArticle.ArticleNom} ({totalQuantite} {premierArticle.Unite})";
+                        }))
+                })
+                .OrderBy(df => df.DateDecharge)
+                .ToList();
 
-    if (lastDecharge != null)
-    {
-        ViewBag.LastPersonnelNom = lastDecharge.PersonnelNom;
-    }
+            var lastDecharge = _dbContext.Decharges
+                .OrderByDescending(d => d.DateDecharge)
+                .ThenByDescending(d => d.Id)
+                .FirstOrDefault();
 
-    ViewBag.Personnel = GetPersonnel();
-    ViewBag.Articles = GetArticles();
-
-    return View(dechargesFusionnees);
-}
-[HttpGet("Decharge/IndexBis")]
-public IActionResult IndexBis()
-{
-    // 1. Même logique : extraction brute et tri par Ticks d'abord
-    var dechargesRaw = _dbContext.Decharges
-        .Join(_dbContext.Personnels,
-            d => d.PersonnelNom,
-            p => p.NomEtPrenoms,
-            (d, p) => new
+            if (lastDecharge != null)
             {
-                d.Id,
-                d.PersonnelNom,
-                d.ArticleNom,
-                d.Quantite,
-                d.SignaturePath,
-                d.Unite,
-                d.DateDecharge,
-                p.Matricule,
-                p.Matiere
-            })
-        .OrderBy(x => x.DateDecharge)
-        .ToList();
+                ViewBag.LastPersonnelNom = lastDecharge.PersonnelNom;
+            }
 
-    // 2. Conversion en DateTime côté client
-    var decharges = dechargesRaw
-        .Select(x => new
+            ViewBag.Personnel = GetPersonnel();
+            ViewBag.Articles = GetArticles();
+
+            return View(dechargesFusionnees);
+        }
+
+        [HttpGet("Decharge/IndexBis")]
+        public IActionResult IndexBis()
         {
-            x.Id,
-            x.PersonnelNom,
-            x.ArticleNom,
-            x.Quantite,
-            x.SignaturePath,
-            x.Unite,
-            DateDechargeReal = x.DateDecharge.HasValue ? new DateTime(x.DateDecharge.Value) : DateTime.MinValue,
-            x.Matricule,
-            x.Matiere
-        })
-        .ToList();
-// 3. Groupement et fusion (Version blindée contre les espaces et la casse)
-var dechargesFusionnees = decharges
-    .GroupBy(d => new { d.PersonnelNom, d.Matricule, d.Matiere, Date = d.DateDechargeReal.Date })
-    .Select(g => new DechargeFusionnee
-    {
-        SignaturePath = g.First().SignaturePath,
-        PersonnelNom = g.Key.PersonnelNom,
-        MATRICULE = g.Key.Matricule,
-        MATIERE = g.Key.Matiere,
-        DateDecharge = g.Key.Date, 
-        
-        // Fonctionnalité de fusion et cumul des quantités
-        ArticlesFusionnes = string.Join("<br/>", g
-            .GroupBy(a => new { 
-                NomNettoye = a.ArticleNom?.Trim().ToLower() ?? "", 
-                UniteNettoye = a.Unite?.Trim().ToLower() ?? "" 
-            })
-            .Select((groupArticle, index) => {
-                var premierArticle = groupArticle.First();
-                var totalQuantite = groupArticle.Sum(d => d.Quantite); // Somme automatique des lignes identiques
-                
-                return $"{index + 1}- {premierArticle.ArticleNom} ({totalQuantite} {premierArticle.Unite})";
-            }))
-    })
-    .OrderBy(df => df.DateDecharge)
-    .ToList();
+            var dechargesRaw = _dbContext.Decharges
+                .Join(_dbContext.Personnels,
+                    d => d.PersonnelNom,
+                    p => p.NomEtPrenoms,
+                    (d, p) => new
+                    {
+                        d.Id,
+                        d.PersonnelNom,
+                        d.ArticleNom,
+                        d.Quantite,
+                        d.SignaturePath,
+                        d.Unite,
+                        d.DateDecharge,
+                        p.Matricule,
+                        p.Matiere
+                    })
+                .OrderBy(x => x.DateDecharge)
+                .ToList();
 
-    var lastDecharge = _dbContext.Decharges
-        .OrderByDescending(d => d.DateDecharge)
-        .ThenByDescending(d => d.Id)
-        .FirstOrDefault();
+            var decharges = dechargesRaw
+                .Select(x => new
+                {
+                    x.Id,
+                    x.PersonnelNom,
+                    x.ArticleNom,
+                    x.Quantite,
+                    x.SignaturePath,
+                    x.Unite,
+                    DateDechargeReal = x.DateDecharge.HasValue ? new DateTime(x.DateDecharge.Value) : DateTime.MinValue,
+                    x.Matricule,
+                    x.Matiere
+                })
+                .ToList();
 
-    if (lastDecharge != null)
-    {
-        ViewBag.LastPersonnelNom = lastDecharge.PersonnelNom;
-    }
+            var dechargesFusionnees = decharges
+                .GroupBy(d => new { d.PersonnelNom, d.Matricule, d.Matiere, Date = d.DateDechargeReal.Date })
+                .Select(g => new DechargeFusionnee
+                {
+                    SignaturePath = g.First().SignaturePath,
+                    PersonnelNom = g.Key.PersonnelNom,
+                    MATRICULE = g.Key.Matricule,
+                    MATIERE = g.Key.Matiere,
+                    DateDecharge = g.Key.Date, 
+                    
+                    ArticlesFusionnes = string.Join("<br/>", g
+                        .GroupBy(a => new { 
+                            NomNettoye = a.ArticleNom?.Trim().ToLower() ?? "", 
+                            UniteNettoye = a.Unite?.Trim().ToLower() ?? "" 
+                        })
+                        .Select((groupArticle, index) => {
+                            var premierArticle = groupArticle.First();
+                            var totalQuantite = groupArticle.Sum(d => d.Quantite);
+                            
+                            return $"{index + 1}- {premierArticle.ArticleNom} ({totalQuantite} {premierArticle.Unite})";
+                        }))
+                })
+                .OrderBy(df => df.DateDecharge)
+                .ToList();
 
-    var dechargesDuJour = dechargesFusionnees
-        .Where(df => df.DateDecharge.Date == DateTime.Today)
-        .OrderByDescending(df => df.DateDecharge)
-        .ToList();
+            var lastDecharge = _dbContext.Decharges
+                .OrderByDescending(d => d.DateDecharge)
+                .ThenByDescending(d => d.Id)
+                .FirstOrDefault();
 
-    ViewBag.Personnel = GetPersonnel();
-    ViewBag.Articles = GetArticles();
+            if (lastDecharge != null)
+            {
+                ViewBag.LastPersonnelNom = lastDecharge.PersonnelNom;
+            }
 
-    return View(dechargesDuJour);
-}
+            var dechargesDuJour = dechargesFusionnees
+                .Where(df => df.DateDecharge.Date == DateTime.Today)
+                .OrderByDescending(df => df.DateDecharge)
+                .ToList();
+
+            ViewBag.Personnel = GetPersonnel();
+            ViewBag.Articles = GetArticles();
+
+            return View(dechargesDuJour);
+        }
+
         [HttpGet("Decharge/Add")]
         public IActionResult Add()
         {
@@ -210,206 +207,253 @@ var dechargesFusionnees = decharges
             return View(model);
         }
 
-       [HttpPost("Decharge/Add")]
-public IActionResult Add(MultiDechargeViewModel model)
-{
-    // 1. Gestion et enregistrement de la signature
-    if (!string.IsNullOrEmpty(model.SignatureData))
-    {
-        try
+        [HttpPost("Decharge/Add")]
+        public IActionResult Add(MultiDechargeViewModel model)
         {
-            var base64Data = model.SignatureData.Replace("data:image/png;base64,", "");
-            byte[] imageBytes = Convert.FromBase64String(base64Data);
+            string signatureFinalPath = null;
 
-            string fileName = Guid.NewGuid().ToString() + ".png";
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "signatures", fileName);
-
-            Directory.CreateDirectory(Path.GetDirectoryName(filePath));
-            System.IO.File.WriteAllBytes(filePath, imageBytes);
-
-            model.SignaturePath = "/signatures/" + fileName;
-        }
-        catch (Exception ex)
-        {
-            ModelState.AddModelError("", "Erreur signature : " + ex.Message);
-        }
-    }
-    else
-    {
-        ModelState.AddModelError("SignatureData", "Veuillez fournir une signature.");
-    }
-
-    if (!ModelState.IsValid)
-    {
-        ViewBag.Personnel = GetPersonnel();
-        ViewBag.Articles = GetArticles();
-        return View(model);
-    }
-
-    // 2. PREMIÈRE BOUCLE : Validation (On garde la validation de sécurité, mais on ne stocke plus NewQty)
-    var articlesAValider = new List<(PROJLRR.Models.Article ArticleData, PROJLRR.Models.DechargeArticle Item)>();
-
-    foreach (var article in model.Articles)
-    {
-        if (string.IsNullOrWhiteSpace(article.ArticleNom) || article.Quantite <= 0)
-            continue;
-
-        var articleData = _dbContext.Articles.FirstOrDefault(a => a.Nom == article.ArticleNom);
-        if (articleData == null)
-        {
-            ModelState.AddModelError("", $"Article {article.ArticleNom} introuvable.");
-            continue;
-        }
-
-        int currentQuantity = articleData.Quantite ?? 0;
-        int stockSec = articleData.StockSec ?? 0;
-        int newQuantity = currentQuantity - article.Quantite;
-
-        if (article.Quantite > currentQuantity)
-        {
-            ModelState.AddModelError("", $"Quantité insuffisante pour {article.ArticleNom}.");
-            continue;
-        }
-
-        if (newQuantity < stockSec)
-        {
-            ModelState.AddModelError("", $"Alerte stock sécurité pour {article.ArticleNom}.");
-            continue;
-        }
-
-        // On mémorise uniquement pour l'insertion
-        articlesAValider.Add((articleData, article));
-    }
-
-    if (!ModelState.IsValid)
-    {
-        ViewBag.Personnel = GetPersonnel();
-        ViewBag.Articles = GetArticles();
-        return View(model);
-    }
-
-    // 3. DEUXIÈME BOUCLE : Enregistrement (Le Trigger SQLite va s'occuper du stock tout seul !)
-    try
-    {
-        int prochainId = _dbContext.Decharges.Any() ? _dbContext.Decharges.Max(d => d.Id) : 0;
-
-        foreach (var specs in articlesAValider)
-        {
-            // ✂️ SUPPRIMÉ : On ne met plus à jour specs.ArticleData ici !
-            prochainId++;
-
-            // Création de la décharge pure
-            var decharge = new Decharge
+            // 1. STRATÉGIE DE SIGNATURE DOUBLE CANAL
+            if (!string.IsNullOrEmpty(model.SignatureData))
             {
-                Id = prochainId,
-                PersonnelNom = model.PersonnelNom,
-                ArticleNom = specs.Item.ArticleNom,
-                Quantite = specs.Item.Quantite,
-                Unite = specs.Item.Unite,
-                DateDecharge = model.DateDecharge.Ticks,
-                SignaturePath = model.SignaturePath
-            };
+                // Cas A : L'utilisateur a dessiné sur le canvas (Prioritaire)
+                try
+                {
+                    var base64Data = model.SignatureData.Replace("data:image/png;base64,", "");
+                    byte[] imageBytes = Convert.FromBase64String(base64Data);
 
-            _dbContext.Decharges.Add(decharge);
-        }
+                    string fileName = Guid.NewGuid().ToString() + ".png";
+                    string filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "signatures", fileName);
 
-        // Sauvegarde de la décharge -> Déclenche instantanément le Trigger SQLite de manière propre
-        _dbContext.SaveChanges();
+                    Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+                    System.IO.File.WriteAllBytes(filePath, imageBytes);
 
-        TempData["SuccessMessage"] = "Décharge enregistrée avec succès !";
-        TempData["LastPersonnelNom"] = model.PersonnelNom;
-        return RedirectToAction("Add");
-    }
-    catch (Exception ex)
-    {
-        var vraieErreur = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
-        ModelState.AddModelError("", $"Erreur Base de données : {vraieErreur}");
-        
-        ViewBag.Personnel = GetPersonnel();
-        ViewBag.Articles = GetArticles();
-        return View(model);
-    }
-}
- [HttpGet]
-public JsonResult GetDerniereDechargePersonnel(string nom)
-{
-    if (string.IsNullOrEmpty(nom))
-        return Json(null);
-
-    // 1. On récupère toutes les décharges de cette personne en mémoire C#
-    var dechargesDuPersonnel = _dbContext.Decharges
-        .Where(d => d.PersonnelNom == nom)
-        .ToList();
-
-    if (!dechargesDuPersonnel.Any())
-        return Json(new List<object>());
-
-    // Fonction de conversion pour corriger définitivement le bug du 03/01/0001
-    Func<object, DateTime> interpreterVraieDate = (dateObj) =>
-    {
-        if (dateObj == null) return DateTime.MinValue;
-
-        if (dateObj is long valLong)
-        {
-            // Timestamp Unix Millisecondes (13 chiffres) -> Anciennes dates
-            if (valLong >= 1000000000000L && valLong < 99999999999999L)
-            {
-                return DateTimeOffset.FromUnixTimeMilliseconds(valLong).LocalDateTime;
+                    signatureFinalPath = "/signatures/" + fileName;
+                }
+                // Si l'injection échoue, on lève une alerte sur le dictionnaire d'états
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", "Erreur de décodage de la signature dessinée : " + ex.Message);
+                }
             }
-            // Ticks .NET (18 chiffres) -> Nouvelles dates
-            return new DateTime(valLong);
+            else if (!string.IsNullOrWhiteSpace(model.Matricule))
+            {
+                // Cas B : L'utilisateur a saisi son matricule pour appeler son historique
+                var personnelValide = _dbContext.Personnels
+                    .Any(p => p.NomEtPrenoms == model.PersonnelNom && p.Matricule == model.Matricule.Trim());
+
+                if (!personnelValide)
+                {
+                    ModelState.AddModelError("Matricule", "Le matricule saisi ne correspond pas au personnel sélectionné.");
+                }
+                else
+                {
+                    var derniereDecharge = _dbContext.Decharges
+                        .Where(d => d.PersonnelNom == model.PersonnelNom && !string.IsNullOrEmpty(d.SignaturePath))
+                        .OrderByDescending(d => d.DateDecharge)
+                        .ThenByDescending(d => d.Id)
+                        .FirstOrDefault();
+
+                    if (derniereDecharge == null)
+                    {
+                        ModelState.AddModelError("Matricule", "Aucune signature précédente enregistrée pour cet agent. Veuillez dessiner manuellement.");
+                    }
+                    else
+                    {
+                        signatureFinalPath = derniereDecharge.SignaturePath;
+                    }
+                }
+            }
+            else
+            {
+                ModelState.AddModelError("SignatureData", "La validation exige soit une signature manuscrite, soit votre matricule.");
+            }
+
+            // Retour direct si le processus de signature a échoué
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Personnel = GetPersonnel();
+                ViewBag.Articles = GetArticles();
+                return View(model);
+            }
+
+            // 2. PREMIÈRE BOUCLE : Validation des stocks de sécurité (Code original préservé)
+            var articlesAValider = new List<(PROJLRR.Models.Article ArticleData, PROJLRR.Models.DechargeArticle Item)>();
+
+            foreach (var article in model.Articles)
+            {
+                if (string.IsNullOrWhiteSpace(article.ArticleNom) || article.Quantite <= 0)
+                    continue;
+
+                var articleData = _dbContext.Articles.FirstOrDefault(a => a.Nom == article.ArticleNom);
+                if (articleData == null)
+                {
+                    ModelState.AddModelError("", $"Article {article.ArticleNom} introuvable.");
+                    continue;
+                }
+
+                int currentQuantity = articleData.Quantite ?? 0;
+                int stockSec = articleData.StockSec ?? 0;
+                int newQuantity = currentQuantity - article.Quantite;
+
+                if (article.Quantite > currentQuantity)
+                {
+                    ModelState.AddModelError("", $"Quantité insuffisante pour {article.ArticleNom}.");
+                    continue;
+                }
+
+                if (newQuantity < stockSec)
+                {
+                    ModelState.AddModelError("", $"Alerte stock sécurité pour {article.ArticleNom}.");
+                    continue;
+                }
+
+                articlesAValider.Add((articleData, article));
+            }
+
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Personnel = GetPersonnel();
+                ViewBag.Articles = GetArticles();
+                return View(model);
+            }
+
+            // 3. DEUXIÈME BOUCLE : Enregistrement (Le Trigger SQLite se charge de soustraire le stock)
+            try
+            {
+                int prochainId = _dbContext.Decharges.Any() ? _dbContext.Decharges.Max(d => d.Id) : 0;
+
+                foreach (var specs in articlesAValider)
+                {
+                    prochainId++;
+
+                    var decharge = new Decharge
+                    {
+                        Id = prochainId,
+                        PersonnelNom = model.PersonnelNom,
+                        ArticleNom = specs.Item.ArticleNom,
+                        Quantite = specs.Item.Quantite,
+                        Unite = specs.Item.Unite,
+                        DateDecharge = model.DateDecharge.Ticks,
+                        SignaturePath = signatureFinalPath // Utilisation du chemin final calculé
+                    };
+
+                    _dbContext.Decharges.Add(decharge);
+                }
+
+                _dbContext.SaveChanges();
+
+                TempData["SuccessMessage"] = "Décharge enregistrée avec succès !";
+                TempData["LastPersonnelNom"] = model.PersonnelNom;
+                return RedirectToAction("Add");
+            }
+            catch (Exception ex)
+            {
+                var vraieErreur = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                ModelState.AddModelError("", $"Erreur Base de données : {vraieErreur}");
+                
+                ViewBag.Personnel = GetPersonnel();
+                ViewBag.Articles = GetArticles();
+                return View(model);
+            }
         }
 
-        try { return Convert.ToDateTime(dateObj); }
-        catch { return DateTime.MinValue; }
-    };
-
-    // 2. On GROUPE par JOURNÉE pure (sans l'heure) et par ARTICLE pour fusionner les doublons
-    var resultats = dechargesDuPersonnel
-        .GroupBy(d => new 
-        {
-            Journee = interpreterVraieDate(d.DateDecharge).Date,
-            NomNettoye = d.ArticleNom?.Trim().ToLower() ?? "",
-            UniteNettoye = d.Unite?.Trim().ToLower() ?? ""
-        })
-        // 3. On trie pour avoir les journées les plus récentes en premier
-        .OrderByDescending(g => g.Key.Journee)
-        // 4. On prend exactement les 5 dernières lignes de l'historique fusionné
-        .Take(5) 
-        .Select(group => {
-            var premierArticle = group.First();
-            var totalQuantite = group.Sum(x => x.Quantite); // Somme des quantités du même jour
-
-            return new
-            {
-                article = premierArticle.ArticleNom,
-                quantite = totalQuantite.ToString(),
-                unite = premierArticle.Unite,
-                // Format propre sans l'heure (ex: 02/06/2026)
-                date = group.Key.Journee.ToString("dd/MM/yyyy")
-            };
-        })
-        .ToList();
-
-    return Json(resultats);
-}
+        // GET: Decharge/GetSignaturePrecedente (Interrogé par AJAX au floutage du Matricule)
         [HttpGet]
-public JsonResult SearchPersonnel(string search)
-{
-    if (string.IsNullOrEmpty(search)) return Json(new List<object>());
+        public JsonResult GetSignaturePrecedente(string nom, string matricule)
+        {
+            if (string.IsNullOrEmpty(nom) || string.IsNullOrEmpty(matricule))
+                return Json(new { success = false, message = "Données d'identité incomplètes." });
 
-    // 1. On passe la recherche en minuscules une seule fois
-    string searchLower = search.ToLower();
+            var personnelValide = _dbContext.Personnels
+                .Any(p => p.NomEtPrenoms == nom.Trim() && p.Matricule == matricule.Trim());
 
-    // 2. On compare en appliquant .ToLower() sur les champs de la base de données
-    var personnels = _dbContext.Personnels
-        .Where(p => p.Matricule.ToLower().Contains(searchLower) || 
-                    p.NomEtPrenoms.ToLower().Contains(searchLower))
-        .Select(p => new { matricule = p.Matricule, nom = p.NomEtPrenoms })
-        .ToList();
+            if (!personnelValide)
+                return Json(new { success = false, message = "Le matricule ne correspond pas au personnel sélectionné." });
 
-    return Json(personnels);
-}
+            var derniereDecharge = _dbContext.Decharges
+                .Where(d => d.PersonnelNom == nom.Trim() && !string.IsNullOrEmpty(d.SignaturePath))
+                .OrderByDescending(d => d.DateDecharge)
+                .ThenByDescending(d => d.Id)
+                .FirstOrDefault();
+
+            if (derniereDecharge != null)
+            {
+                return Json(new { success = true, path = derniereDecharge.SignaturePath });
+            }
+
+            return Json(new { success = false, message = "Aucun historique de signature trouvé pour cet agent." });
+        }
+
+        [HttpGet]
+        public JsonResult GetDerniereDechargePersonnel(string nom)
+        {
+            if (string.IsNullOrEmpty(nom))
+                return Json(null);
+
+            var dechargesDuPersonnel = _dbContext.Decharges
+                .Where(d => d.PersonnelNom == nom)
+                .ToList();
+
+            if (!dechargesDuPersonnel.Any())
+                return Json(new List<object>());
+
+            Func<object, DateTime> interpreterVraieDate = (dateObj) =>
+            {
+                if (dateObj == null) return DateTime.MinValue;
+
+                if (dateObj is long valLong)
+                {
+                    if (valLong >= 1000000000000L && valLong < 99999999999999L)
+                    {
+                        return DateTimeOffset.FromUnixTimeMilliseconds(valLong).LocalDateTime;
+                    }
+                    return new DateTime(valLong);
+                }
+
+                try { return Convert.ToDateTime(dateObj); }
+                catch { return DateTime.MinValue; }
+            };
+
+            var resultats = dechargesDuPersonnel
+                .GroupBy(d => new 
+                {
+                    Journee = interpreterVraieDate(d.DateDecharge).Date,
+                    NomNettoye = d.ArticleNom?.Trim().ToLower() ?? "",
+                    UniteNettoye = d.Unite?.Trim().ToLower() ?? ""
+                })
+                .OrderByDescending(g => g.Key.Journee)
+                .Take(5) 
+                .Select(group => {
+                    var premierArticle = group.First();
+                    var totalQuantite = group.Sum(x => x.Quantite);
+
+                    return new
+                    {
+                        article = premierArticle.ArticleNom,
+                        quantite = totalQuantite.ToString(),
+                        unite = premierArticle.Unite,
+                        date = group.Key.Journee.ToString("dd/MM/yyyy")
+                    };
+                })
+                .ToList();
+
+            return Json(resultats);
+        }
+
+        [HttpGet]
+        public JsonResult SearchPersonnel(string search)
+        {
+            if (string.IsNullOrEmpty(search)) return Json(new List<object>());
+            string searchLower = search.ToLower();
+
+            var personnels = _dbContext.Personnels
+                .Where(p => p.Matricule.ToLower().Contains(searchLower) || 
+                            p.NomEtPrenoms.ToLower().Contains(searchLower))
+                .Select(p => new { matricule = p.Matricule, nom = p.NomEtPrenoms })
+                .ToList();
+
+            return Json(personnels);
+        }
 
         [HttpGet]
         public JsonResult SearchPersonnel5(string search)
@@ -443,13 +487,13 @@ public JsonResult SearchPersonnel(string search)
                 .ToList();
         }
 
-private List<Article> GetArticles()
-{
-    return _dbContext.Articles
-        .FromSqlRaw("SELECT * FROM ARTICLE WHERE Id IS NOT NULL") // 👈 SQLite nettoie avant qu'EF Core ne touche aux données
-        .Select(a => new Article { Id = a.Id, Nom = a.Nom })
-        .OrderBy(a => a.Nom)
-        .ToList();
-}
+        private List<Article> GetArticles()
+        {
+            return _dbContext.Articles
+                .FromSqlRaw("SELECT * FROM ARTICLE WHERE Id IS NOT NULL")
+                .Select(a => new Article { Id = a.Id, Nom = a.Nom })
+                .OrderBy(a => a.Nom)
+                .ToList();
+        }
     }
 }

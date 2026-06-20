@@ -37,6 +37,10 @@
             --radius-md: 8px;
             --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
             --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -1px rgba(0,0,0,0.04);
+
+            /* --- COULEURS DYNAMIQUES PAR DÉFAUT (Modifiées par le script hors-ligne) --- */
+            --dynamic-bg: #0f172a;
+            --dynamic-text: #ffffff;
         }
 
         body {
@@ -48,28 +52,38 @@
             flex-direction: column;
         }
 
-        /* --- HEADER & NAVIGATION --- */
+        /* --- HEADER ACCORDÉ À LA COULEUR ALÉATOIRE --- */
         .header-banner {
-            background-color: var(--dark-surface);
-            border-bottom: 1px solid #1e293b;
+            background-color: var(--dynamic-bg) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: background-color 0.4s ease, color 0.4s ease;
+        }
+        
+        .header-banner h1 {
+            color: var(--dynamic-text) !important;
         }
 
+        /* --- NAVBAR ACCORDÉE À LA COULEUR ALÉATOIRE --- */
         .navbar-custom {
-            background-color: #1e293b;
+            background-color: var(--dynamic-bg) !important;
             box-shadow: var(--shadow-sm);
             padding: 0.6rem 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.08); /* Fine ligne de séparation avec le header */
+            transition: background-color 0.4s ease;
         }
 
+        /* Adaptation dynamique de la couleur des liens de la navbar */
         .navbar-custom .nav-link {
-            color: #cbd5e1 !important;
+            color: var(--dynamic-text) !important;
+            opacity: 0.8; /* Légèrement estompé par défaut */
             font-weight: 500;
             font-size: 0.95rem;
-            transition: color 0.2s ease;
+            transition: all 0.2s ease;
         }
 
         .navbar-custom .nav-link:hover,
         .navbar-custom .nav-item.show .nav-link {
-            color: #ffffff !important;
+            opacity: 1 !important; /* Éclairé au survol ou focus */
         }
 
         /* Menu Déroulant Élégant */
@@ -128,16 +142,17 @@
             padding: 1.5rem 0;
         }
 
-        /* --- FOOTER ÉLÉGANT --- */
+        /* --- FOOTER ÉLÉGANT ACCORDÉ AU RESTE --- */
         footer {
             flex-shrink: 0;
             text-align: center;
             padding: 1.5rem;
-            background-color: #ffffff;
-            color: #64748b;
+            background-color: var(--dynamic-bg) !important;
+            color: var(--dynamic-text) !important;
             font-size: 0.85rem;
-            border-top: 1px solid #e2e8f0;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
             font-weight: 500;
+            transition: background-color 0.4s ease, color 0.4s ease;
         }
 
         /* Animation d'affichage des menus */
@@ -149,10 +164,42 @@
 </head>
 <body>
 
+    <script>
+        (function () {
+            // Liste locale (Hors-ligne) de thèmes [Fond / Texte] bien contrastés et professionnels
+            const themes = [
+                { bg: '#0f172a', text: '#f8fafc' }, // Ardoise Sombre / Blanc Cassé
+                { bg: '#312e81', text: '#ffffff' }, // Indigo Royal / Blanc
+                { bg: '#1e3a8a', text: '#ffffff' }, // Bleu Institutionnel / Blanc
+                { bg: '#064e3b', text: '#f0fdf4' }, // Vert Forêt / Vert Très Clair
+                { bg: '#581c87', text: '#fdf4ff' }, // Byzantium / Violet Très Clair
+                { bg: '#451a03', text: '#fff7ed' }, // Brun Chaud Riche / Ambre Clair
+                { bg: '#f1f5f9', text: '#0f172a' }, // Gris Clair Lumineux / Texte Ardoise
+                { bg: '#e2e8f0', text: '#1e293b' }, // Métal Douceur / Texte Sombre
+                { bg: '#2e1065', text: '#f5f3ff' }  // Violet Nuit Obscur / Blanc
+            ];
+
+            let savedBg = sessionStorage.getItem('lrr_theme_bg');
+            let savedText = sessionStorage.getItem('lrr_theme_text');
+
+            if (!savedBg || !savedText) {
+                const randomTheme = themes[Math.floor(Math.random() * themes.length)];
+                savedBg = randomTheme.bg;
+                savedText = randomTheme.text;
+                
+                sessionStorage.setItem('lrr_theme_bg', savedBg);
+                sessionStorage.setItem('lrr_theme_text', savedText);
+            }
+
+            document.documentElement.style.setProperty('--dynamic-bg', savedBg);
+            document.documentElement.style.setProperty('--dynamic-text', savedText);
+        })();
+    </script>
+
     <header class="header-banner py-3">
         <div class="container-fluid d-flex align-items-center justify-content-center text-center px-4">
             <img src="/uploads/LOGO LRR.png" alt="Logo LRR" class="me-3" style="height: 48px; width: auto; object-fit: contain;">
-            <h1 class="text-white fw-bold m-0" style="font-size: 1.35rem; letter-spacing: 0.03em;">
+            <h1 class="fw-bold m-0" style="font-size: 1.35rem; letter-spacing: 0.03em;">
                 LYCÉE RAHERIVELO RAMAMONJY FIANARANTSOA
             </h1>
         </div>
@@ -223,7 +270,7 @@
                         }
 
                         <li class="nav-item">
-                            <span class="nav-link text-white-50 small p-0">👋 Connecté : <b>@User.Identity.Name</b></span>
+                            <span class="nav-link small p-0">👋 Connecté : <b>@User.Identity.Name</b></span>
                         </li>
                         <li class="nav-item">
                             <a class="btn btn-outline-danger btn-sm px-3 rounded-pill" style="font-size: 0.85rem;" href="@Url.Action("Logout", "Account")" onclick="sessionStorage.clear();">Déconnexion</a>
@@ -253,19 +300,15 @@
     <script src="@Url.Content("~/js/site.js")"></script>
 
     <script>
-        // =================================================================
-        // LOGIQUE OPTIMISÉE DE VEILLE ET REQUÊTE COMMUNE (DASHBOARD)
-        // =================================================================
+        // --- Le reste de vos scripts (Heartbeat, Dashboard, PIN) reste inchangé et fonctionnel ---
         $(document).ready(function() {
             const isAuthenticated = "@User.Identity.IsAuthenticated" === "True";
             const isAdmin = "@User.IsInRole("Admin")" === "True";
 
             if (isAuthenticated) {
-                // Signal initial + Pulsation (Heartbeat) calée à 60 secondes pour ménager MonsterASP
                 envoiSignalPresence();
                 setInterval(envoiSignalPresence, 60000);
 
-                // Si Administrateur, on appelle le point unifié toutes les 60 secondes (au lieu de 20s)
                 if (isAdmin) {
                     chargerDashboardTempsReel();
                     setInterval(chargerDashboardTempsReel, 60000);
@@ -278,10 +321,7 @@
         }
 
         function chargerDashboardTempsReel() {
-            // 🚀 REQUÊTE PACKAGÉE UNIQUE (Notifications + Enseignants connectés d'un seul coup)
             $.get('/Search/GetLiveDashboardData', function(data) {
-                
-                // --- TRAITEMENT DES NOTIFICATIONS ---
                 const notifCount = data.notifications.length;
                 if (notifCount > 0) {
                     $('#badgeModifsCount').text(notifCount).removeClass('d-none');
@@ -302,7 +342,6 @@
                     $('#emptyModifs').removeClass('d-none');
                 }
 
-                // --- TRAITEMENT DES ENSEIGNANTS EN LIGNE ---
                 const teachersCount = data.teachers.length;
                 if (teachersCount > 0) {
                     $('#badgeOnlineCount').text(teachersCount).removeClass('d-none');
@@ -326,16 +365,12 @@
                 if(res.success) {
                     $(element).fadeOut(250, function() { 
                         $(this).remove(); 
-                        // Met à jour instantanément les compteurs du layout
                         chargerDashboardTempsReel(); 
                     });
                 }
             });
         };
 
-        // =================================================================
-        // VERROUILLAGE DES SECTIONS ADMINISTRATIVES SÉCURISÉES (CODE PIN)
-        // =================================================================
         window.naviguerVersPageSecurisee = async function(url) {
             if (await validerAccesGeneral()) {
                 window.location.href = url;

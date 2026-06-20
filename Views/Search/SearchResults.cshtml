@@ -511,6 +511,7 @@
                 <option value="LICENCE">LICENCE(BACC+3)</option>
                 <option value="MAITRISE">MAITRISE(BACC+4)</option>
                 <option value="MASTER">MASTER(BACC+5)</option>
+                <option value="DEA">DEA</option>
                 <option value="DOCTORAT">DOCTORAT</option>
             </select>
         </div>
@@ -695,80 +696,103 @@
         });
 
         // Soumission du formulaire
-        $("#updateForm").submit(function(e){
-            e.preventDefault();
-            
-            let formData = new FormData(this);
-            let personnelNum = $("#editNum").val(); 
-            
-            $.ajax({ 
-                url: '/Search/UpdatePersonnel', 
-                type: 'POST', 
-                data: formData, 
-                processData: false, 
-                contentType: false, 
-                success: res => { 
-                    if (res.success) {
-                        alert("Enregistré avec succès !"); 
-                        let $card = $("#card-" + personnelNum);
-                        
-                        if ($card.length > 0) {
-                            let cacheBuster = new Date().getTime(); 
-                            
-                            $("#editPhotoPreview").attr("src", res.photoUrl + "?t=" + cacheBuster);
-                            $card.find(".photo-personnel").attr("src", res.photoUrl + "?t=" + cacheBuster);
-                            
-                            $card.find(".Matricule").text($("#editMatricule").val());
-                            $card.find(".nom_prenoms").text($("#editNomEtPrenoms").val()); 
-                            $card.find(".Cin").text($("#editCin").val());
-                            $card.find(".Corps").text($("#editCorps").val());
-                            $card.find(".Matiere").text($("#editMatiere").val());
-                            $card.find(".Diplomeac").text($("#editDiplomeac").val());
-                            $card.find(".Diplomeped").text($("#editDiplomeped").val());
-                            $card.find(".Contact").text($("#editContact").val());
-                            $card.find(".Fonction").text($("#editFonction").val());
-                            
-                            let dateNaiss = $("#editDatenaiss").val();
-                            if(dateNaiss && dateNaiss.includes("-")) {
-                                let d = dateNaiss.split('-'); $card.find(".Datenaiss").text(`${d[2]}/${d[1]}/${d[0]}`);
-                            }
-                            let dateEntree = $("#editDatedentre").val();
-                            if(dateEntree && dateEntree.includes("-")) {
-                                let d = dateEntree.split('-'); $card.find(".Datedentre").text(`${d[2]}/${d[1]}/${d[0]}`);
-                            }
-                            let datePrise = $("#editDatedeprise").val();
-                            if(datePrise && datePrise.includes("-")) {
-                                let d = datePrise.split('-'); $card.find(".Datedeprise").text(`${d[2]}/${d[1]}/${d[0]}`);
-                            }
+$("#updateForm").submit(function(e){
+    e.preventDefault();
+    
+    let formData = new FormData(this);
+    let personnelNum = $("#editNum").val(); 
+    
+    $.ajax({ 
+        url: '/Search/UpdatePersonnel', 
+        type: 'POST', 
+        data: formData, 
+        processData: false, 
+        contentType: false, 
+        success: res => { 
+            if (res.success) {
+                // 🔥 Remplacement par SweetAlert2 (Succès temporisé)
+                Swal.fire({
+                    icon: 'success',
+                    title: '<span style="color: #166534;">Réussi</span>',
+                    html: '<b style="color: #14532d; font-size: 1.1rem;">Enregistré avec succès !</b>', 
+                    background: '#f0fdf4', 
+                    iconColor: '#22c55e',
+                    timer: 2000,
+                    timerProgressBar: true,
+                    showConfirmButton: false,
+                    customClass: { popup: 'rounded-4 shadow border border-success' }
+                });
 
-                            $card.find(".Perav").text($("#editPerav").val());
-                            $card.find(".Demav").text($("#editDemav").val());
-                            $card.find(".Temav").text($("#editTemav").val());
-                            $card.find(".Qemav").text($("#editQemav").val());
-                            $card.find(".Cemav").text($("#editCemav").val());
-                            $card.find(".Semav").text($("#editSemav").val());
-                            $card.find(".Sepmav").text($("#editSepmav").val());
-                            $card.find(".Hemav").text($("#editHemav").val());
-                            $card.find(".Nemav").text($("#editNemav").val());
-                            $card.find(".Dxemav").text($("#editDxemav").val());
-                            $card.find(".Onemav").text($("#editOnemav").val());
-                            $card.find(".Dou").text($("#editDou").val());
-                            $card.find(".Trei").text($("#editTrei").val());
-                            $card.find(".Quat").text($("#editQuat").val());
-                            $card.find(".Quin").text($("#editQuin").val());
-                            $card.find(".Seiz").text($("#editSeiz").val());
-                        }
-                        closeEditModal();
-                    } else {
-                        alert("Erreur : " + res.message);
+                let $card = $("#card-" + personnelNum);
+                
+                if ($card.length > 0) {
+                    let cacheBuster = new Date().getTime(); 
+                    
+                    $("#editPhotoPreview").attr("src", res.photoUrl + "?t=" + cacheBuster);
+                    $card.find(".photo-personnel").attr("src", res.photoUrl + "?t=" + cacheBuster);
+                    
+                    $card.find(".Matricule").text($("#editMatricule").val());
+                    $card.find(".nom_prenoms").text($("#editNomEtPrenoms").val()); 
+                    $card.find(".Cin").text($("#editCin").val());
+                    $card.find(".Corps").text($("#editCorps").val());
+                    $card.find(".Matiere").text($("#editMatiere").val());
+                    $card.find(".Diplomeac").text($("#editDiplomeac").val());
+                    $card.find(".Diplomeped").text($("#editDiplomeped").val());
+                    $card.find(".Contact").text($("#editContact").val());
+                    $card.find(".Fonction").text($("#editFonction").val());
+                    
+                    let dateNaiss = $("#editDatenaiss").val();
+                    if(dateNaiss && dateNaiss.includes("-")) {
+                        let d = dateNaiss.split('-'); $card.find(".Datenaiss").text(`${d[2]}/${d[1]}/${d[0]}`);
                     }
-                },
-                error: err => {
-                    alert("Erreur serveur lors de la mise à jour (Statut: " + err.status + ").");
-                }
-            });
-        });
+                    let dateEntree = $("#editDatedentre").val();
+                    if(dateEntree && dateEntree.includes("-")) {
+                        let d = dateEntree.split('-'); $card.find(".Datedentre").text(`${d[2]}/${d[1]}/${d[0]}`);
+                    }
+                    let datePrise = $("#editDatedeprise").val();
+                    if(datePrise && datePrise.includes("-")) {
+                        let d = datePrise.split('-'); $card.find(".Datedeprise").text(`${d[2]}/${d[1]}/${d[0]}`);
+                    }
 
+                    $card.find(".Perav").text($("#editPerav").val());
+                    $card.find(".Demav").text($("#editDemav").val());
+                    $card.find(".Temav").text($("#editTemav").val());
+                    $card.find(".Qemav").text($("#editQemav").val());
+                    $card.find(".Cemav").text($("#editCemav").val());
+                    $card.find(".Semav").text($("#editSemav").val());
+                    $card.find(".Sepmav").text($("#editSepmav").val());
+                    $card.find(".Hemav").text($("#editHemav").val());
+                    $card.find(".Nemav").text($("#editNemav").val());
+                    $card.find(".Dxemav").text($("#editDxemav").val());
+                    $card.find(".Onemav").text($("#editOnemav").val());
+                    $card.find(".Dou").text($("#editDou").val());
+                    $card.find(".Trei").text($("#editTrei").val());
+                    $card.find(".Quat").text($("#editQuat").val());
+                    $card.find(".Quin").text($("#editQuin").val());
+                    $card.find(".Seiz").text($("#editSeiz").val());
+                }
+                closeEditModal();
+            } else {
+                // 💥 Remplacement par SweetAlert2 (Erreur renvoyée par le contrôleur)
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Échec de la mise à jour',
+                    text: res.message,
+                    confirmButtonColor: '#ef4444'
+                });
+            }
+        },
+        error: err => {
+            // 💥 Remplacement par SweetAlert2 (Erreur HTTP / Serveur)
+            Swal.fire({
+                icon: 'error',
+                title: 'Erreur Serveur',
+                text: "Impossible de joindre le serveur ou de traiter la demande (Statut : " + err.status + ").",
+                confirmButtonColor: '#dc2626'
+            });
+        }
+    });
+});
         // Archivage - Limité à l'admin
         $(document).on('click', '.btn-delete', function () {
             if (!IS_ADMIN) return false;
