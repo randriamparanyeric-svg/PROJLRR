@@ -16,14 +16,7 @@
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
-    .page-title {
-        font-weight: 700;
-        letter-spacing: 1px;
-        color: #2c3e50;
-        margin: 30px 0;
-        text-transform: uppercase;
-        text-align: center;
-    }
+    
 
     /* --- Formulaire de recherche --- */
     .search-container {
@@ -293,33 +286,6 @@
     }
 </style>
 
-<h5 class="page-title">Recherche de Personnel du Lycée Raherivelo Ramamonjy</h5>
-
-<div class="search-container">
-    <form id="searchForm" onsubmit="return false;">
-        <div style="text-align: left; margin-bottom: 8px;">
-            <label for="PersonnelNom" style="font-weight: 600;">Rechercher par Matricule ou Nom :</label>
-        </div>
-        <div class="search-group">
-            @if (isAdmin)
-            {
-                <input type="text" id="PersonnelNom" class="search-input" name="searchTerm" required autocomplete="off" value="@ViewBag.SearchTerm" />
-                <button type="button" id="btnSubmitSearch" class="btn-search">
-                    🔍 Rechercher
-                </button>
-            }
-            else
-            {
-                <input type="text" id="PersonnelNom" class="search-input" name="searchTerm" required autocomplete="off" value="@userNom" readonly 
-                       style="background-color: #e9ecef; color: #6c757d; cursor: not-allowed; border: 1px solid #ced4da;" />
-                <button type="button" id="btnSubmitSearch" disabled class="btn-search" style="background-color: #d3d3d3 !important; color: #777 !important; cursor: not-allowed; opacity: 0.6;">
-                    🔍 Rechercher
-                </button>
-            }
-            <div id="suggestions" class="list-group"></div>
-        </div>
-    </form>
-</div>
 <style>
     @@keyframes modernPulse {
         0%, 100% { 
@@ -364,6 +330,33 @@
         situé en bas de la page.
     </span>
 </div>
+
+<div class="search-container">
+    <form id="searchForm" onsubmit="return false;">
+        <div style="text-align: left; margin-bottom: 8px;">
+            <label for="PersonnelNom" style="font-weight: 600;">Rechercher par Matricule ou Nom :</label>
+        </div>
+        <div class="search-group">
+            @if (isAdmin)
+            {
+                <input type="text" id="PersonnelNom" class="search-input" name="searchTerm" required autocomplete="off" value="@ViewBag.SearchTerm" />
+                <button type="button" id="btnSubmitSearch" class="btn-search">
+                    🔍 Rechercher
+                </button>
+            }
+            else
+            {
+                <input type="text" id="PersonnelNom" class="search-input" name="searchTerm" required autocomplete="off" value="@userNom" readonly 
+                       style="background-color: #e9ecef; color: #6c757d; cursor: not-allowed; border: 1px solid #ced4da;" />
+                <button type="button" id="btnSubmitSearch" disabled class="btn-search" style="background-color: #d3d3d3 !important; color: #777 !important; cursor: not-allowed; opacity: 0.6;">
+                    🔍 Rechercher
+                </button>
+            }
+            <div id="suggestions" class="list-group"></div>
+        </div>
+    </form>
+</div>
+
 <div id="resultsContainer">
     @if (Model != null && Model.Any())
     {
@@ -447,12 +440,21 @@
         </div>
 
         <div class="form-group"><label>Matricule:</label> <input type="text" id="editMatricule" name="Matricule" /></div>
-        <div class="form-group"><label>Nom & Prénoms:</label> <input type="text" id="editNomEtPrenoms" name="NomEtPrenoms" required /></div>
+        <div class="form-group">
+    <label>Nom & Prénoms:</label> 
+    <input type="text" id="editNomEtPrenoms" name="NomEtPrenoms" required style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" />
+</div>
         
         <div class="form-group"><label>Cin:</label> <input type="text" id="editCin" name="Cin" /></div>
-        <div class="form-group"><label>Décision ou Note de Service:</label> <input type="text" id="editDec" name="Dec" /></div>
+       <div class="form-group">
+    <label>Décision ou Note de Service:</label> 
+    <input type="text" id="editDec" name="Dec" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" />
+</div>
         
-        <div class="form-group"><label>Corps et Grade:</label> <input type="text" id="editCorps" name="Corps" /></div>
+        <div class="form-group">
+    <label>Corps et Grade:</label> 
+    <input type="text" id="editCorps" name="Corps" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" />
+</div>
         <div class="form-group">
             <label>Matière ou Bureau:</label> 
             <select id="editMatiere" name="Matiere" class="form-control">
@@ -493,7 +495,10 @@
         </div>
         
         <div class="form-group"><label>Date Naissance:</label> <input type="date" id="editDatenaiss" name="Datenaiss" /></div>
-        <div class="form-group"><label>Lieu Naissance:</label> <input type="text" id="editLieudenaiss" name="Lieudenaiss" /></div>
+        <div class="form-group">
+    <label>Lieu Naissance:</label> 
+    <input type="text" id="editLieudenaiss" name="Lieudenaiss" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" />
+</div>
         
         <div class="form-group"><label>Sexe:</label> <select id="editSexe" name="Sexe"><option value="H">HOMME</option><option value="F">FEMME</option></select></div>
         <div class="form-group"><label>Statut:</label> <select id="editStatut" name="Statut"><option value="EFA">EFA</option><option value="FONCTIONNAIRE">FONCTIONNAIRE</option></select></div>
@@ -530,22 +535,70 @@
         
         <div class="section-divider"><h4>Détails des Avancements</h4></div>
 
-        <div class="form-group"><label>N° de l'acte du 1°Av:</label> <input type="text" id="editPerav" name="Perav" /></div>
-        <div class="form-group"><label>N° de l'acte du 2°Av:</label> <input type="text" id="editDemav" name="Demav" /></div>
-        <div class="form-group"><label>N° de l'acte du 3°Av:</label> <input type="text" id="editTemav" name="Temav" /></div>
-        <div class="form-group"><label>N° de l'acte du 4°Av:</label> <input type="text" id="editQemav" name="Qemav" /></div>
-        <div class="form-group"><label>N° de l'acte du 5°Av:</label> <input type="text" id="editCemav" name="Cemav" /></div>
-        <div class="form-group"><label>N° de l'acte du 6°Av:</label> <input type="text" id="editSemav" name="Semav" /></div>
-        <div class="form-group"><label>N° de l'acte du 7°Av:</label> <input type="text" id="editSepmav" name="Sepmav" /></div>
-        <div class="form-group"><label>N° de l'acte du 8°Av:</label> <input type="text" id="editHemav" name="Hemav" /></div>
-        <div class="form-group"><label>N° de l'acte du 9°Av:</label> <input type="text" id="editNemav" name="Nemav" /></div>
-        <div class="form-group"><label>N° de l'acte du 10°Av:</label> <input type="text" id="editDxemav" name="Dxemav" /></div>
-        <div class="form-group"><label>N° de l'acte du 11°Av:</label> <input type="text" id="editOnemav" name="Onemav" /></div>
-        <div class="form-group"><label>N° de l'acte du 12°Av:</label> <input type="text" id="editDou" name="Dou" /></div>
-        <div class="form-group"><label>N° de l'acte du 13°Av:</label> <input type="text" id="editTrei" name="Trei" /></div>
-        <div class="form-group"><label>N° de l'acte du 14°Av:</label> <input type="text" id="editQuat" name="Quat" /></div>
-        <div class="form-group"><label>N° de l'acte du 15°Av:</label> <input type="text" id="editQuin" name="Quin" /></div>
-        <div class="form-group"><label>N° de l'acte du 16°Av:</label> <input type="text" id="editSeiz" name="Seiz" /></div>
+        <div class="form-group">
+    <label>N° de l'acte du 1°Av:</label> 
+    <input type="text" id="editPerav" name="Perav" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" />
+</div>
+<div class="form-group">
+    <label>N° de l'acte du 2°Av:</label> 
+    <input type="text" id="editDemav" name="Demav" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" />
+</div>
+<div class="form-group">
+    <label>N° de l'acte du 3°Av:</label> 
+    <input type="text" id="editTemav" name="Temav" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" />
+</div>
+<div class="form-group">
+    <label>N° de l'acte du 4°Av:</label> 
+    <input type="text" id="editQemav" name="Qemav" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" />
+</div>
+<div class="form-group">
+    <label>N° de l'acte du 5°Av:</label> 
+    <input type="text" id="editCemav" name="Cemav" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" />
+</div>
+<div class="form-group">
+    <label>N° de l'acte du 6°Av:</label> 
+    <input type="text" id="editSemav" name="Semav" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" />
+</div>
+<div class="form-group">
+    <label>N° de l'acte du 7°Av:</label> 
+    <input type="text" id="editSepmav" name="Sepmav" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" />
+</div>
+<div class="form-group">
+    <label>N° de l'acte du 8°Av:</label> 
+    <input type="text" id="editHemav" name="Hemav" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" />
+</div>
+<div class="form-group">
+    <label>N° de l'acte du 9°Av:</label> 
+    <input type="text" id="editNemav" name="Nemav" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" />
+</div>
+<div class="form-group">
+    <label>N° de l'acte du 10°Av:</label> 
+    <input type="text" id="editDxemav" name="Dxemav" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" />
+</div>
+<div class="form-group">
+    <label>N° de l'acte du 11°Av:</label> 
+    <input type="text" id="editOnemav" name="Onemav" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" />
+</div>
+<div class="form-group">
+    <label>N° de l'acte du 12°Av:</label> 
+    <input type="text" id="editDou" name="Dou" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" />
+</div>
+<div class="form-group">
+    <label>N° de l'acte du 13°Av:</label> 
+    <input type="text" id="editTrei" name="Trei" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" />
+</div>
+<div class="form-group">
+    <label>N° de l'acte du 14°Av:</label> 
+    <input type="text" id="editQuat" name="Quat" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" />
+</div>
+<div class="form-group">
+    <label>N° de l'acte du 15°Av:</label> 
+    <input type="text" id="editQuin" name="Quin" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" />
+</div>
+<div class="form-group">
+    <label>N° de l'acte du 16°Av:</label> 
+    <input type="text" id="editSeiz" name="Seiz" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" />
+</div>
         
         <div class="form-actions">
             <button type="submit" class="btn-save-modal">Enregistrer</button>

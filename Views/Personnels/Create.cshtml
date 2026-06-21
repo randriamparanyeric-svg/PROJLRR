@@ -21,15 +21,15 @@
                            value="@Model.Matricule" placeholder="Ex: 123456 ou EN COURS" />
                 </div>
 
-                <div class="form-group mb-4">
-                    <label for="NomEtPrenoms" class="custom-label">Nom et Prénoms</label>
-                    <input type="text" id="NomEtPrenoms" name="NomEtPrenoms" class="form-control custom-input" value="@Model.NomEtPrenoms" placeholder="Nom complet" />
-                </div>
+               <div class="form-group mb-4">
+    <label for="NomEtPrenoms" class="custom-label">Nom et Prénoms</label>
+    <input type="text" id="NomEtPrenoms" name="NomEtPrenoms" class="form-control custom-input text-uppercase" value="@Model.NomEtPrenoms" placeholder="Nom complet" oninput="this.value = this.value.toUpperCase()" />
+</div>
 
                 <div class="form-group mb-4">
-                    <label for="CIN" class="custom-label">CIN</label>
-                    <input type="text" id="CIN" name="CIN" class="form-control custom-input" value="@Model.Cin" placeholder="Numéro de carte d'identité" />
-                </div>
+    <label for="CIN" class="custom-label">CIN (SANS ESPACE)</label>
+    <input type="text" id="CIN" name="CIN" class="form-control custom-input" value="@Model.Cin" placeholder="Ex:101112412198" />
+</div>
 
                 <div class="form-group mb-4">
                     <label for="SEXE" class="custom-label">Sexe</label>
@@ -46,10 +46,9 @@
            value="@(DateTime.TryParse(Model.Datenaiss, out var d1) ? d1.ToString("yyyy-MM-dd") : "")" />
 </div>
                 <div class="form-group mb-4">
-                    <label for="LIEUDENAISS" class="custom-label">Lieu de naissance</label>
-                    <input type="text" id="LIEUDENAISS" name="LIEUDENAISS" class="form-control custom-input" value="@Model.Lieudenaiss" placeholder="Ville ou commune" />
-                </div>
-
+    <label for="LIEUDENAISS" class="custom-label">Lieu de naissance</label>
+    <input type="text" id="LIEUDENAISS" name="LIEUDENAISS" class="form-control custom-input text-uppercase" value="@Model.Lieudenaiss" placeholder="Ville ou commune" oninput="this.value = this.value.toUpperCase()" />
+</div>
                 <div class="form-group mb-4">
                     <label for="CONTACT" class="custom-label">Contact</label>
                     <input type="text" id="CONTACT" name="CONTACT" class="form-control custom-input" value="@Model.Contact" placeholder="Ex: 034 XX XX XX" />
@@ -118,14 +117,14 @@
                 </div>
 
                 <div class="form-group mb-4">
-                    <label for="CORPS" class="custom-label">Corps et Grade</label>
-                    <input type="text" id="CORPS" name="CORPS" class="form-control custom-input" value="@Model.Corps" placeholder="Ex: CONCEPTEURS 2/1" />
-                </div>
+    <label for="CORPS" class="custom-label">Corps et Grade</label>
+    <input type="text" id="CORPS" name="CORPS" class="form-control custom-input text-uppercase" value="@Model.Corps" placeholder="Ex: CONCEPTEURS 2/1" oninput="this.value = this.value.toUpperCase()" />
+</div>
 
                 <div class="form-group mb-4">
-                    <label for="DEC" class="custom-label">N°Décision ou Note de Service(à préciser)</label>
-                    <input type="text" id="DEC" name="DEC" class="form-control custom-input" value="@Model.Dec" />
-                </div>
+    <label for="DEC" class="custom-label">N°Décision ou Note de Service(à préciser)</label>
+    <input type="text" id="DEC" name="DEC" class="form-control custom-input text-uppercase" value="@Model.Dec" oninput="this.value = this.value.toUpperCase()" />
+</div>
 
                 <div class="form-group mb-4">
     <label for="DATEDENTRE" class="custom-label">Date d'entrée dans l'administration</label>
@@ -170,22 +169,85 @@
 
             <div class="form-section-title">Historique des Avancements d'Échelon</div>
             <div class="form-section advancement-grid">
-                <div class="form-group mb-3"><label for="PERAV" class="custom-label">N° de l'acte du 1° AVANCEMENT</label><input type="text" id="PERAV" name="PERAV" class="form-control custom-input" value="@Model.Perav" /></div>
-                <div class="form-group mb-3"><label for="DEMAV" class="custom-label">N°de l'acte du 2° AVANCEMENT</label><input type="text" id="DEMAV" name="DEMAV" class="form-control custom-input" value="@Model.Demav" /></div>
-                <div class="form-group mb-3"><label for="TEMAV" class="custom-label">N° de l'acte du 3° AVANCEMENT</label><input type="text" id="TEMAV" name="TEMAV" class="form-control custom-input" value="@Model.Temav" /></div>
-                <div class="form-group mb-3"><label for="QEMAV" class="custom-label">N° de l'acte du 4° AVANCEMENT</label><input type="text" id="QEMAV" name="QEMAV" class="form-control custom-input" value="@Model.Qemav" /></div>
-                <div class="form-group mb-3"><label for="CEMAV" class="custom-label">N° de l'acte du 5° AVANCEMENT</label><input type="text" id="CEMAV" name="CEMAV" class="form-control custom-input" value="@Model.Cemav" /></div>
-                <div class="form-group mb-3"><label for="SEMAV" class="custom-label">N° de l'acte du 6° AVANCEMENT</label><input type="text" id="SEMAV" name="SEMAV" class="form-control custom-input" value="@Model.Semav" /></div>
-                <div class="form-group mb-3"><label for="SEPMAV" class="custom-label">N° de l'acte du 7° AVANCEMENT</label><input type="text" id="SEPMAV" name="SEPMAV" class="form-control custom-input" value="@Model.Sepmav" /></div>
-                <div class="form-group mb-3"><label for="HEMAV" class="custom-label">N° de l'acte du 8° AVANCEMENT</label><input type="text" id="HEMAV" name="HEMAV" class="form-control custom-input" value="@Model.Hemav" /></div>
-                <div class="form-group mb-3"><label for="NEMAV" class="custom-label">N° de l'acte du 9° AVANCEMENT</label><input type="text" id="NEMAV" name="NEMAV" class="form-control custom-input" value="@Model.Nemav" /></div>
-                <div class="form-group mb-3"><label for="DXEMAV" class="custom-label">N° de l'acte du 10° AVANCEMENT</label><input type="text" id="DXEMAV" name="DXEMAV" class="form-control custom-input" value="@Model.Dxemav" /></div>
-                <div class="form-group mb-3"><label for="ONEMAV" class="custom-label">N° de l'acte du 11° AVANCEMENT</label><input type="text" id="ONEMAV" name="ONEMAV" class="form-control custom-input" value="@Model.Onemav" /></div>
-                <div class="form-group mb-3"><label for="DOU" class="custom-label">N° de l'acte du 12° AVANCEMENT</label><input type="text" id="DOU" name="DOU" class="form-control custom-input" value="@Model.Dou" /></div>
-                <div class="form-group mb-3"><label for="TREI" class="custom-label">N° de l'acte du 13° AVANCEMENT</label><input type="text" id="TREI" name="TREI" class="form-control custom-input" value="@Model.Trei" /></div>
-                <div class="form-group mb-3"><label for="QUAT" class="custom-label">N° de l'acte du 14° AVANCEMENT</label><input type="text" id="QUAT" name="QUAT" class="form-control custom-input" value="@Model.Quat" /></div>
-                <div class="form-group mb-3"><label for="QUIN" class="custom-label">N° de l'acte du 15° AVANCEMENT</label><input type="text" id="QUIN" name="QUIN" class="form-control custom-input" value="@Model.Quin" /></div>
-                <div class="form-group mb-3"><label for="SEIZ" class="custom-label">N° de l'acte du 16° AVANCEMENT</label><input type="text" id="SEIZ" name="SEIZ"  class="form-control custom-input" value="@Model.Seiz" /></div>
+               <div class="form-group mb-3">
+    <label for="PERAV" class="custom-label">N° de l'acte du 1° AVANCEMENT</label>
+    <input type="text" id="PERAV" name="PERAV" class="form-control custom-input text-uppercase" value="@Model.Perav" oninput="this.value = this.value.toUpperCase()" />
+</div>
+
+<div class="form-group mb-3">
+    <label for="DEMAV" class="custom-label">N°de l'acte du 2° AVANCEMENT</label>
+    <input type="text" id="DEMAV" name="DEMAV" class="form-control custom-input text-uppercase" value="@Model.Demav" oninput="this.value = this.value.toUpperCase()" />
+</div>
+
+<div class="form-group mb-3">
+    <label for="TEMAV" class="custom-label">N° de l'acte du 3° AVANCEMENT</label>
+    <input type="text" id="TEMAV" name="TEMAV" class="form-control custom-input text-uppercase" value="@Model.Temav" oninput="this.value = this.value.toUpperCase()" />
+</div>
+
+<div class="form-group mb-3">
+    <label for="QEMAV" class="custom-label">N° de l'acte du 4° AVANCEMENT</label>
+    <input type="text" id="QEMAV" name="QEMAV" class="form-control custom-input text-uppercase" value="@Model.Qemav" oninput="this.value = this.value.toUpperCase()" />
+</div>
+
+<div class="form-group mb-3">
+    <label for="CEMAV" class="custom-label">N° de l'acte du 5° AVANCEMENT</label>
+    <input type="text" id="CEMAV" name="CEMAV" class="form-control custom-input text-uppercase" value="@Model.Cemav" oninput="this.value = this.value.toUpperCase()" />
+</div>
+
+<div class="form-group mb-3">
+    <label for="SEMAV" class="custom-label">N° de l'acte du 6° AVANCEMENT</label>
+    <input type="text" id="SEMAV" name="SEMAV" class="form-control custom-input text-uppercase" value="@Model.Semav" oninput="this.value = this.value.toUpperCase()" />
+</div>
+
+<div class="form-group mb-3">
+    <label for="SEPMAV" class="custom-label">N° de l'acte du 7° AVANCEMENT</label>
+    <input type="text" id="SEPMAV" name="SEPMAV" class="form-control custom-input text-uppercase" value="@Model.Sepmav" oninput="this.value = this.value.toUpperCase()" />
+</div>
+
+<div class="form-group mb-3">
+    <label for="HEMAV" class="custom-label">N° de l'acte du 8° AVANCEMENT</label>
+    <input type="text" id="HEMAV" name="HEMAV" class="form-control custom-input text-uppercase" value="@Model.Hemav" oninput="this.value = this.value.toUpperCase()" />
+</div>
+
+<div class="form-group mb-3">
+    <label for="NEMAV" class="custom-label">N° de l'acte du 9° AVANCEMENT</label>
+    <input type="text" id="NEMAV" name="NEMAV" class="form-control custom-input text-uppercase" value="@Model.Nemav" oninput="this.value = this.value.toUpperCase()" />
+</div>
+
+<div class="form-group mb-3">
+    <label for="DXEMAV" class="custom-label">N° de l'acte du 10° AVANCEMENT</label>
+    <input type="text" id="DXEMAV" name="DXEMAV" class="form-control custom-input text-uppercase" value="@Model.Dxemav" oninput="this.value = this.value.toUpperCase()" />
+</div>
+
+<div class="form-group mb-3">
+    <label for="ONEMAV" class="custom-label">N° de l'acte du 11° AVANCEMENT</label>
+    <input type="text" id="ONEMAV" name="ONEMAV" class="form-control custom-input text-uppercase" value="@Model.Onemav" oninput="this.value = this.value.toUpperCase()" />
+</div>
+
+<div class="form-group mb-3">
+    <label for="DOU" class="custom-label">N° de l'acte du 12° AVANCEMENT</label>
+    <input type="text" id="DOU" name="DOU" class="form-control custom-input text-uppercase" value="@Model.Dou" oninput="this.value = this.value.toUpperCase()" />
+</div>
+
+<div class="form-group mb-3">
+    <label for="TREI" class="custom-label">N° de l'acte du 13° AVANCEMENT</label>
+    <input type="text" id="TREI" name="TREI" class="form-control custom-input text-uppercase" value="@Model.Trei" oninput="this.value = this.value.toUpperCase()" />
+</div>
+
+<div class="form-group mb-3">
+    <label for="QUAT" class="custom-label">N° de l'acte du 14° AVANCEMENT</label>
+    <input type="text" id="QUAT" name="QUAT" class="form-control custom-input text-uppercase" value="@Model.Quat" oninput="this.value = this.value.toUpperCase()" />
+</div>
+
+<div class="form-group mb-3">
+    <label for="QUIN" class="custom-label">N° de l'acte du 15° AVANCEMENT</label>
+    <input type="text" id="QUIN" name="QUIN" class="form-control custom-input text-uppercase" value="@Model.Quin" oninput="this.value = this.value.toUpperCase()" />
+</div>
+
+<div class="form-group mb-3">
+    <label for="SEIZ" class="custom-label">N° de l'acte du 16° AVANCEMENT</label>
+    <input type="text" id="SEIZ" name="SEIZ" class="form-control custom-input text-uppercase" value="@Model.Seiz" oninput="this.value = this.value.toUpperCase()" />
+</div>
             </div>
 
             <div class="form-actions mt-5">
