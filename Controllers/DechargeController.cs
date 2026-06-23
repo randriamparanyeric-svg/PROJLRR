@@ -17,175 +17,186 @@ namespace PROJLRR.Controllers
             _dbContext = dbContext;
         }
 
-        [HttpGet("Decharge/Index")]
-        public IActionResult Index()
-        {
-            // 1. Récupération des données brutes triées par Ticks (long?)
-            var dechargesRaw = _dbContext.Decharges
-                .Join(_dbContext.Personnels,
-                    d => d.PersonnelNom,
-                    p => p.NomEtPrenoms,
-                    (d, p) => new
-                    {
-                        d.Id,
-                        d.PersonnelNom,
-                        d.ArticleNom,
-                        d.Quantite,
-                        d.SignaturePath,
-                        d.Unite,
-                        d.DateDecharge,
-                        p.Matricule,
-                        p.Matiere
-                    })
-                .OrderBy(x => x.DateDecharge)
-                .ToList();
-
-            // 2. Conversion SÉCURISÉE et INTELLIGENTE en DateTime côté C#
-            var decharges = dechargesRaw
-                .Select(x => new
-                {
-                    x.Id,
-                    x.PersonnelNom,
-                    x.ArticleNom,
-                    x.Quantite,
-                    x.SignaturePath,
-                    x.Unite,
-                    
-                    DateDechargeReal = x.DateDecharge.HasValue && x.DateDecharge.Value > 0
-                        ? (x.DateDecharge.Value > 600000000000000000 
-                            ? new DateTime(x.DateDecharge.Value) 
-                            : DateTimeOffset.FromUnixTimeMilliseconds(x.DateDecharge.Value).DateTime.ToLocalTime()) 
-                        : DateTime.MinValue,
-                        
-                    x.Matricule,
-                    x.Matiere
-                })
-                .ToList();
-
-            // 3. Groupement et fusion (Version blindée contre les espaces et la casse)
-            var dechargesFusionnees = decharges
-                .GroupBy(d => new { d.PersonnelNom, d.Matricule, d.Matiere, Date = d.DateDechargeReal.Date })
-                .Select(g => new DechargeFusionnee
-                {
-                    SignaturePath = g.First().SignaturePath,
-                    PersonnelNom = g.Key.PersonnelNom,
-                    MATRICULE = g.Key.Matricule,
-                    MATIERE = g.Key.Matiere,
-                    DateDecharge = g.Key.Date, 
-                    
-                    ArticlesFusionnes = string.Join("<br/>", g
-                        .GroupBy(a => new { 
-                            NomNettoye = a.ArticleNom?.Trim().ToLower() ?? "", 
-                            UniteNettoye = a.Unite?.Trim().ToLower() ?? "" 
-                        })
-                        .Select((groupArticle, index) => {
-                            var premierArticle = groupArticle.First();
-                            var totalQuantite = groupArticle.Sum(d => d.Quantite);
-                            
-                            return $"{index + 1}- {premierArticle.ArticleNom} ({totalQuantite} {premierArticle.Unite})";
-                        }))
-                })
-                .OrderBy(df => df.DateDecharge)
-                .ToList();
-
-            var lastDecharge = _dbContext.Decharges
-                .OrderByDescending(d => d.DateDecharge)
-                .ThenByDescending(d => d.Id)
-                .FirstOrDefault();
-
-            if (lastDecharge != null)
+       [HttpGet("Decharge/Index")]
+public IActionResult Index()
+{
+    // 1. Récupération des données avec une LEFT JOIN (inclut tout le monde)
+    var dechargesRaw = _dbContext.Decharges
+        .GroupJoin(_dbContext.Personnels,
+            d => d.PersonnelNom.ToLower().Trim(),
+            p => p.NomEtPrenoms.ToLower().Trim(),
+            (d, personnels) => new { d, personnels })
+        .SelectMany(x => x.personnels.DefaultIfEmpty(), // LEFT JOIN : garde les décharges même sans personnel trouvé
+            (x, p) => new
             {
-                ViewBag.LastPersonnelNom = lastDecharge.PersonnelNom;
-            }
+                x.d.Id,
+                x.d.PersonnelNom,
+                x.d.ArticleNom,
+                x.d.Quantite,
+                x.d.SignaturePath,
+                x.d.Unite,
+                x.d.DateDecharge,
+                // Si le personnel n'existe pas (p est null), on met des valeurs par défaut
+                Matricule = p != null ? p.Matricule : "N/A",
+                Matiere = p != null ? p.Matiere : "" 
+            })
+        .OrderBy(x => x.DateDecharge)
+        .ToList();
 
-            ViewBag.Personnel = GetPersonnel();
-            ViewBag.Articles = GetArticles();
+    // 2. Conversion SÉCURISÉE et INTELLIGENTE en DateTime côté C#
+    var decharges = dechargesRaw
+        .Select(x => new
+        {
+            x.Id,
+            x.PersonnelNom,
+            x.ArticleNom,
+            x.Quantite,
+            x.SignaturePath,
+            x.Unite,
+            
+            DateDechargeReal = x.DateDecharge.HasValue && x.DateDecharge.Value > 0
+                ? (x.DateDecharge.Value > 600000000000000000 
+                    ? new DateTime(x.DateDecharge.Value) 
+                    : DateTimeOffset.FromUnixTimeMilliseconds(x.DateDecharge.Value).DateTime.ToLocalTime()) 
+                : DateTime.MinValue,
+                
+            x.Matricule,
+            x.Matiere
+        })
+        .ToList();
 
-            return View(dechargesFusionnees);
-        }
+    // 3. Groupement et fusion
+    var dechargesFusionnees = decharges
+        .GroupBy(d => new { d.PersonnelNom, d.Matricule, d.Matiere, Date = d.DateDechargeReal.Date })
+        .Select(g => new DechargeFusionnee
+        {
+            SignaturePath = g.First().SignaturePath,
+            PersonnelNom = g.Key.PersonnelNom,
+            MATRICULE = g.Key.Matricule,
+            MATIERE = g.Key.Matiere,
+            DateDecharge = g.Key.Date, 
+            
+            ArticlesFusionnes = string.Join("<br/>", g
+                .GroupBy(a => new { 
+                    NomNettoye = a.ArticleNom?.Trim().ToLower() ?? "", 
+                    UniteNettoye = a.Unite?.Trim().ToLower() ?? "" 
+                })
+                .Select((groupArticle, index) => {
+                    var premierArticle = groupArticle.First();
+                    var totalQuantite = groupArticle.Sum(d => d.Quantite);
+                    
+                    return $"{index + 1}- {premierArticle.ArticleNom} ({totalQuantite} {premierArticle.Unite})";
+                }))
+        })
+        .OrderBy(df => df.DateDecharge)
+        .ToList();
+
+    var lastDecharge = _dbContext.Decharges
+        .OrderByDescending(d => d.DateDecharge)
+        .ThenByDescending(d => d.Id)
+        .FirstOrDefault();
+
+    if (lastDecharge != null)
+    {
+        ViewBag.LastPersonnelNom = lastDecharge.PersonnelNom;
+    }
+
+    ViewBag.Personnel = GetPersonnel();
+    ViewBag.Articles = GetArticles();
+
+    return View(dechargesFusionnees);
+}
 
         [HttpGet("Decharge/IndexBis")]
-        public IActionResult IndexBis()
-        {
-            var dechargesRaw = _dbContext.Decharges
-                .Join(_dbContext.Personnels,
-                    d => d.PersonnelNom,
-                    p => p.NomEtPrenoms,
-                    (d, p) => new
-                    {
-                        d.Id,
-                        d.PersonnelNom,
-                        d.ArticleNom,
-                        d.Quantite,
-                        d.SignaturePath,
-                        d.Unite,
-                        d.DateDecharge,
-                        p.Matricule,
-                        p.Matiere
-                    })
-                .OrderBy(x => x.DateDecharge)
-                .ToList();
-
-            var decharges = dechargesRaw
-                .Select(x => new
-                {
-                    x.Id,
-                    x.PersonnelNom,
-                    x.ArticleNom,
-                    x.Quantite,
-                    x.SignaturePath,
-                    x.Unite,
-                    DateDechargeReal = x.DateDecharge.HasValue ? new DateTime(x.DateDecharge.Value) : DateTime.MinValue,
-                    x.Matricule,
-                    x.Matiere
-                })
-                .ToList();
-
-            var dechargesFusionnees = decharges
-                .GroupBy(d => new { d.PersonnelNom, d.Matricule, d.Matiere, Date = d.DateDechargeReal.Date })
-                .Select(g => new DechargeFusionnee
-                {
-                    SignaturePath = g.First().SignaturePath,
-                    PersonnelNom = g.Key.PersonnelNom,
-                    MATRICULE = g.Key.Matricule,
-                    MATIERE = g.Key.Matiere,
-                    DateDecharge = g.Key.Date, 
-                    
-                    ArticlesFusionnes = string.Join("<br/>", g
-                        .GroupBy(a => new { 
-                            NomNettoye = a.ArticleNom?.Trim().ToLower() ?? "", 
-                            UniteNettoye = a.Unite?.Trim().ToLower() ?? "" 
-                        })
-                        .Select((groupArticle, index) => {
-                            var premierArticle = groupArticle.First();
-                            var totalQuantite = groupArticle.Sum(d => d.Quantite);
-                            
-                            return $"{index + 1}- {premierArticle.ArticleNom} ({totalQuantite} {premierArticle.Unite})";
-                        }))
-                })
-                .OrderBy(df => df.DateDecharge)
-                .ToList();
-
-            var lastDecharge = _dbContext.Decharges
-                .OrderByDescending(d => d.DateDecharge)
-                .ThenByDescending(d => d.Id)
-                .FirstOrDefault();
-
-            if (lastDecharge != null)
+public IActionResult IndexBis()
+{
+    // 1. Récupération des données avec LEFT JOIN pour ne perdre aucune décharge
+    var dechargesRaw = _dbContext.Decharges
+        .GroupJoin(_dbContext.Personnels,
+            d => (d.PersonnelNom ?? "").ToLower().Trim(), // Clé décharge
+            p => (p.NomEtPrenoms ?? "").ToLower().Trim(), // Clé personnel
+            (d, personnels) => new { d, personnels })
+        .SelectMany(x => x.personnels.DefaultIfEmpty(), // Le "Left" : garde tout
+            (x, p) => new
             {
-                ViewBag.LastPersonnelNom = lastDecharge.PersonnelNom;
-            }
+                x.d.Id,
+                x.d.PersonnelNom,
+                x.d.ArticleNom,
+                x.d.Quantite,
+                x.d.SignaturePath,
+                x.d.Unite,
+                x.d.DateDecharge,
+                // Si le personnel n'est pas trouvé, on met des valeurs par défaut
+                Matricule = p != null ? p.Matricule : "N/A",
+                Matiere = p != null ? p.Matiere : ""
+            })
+        .OrderBy(x => x.DateDecharge)
+        .ToList();
 
-            var dechargesDuJour = dechargesFusionnees
-                .Where(df => df.DateDecharge.Date == DateTime.Today)
-                .OrderByDescending(df => df.DateDecharge)
-                .ToList();
+    // 2. Conversion sécurisée
+    var decharges = dechargesRaw
+        .Select(x => new
+        {
+            x.Id,
+            x.PersonnelNom,
+            x.ArticleNom,
+            x.Quantite,
+            x.SignaturePath,
+            x.Unite,
+            DateDechargeReal = x.DateDecharge.HasValue ? new DateTime(x.DateDecharge.Value) : DateTime.MinValue,
+            x.Matricule,
+            x.Matiere
+        })
+        .ToList();
 
-            ViewBag.Personnel = GetPersonnel();
-            ViewBag.Articles = GetArticles();
+    // 3. Groupement et fusion
+    var dechargesFusionnees = decharges
+        .GroupBy(d => new { d.PersonnelNom, d.Matricule, d.Matiere, Date = d.DateDechargeReal.Date })
+        .Select(g => new DechargeFusionnee
+        {
+            SignaturePath = g.First().SignaturePath,
+            PersonnelNom = g.Key.PersonnelNom,
+            MATRICULE = g.Key.Matricule,
+            MATIERE = g.Key.Matiere,
+            DateDecharge = g.Key.Date,
+            
+            ArticlesFusionnes = string.Join("<br/>", g
+                .GroupBy(a => new { 
+                    NomNettoye = a.ArticleNom?.Trim().ToLower() ?? "", 
+                    UniteNettoye = a.Unite?.Trim().ToLower() ?? "" 
+                })
+                .Select((groupArticle, index) => {
+                    var premierArticle = groupArticle.First();
+                    var totalQuantite = groupArticle.Sum(d => d.Quantite);
+                    
+                    return $"{index + 1}- {premierArticle.ArticleNom} ({totalQuantite} {premierArticle.Unite})";
+                }))
+        })
+        .OrderBy(df => df.DateDecharge)
+        .ToList();
 
-            return View(dechargesDuJour);
-        }
+    // 4. Filtrage par jour (IndexBis = Décharges du jour uniquement)
+    var dechargesDuJour = dechargesFusionnees
+        .Where(df => df.DateDecharge.Date == DateTime.Today)
+        .OrderByDescending(df => df.DateDecharge)
+        .ToList();
+
+    // ViewBag pour le formulaire (toujours basé sur le tout)
+    var lastDecharge = _dbContext.Decharges
+        .OrderByDescending(d => d.DateDecharge)
+        .ThenByDescending(d => d.Id)
+        .FirstOrDefault();
+
+    if (lastDecharge != null)
+    {
+        ViewBag.LastPersonnelNom = lastDecharge.PersonnelNom;
+    }
+
+    ViewBag.Personnel = GetPersonnel();
+    ViewBag.Articles = GetArticles();
+
+    return View(dechargesDuJour);
+}
 
         [HttpGet("Decharge/Add")]
         public IActionResult Add()
@@ -440,34 +451,33 @@ namespace PROJLRR.Controllers
             return Json(resultats);
         }
 
-        [HttpGet]
-        public JsonResult SearchPersonnel(string search)
-        {
-            if (string.IsNullOrEmpty(search)) return Json(new List<object>());
-            string searchLower = search.ToLower();
+      [HttpGet]
+public JsonResult SearchPersonnel(string search)
+{
+    if (string.IsNullOrEmpty(search)) return Json(new List<object>());
+    string searchLower = search.ToLower();
 
-            var personnels = _dbContext.Personnels
-                .Where(p => p.Matricule.ToLower().Contains(searchLower) || 
-                            p.NomEtPrenoms.ToLower().Contains(searchLower))
-                .Select(p => new { matricule = p.Matricule, nom = p.NomEtPrenoms })
-                .ToList();
+    // 1. Recherche dans la table Personnels (on garde Matricule ici car il existe)
+    var queryPersonnels = _dbContext.Personnels
+        .Where(p => (p.Matricule ?? "").ToLower().Contains(searchLower) || 
+                    (p.NomEtPrenoms ?? "").ToLower().Contains(searchLower))
+        .Select(p => new { matricule = p.Matricule, nom = p.NomEtPrenoms });
 
-            return Json(personnels);
-        }
+    // 2. Recherche dans la table Decharges (on retire Matricule car il n'existe pas)
+    // On se base uniquement sur le nom du personnel
+    var queryDecharges = _dbContext.Decharges
+        .Where(d => (d.PersonnelNom ?? "").ToLower().Contains(searchLower))
+        .Select(d => new { matricule = "N/A", nom = d.PersonnelNom }); // Matricule est inconnu ici
 
-        [HttpGet]
-        public JsonResult SearchPersonnel5(string search)
-        {
-            if (string.IsNullOrEmpty(search)) return Json(new List<object>());
+    // 3. Union et nettoyage
+    var resultats = queryPersonnels.Union(queryDecharges)
+        .GroupBy(x => x.nom.ToLower().Trim()) 
+        .Select(g => g.FirstOrDefault())      
+        .Take(10)                             
+        .ToList();
 
-            var personnels = _dbContext.Personnels
-                .Where(p => p.NomEtPrenoms.Contains(search))
-                .Select(p => new { nom = p.NomEtPrenoms })
-                .ToList();
-
-            return Json(personnels);
-        }
-
+    return Json(resultats);
+}
         [HttpGet]
         public IActionResult GetArt()
         {
@@ -479,14 +489,31 @@ namespace PROJLRR.Controllers
             return Json(articles);
         }
 
-        private List<Personnel> GetPersonnel()
-        {
-            return _dbContext.Personnels
-                .Select(p => new Personnel { Matricule = p.Matricule, NomEtPrenoms = p.NomEtPrenoms })
-                .OrderBy(p => p.NomEtPrenoms)
-                .ToList();
-        }
+      private List<Personnel> GetPersonnel()
+{
+    // 1. On récupère la liste du personnel depuis la table de référence
+    var sourceReference = _dbContext.Personnels
+        .Select(p => new { Matricule = p.Matricule, NomEtPrenoms = p.NomEtPrenoms });
 
+    // 2. On récupère la liste depuis la table des décharges
+    // Comme 'Decharge' n'a pas de matricule, on met 'null' pour le champ Matricule
+    // afin que la structure de l'objet anonyme corresponde à celle de sourceReference.
+    var sourceDecharge = _dbContext.Decharges
+        .Where(d => d.PersonnelNom != null) // On ignore les noms nuls
+        .Select(d => new { Matricule = (string?)null, NomEtPrenoms = d.PersonnelNom });
+
+    // 3. On fusionne les deux listes, on groupe par nom
+    return sourceReference.Union(sourceDecharge)
+        .GroupBy(x => x.NomEtPrenoms!.ToLower().Trim()) // On groupe par nom normalisé
+        .Select(g => new Personnel 
+        { 
+            // On prend les infos du premier élément trouvé dans le groupe
+            Matricule = g.FirstOrDefault()!.Matricule, 
+            NomEtPrenoms = g.FirstOrDefault()!.NomEtPrenoms 
+        })
+        .OrderBy(p => p.NomEtPrenoms)
+        .ToList();
+}
         private List<Article> GetArticles()
         {
             return _dbContext.Articles
