@@ -126,10 +126,24 @@
             </select>
         </div>
 
-        <div class="form-group mb-4">
-            <label for="CORPS" class="custom-label">Corps</label>
-            <input type="text" id="CORPS" name="CORPS" class="form-control custom-input text-uppercase" value="@Model.Corps" placeholder="Ex: CONCEPTEURS" oninput="this.value = this.value.toUpperCase()" />
-        </div>
+       <div class="form-group mb-4">
+    <label for="CORPS" class="custom-label">Corps</label>
+    <select id="CORPS" name="CORPS" class="form-control custom-select">
+        <option value="" disabled selected>Sélectionner le Corps</option>
+        <option value="SOUS OPERATEURS" selected="@(Model.Corps == "SOUS OPERATEURS" ? "selected" : null)">SOUS OPERATEURS</option>
+        <option value="OPERATEURS" selected="@(Model.Corps == "OPERATEURS" ? "selected" : null)">OPERATEURS</option>
+        <option value="ENCADREURS" selected="@(Model.Corps == "ENCADREURS" ? "selected" : null)">ENCADREURS</option>
+        <option value="TECHNICIENS SUPERIEURS" selected="@(Model.Corps == "TECHNICIENS SUPERIEURS" ? "selected" : null)">TECHNICIENS SUPERIEURS</option>
+        <option value="REALISATEURS ADJOINTS" selected="@(Model.Corps == "REALISATEURS ADJOINTS" ? "selected" : null)">REALISATEURS ADJOINTS</option>
+        <option value="REALISATEURS" selected="@(Model.Corps == "REALISATEURS" ? "selected" : null)">REALISATEURS</option>
+        <option value="CONCEPTEURS" selected="@(Model.Corps == "CONCEPTEURS" ? "selected" : null)">CONCEPTEURS</option>
+        <option value="PROFESSEURS CERTIFIES" selected="@(Model.Corps == "PROFESSEURS CERTIFIES" ? "selected" : null)">PROFESSEURS CERTIFIES</option>
+        <option value="INST A" selected="@(Model.Corps == "INST A" ? "selected" : null)">INST A</option>
+        <option value="INST B" selected="@(Model.Corps == "INST B" ? "selected" : null)">INST B</option>
+        <option value="INST C" selected="@(Model.Corps == "INST C" ? "selected" : null)">INST C</option>
+        <option value="CHARGE D'ENSEIGNEMENT" selected="@(Model.Corps == "CHARGE D'ENSEIGNEMENT" ? "selected" : null)">CHARGE D'ENSEIGNEMENT</option>
+    </select>
+</div>
 
         <div class="form-group mb-4">
             <label for="Grade" class="custom-label">Grade</label>
@@ -147,18 +161,41 @@
 <option value="P3" selected="@(Model.Grade == "P3" ? "selected" : null)">P3</option>
 <option value="P EX1" selected="@(Model.Grade == "P EX1" ? "selected" : null)">P EX1</option>
 <option value="P EX2" selected="@(Model.Grade == "P EX2" ? "selected" : null)">P EX2</option>
+<!-- AUX ECH° I -->
 <option value="AUX ECH° I 1°ECHELON" selected="@(Model.Grade == "AUX ECH° I 1°ECHELON" ? "selected" : null)">AUX ECH° I 1°ECHELON</option>
 <option value="AUX ECH° I 2°ECHELON" selected="@(Model.Grade == "AUX ECH° I 2°ECHELON" ? "selected" : null)">AUX ECH° I 2°ECHELON</option>
 <option value="AUX ECH° I 3°ECHELON" selected="@(Model.Grade == "AUX ECH° I 3°ECHELON" ? "selected" : null)">AUX ECH° I 3°ECHELON</option>
+<option value="AUX ECH° I 4°ECHELON" selected="@(Model.Grade == "AUX ECH° I 4°ECHELON" ? "selected" : null)">AUX ECH° I 4°ECHELON</option>
+<option value="AUX ECH° I 5°ECHELON" selected="@(Model.Grade == "AUX ECH° I 5°ECHELON" ? "selected" : null)">AUX ECH° I 5°ECHELON</option>
+<option value="AUX ECH° I 6°ECHELON" selected="@(Model.Grade == "AUX ECH° I 6°ECHELON" ? "selected" : null)">AUX ECH° I 6°ECHELON</option>
+<option value="AUX ECH° I 7°ECHELON" selected="@(Model.Grade == "AUX ECH° I 7°ECHELON" ? "selected" : null)">AUX ECH° I 7°ECHELON</option>
+
+<!-- AUX ECH° II -->
 <option value="AUX ECH° II 1°ECHELON" selected="@(Model.Grade == "AUX ECH° II 1°ECHELON" ? "selected" : null)">AUX ECH° II 1°ECHELON</option>
 <option value="AUX ECH° II 2°ECHELON" selected="@(Model.Grade == "AUX ECH° II 2°ECHELON" ? "selected" : null)">AUX ECH° II 2°ECHELON</option>
 <option value="AUX ECH° II 3°ECHELON" selected="@(Model.Grade == "AUX ECH° II 3°ECHELON" ? "selected" : null)">AUX ECH° II 3°ECHELON</option>
+<option value="AUX ECH° II 4°ECHELON" selected="@(Model.Grade == "AUX ECH° II 4°ECHELON" ? "selected" : null)">AUX ECH° II 4°ECHELON</option>
+<option value="AUX ECH° II 5°ECHELON" selected="@(Model.Grade == "AUX ECH° II 5°ECHELON" ? "selected" : null)">AUX ECH° II 5°ECHELON</option>
+<option value="AUX ECH° II 6°ECHELON" selected="@(Model.Grade == "AUX ECH° II 6°ECHELON" ? "selected" : null)">AUX ECH° II 6°ECHELON</option>
+<option value="AUX ECH° II 7°ECHELON" selected="@(Model.Grade == "AUX ECH° II 7°ECHELON" ? "selected" : null)">AUX ECH° II 7°ECHELON</option>
+
+<!-- AUX ECH° III -->
 <option value="AUX ECH° III 1°ECHELON" selected="@(Model.Grade == "AUX ECH° III 1°ECHELON" ? "selected" : null)">AUX ECH° III 1°ECHELON</option>
 <option value="AUX ECH° III 2°ECHELON" selected="@(Model.Grade == "AUX ECH° III 2°ECHELON" ? "selected" : null)">AUX ECH° III 2°ECHELON</option>
 <option value="AUX ECH° III 3°ECHELON" selected="@(Model.Grade == "AUX ECH° III 3°ECHELON" ? "selected" : null)">AUX ECH° III 3°ECHELON</option>
+<option value="AUX ECH° III 4°ECHELON" selected="@(Model.Grade == "AUX ECH° III 4°ECHELON" ? "selected" : null)">AUX ECH° III 4°ECHELON</option>
+<option value="AUX ECH° III 5°ECHELON" selected="@(Model.Grade == "AUX ECH° III 5°ECHELON" ? "selected" : null)">AUX ECH° III 5°ECHELON</option>
+<option value="AUX ECH° III 6°ECHELON" selected="@(Model.Grade == "AUX ECH° III 6°ECHELON" ? "selected" : null)">AUX ECH° III 6°ECHELON</option>
+<option value="AUX ECH° III 7°ECHELON" selected="@(Model.Grade == "AUX ECH° III 7°ECHELON" ? "selected" : null)">AUX ECH° III 7°ECHELON</option>
+
+<!-- AUX ECH° IV -->
 <option value="AUX ECH° IV 1°ECHELON" selected="@(Model.Grade == "AUX ECH° IV 1°ECHELON" ? "selected" : null)">AUX ECH° IV 1°ECHELON</option>
 <option value="AUX ECH° IV 2°ECHELON" selected="@(Model.Grade == "AUX ECH° IV 2°ECHELON" ? "selected" : null)">AUX ECH° IV 2°ECHELON</option>
 <option value="AUX ECH° IV 3°ECHELON" selected="@(Model.Grade == "AUX ECH° IV 3°ECHELON" ? "selected" : null)">AUX ECH° IV 3°ECHELON</option>
+<option value="AUX ECH° IV 4°ECHELON" selected="@(Model.Grade == "AUX ECH° IV 4°ECHELON" ? "selected" : null)">AUX ECH° IV 4°ECHELON</option>
+<option value="AUX ECH° IV 5°ECHELON" selected="@(Model.Grade == "AUX ECH° IV 5°ECHELON" ? "selected" : null)">AUX ECH° IV 5°ECHELON</option>
+<option value="AUX ECH° IV 6°ECHELON" selected="@(Model.Grade == "AUX ECH° IV 6°ECHELON" ? "selected" : null)">AUX ECH° IV 6°ECHELON</option>
+<option value="AUX ECH° IV 7°ECHELON" selected="@(Model.Grade == "AUX ECH° IV 7°ECHELON" ? "selected" : null)">AUX ECH° IV 7°ECHELON</option>
             </select>
         </div>
 

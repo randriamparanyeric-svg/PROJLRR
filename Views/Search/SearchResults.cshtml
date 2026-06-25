@@ -15,6 +15,20 @@
 }
 
 <style>
+.btn-print {
+    background-color: #17a2b8; /* Couleur Cyan / Info professionnelle */
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+}
+
+.btn-print:hover {
+    background-color: #138496;
+}
     /* --- Design Global & Modernisation --- */
     body {
         background-color: #f8f9fa;
@@ -452,17 +466,24 @@
 <tr><th>CLASSE TENUE N°6 :</th> <td class="ClasseTenue6">@p.ClasseTenue6</td></tr>
 <tr><th>CLASSE TENUE N°7 :</th> <td class="ClasseTenue7">@p.ClasseTenue7</td></tr>
 <tr><th>CLASSE TENUE N°8 :</th> <td class="ClasseTenue8">@p.ClasseTenue8</td></tr>
-                   </tbody>
+                    </tbody>
                 </table>
+                
+                <!-- Section des Boutons réorganisée -->
                 <div class="card-actions">
+                    <!-- Accessible à tous -->
+                    <button type="button" class="btn-edit btn-edit-card" data-id="@p.Num">✏️Modifier</button>
+                    
+                    <!-- Nouveau Bouton Imprimer inséré au milieu (Accessible à tous) -->
+                    <button type="button" class="btn-print btn-print-card" onclick="imprimerFiche('card-@p.Num')">🖨️ Imprimer la fiche</button>
+                    
+                    <!-- Restriction sur l'archivage uniquement -->
                     @if (isAdmin)
                     {
-                        <button type="button" class="btn-edit btn-edit-card" data-id="@p.Num">✏️Modifier</button>
                         <button type="button" class="btn-delete btn-delete-card" data-id="@p.Num">🗑 Archiver</button>
                     }
                     else
                     {
-                        <button type="button" class="btn-edit btn-edit-card" data-id="@p.Num">✏️Modifier</button>
                         <button type="button" class="btn-delete" disabled style="background-color: #e9ecef; color: #777; border: none; padding: 10px 15px; cursor: not-allowed; opacity: 0.6; border-radius: 8px;">🗑 Archiver</button>
                     }
                 </div>
@@ -576,9 +597,23 @@
         </div>
         
         <div class="form-group">
-            <label>Corps:</label> 
-            <input type="text" id="editCorps" name="Corps" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" placeholder="Ex: CONCEPTEURS" />
-        </div>
+    <label>Corps:</label> 
+    <select id="editCorps" name="Corps" class="form-control">
+        <option value="" disabled selected>Sélectionner le Corps</option>
+        <option value="SOUS OPERATEURS">SOUS OPERATEURS</option>
+        <option value="OPERATEURS">OPERATEURS</option>
+        <option value="ENCADREURS">ENCADREURS</option>
+        <option value="TECHNICIENS SUPERIEURS">TECHNICIENS SUPERIEURS</option>
+        <option value="REALISATEURS ADJOINTS">REALISATEURS ADJOINTS</option>
+        <option value="REALISATEURS">REALISATEURS</option>
+        <option value="CONCEPTEURS">CONCEPTEURS</option>
+        <option value="PROFESSEURS CERTIFIES">PROFESSEURS CERTIFIES</option>
+        <option value="INST A">INST A</option>
+        <option value="INST B">INST B</option>
+        <option value="INST C">INST C</option>
+        <option value="CHARGE D'ENSEIGNEMENT">CHARGE D'ENSEIGNEMENT</option>
+    </select>
+</div>
 
         <div class="form-group">
             <label>Grade:</label> 
@@ -595,18 +630,42 @@
 <option value="P3">P3</option>
 <option value="P EX1">P EX1</option>
 <option value="P EX2">P EX2</option>
+
+<!-- AUX ECH° I -->
 <option value="AUX ECH° I 1°ECHELON">AUX ECH° I 1°ECHELON</option>
 <option value="AUX ECH° I 2°ECHELON">AUX ECH° I 2°ECHELON</option>
 <option value="AUX ECH° I 3°ECHELON">AUX ECH° I 3°ECHELON</option>
+<option value="AUX ECH° I 4°ECHELON">AUX ECH° I 4°ECHELON</option>
+<option value="AUX ECH° I 5°ECHELON">AUX ECH° I 5°ECHELON</option>
+<option value="AUX ECH° I 6°ECHELON">AUX ECH° I 6°ECHELON</option>
+<option value="AUX ECH° I 7°ECHELON">AUX ECH° I 7°ECHELON</option>
+
+<!-- AUX ECH° II -->
 <option value="AUX ECH° II 1°ECHELON">AUX ECH° II 1°ECHELON</option>
 <option value="AUX ECH° II 2°ECHELON">AUX ECH° II 2°ECHELON</option>
 <option value="AUX ECH° II 3°ECHELON">AUX ECH° II 3°ECHELON</option>
+<option value="AUX ECH° II 4°ECHELON">AUX ECH° II 4°ECHELON</option>
+<option value="AUX ECH° II 5°ECHELON">AUX ECH° II 5°ECHELON</option>
+<option value="AUX ECH° II 6°ECHELON">AUX ECH° II 6°ECHELON</option>
+<option value="AUX ECH° II 7°ECHELON">AUX ECH° II 7°ECHELON</option>
+
+<!-- AUX ECH° III -->
 <option value="AUX ECH° III 1°ECHELON">AUX ECH° III 1°ECHELON</option>
 <option value="AUX ECH° III 2°ECHELON">AUX ECH° III 2°ECHELON</option>
 <option value="AUX ECH° III 3°ECHELON">AUX ECH° III 3°ECHELON</option>
+<option value="AUX ECH° III 4°ECHELON">AUX ECH° III 4°ECHELON</option>
+<option value="AUX ECH° III 5°ECHELON">AUX ECH° III 5°ECHELON</option>
+<option value="AUX ECH° III 6°ECHELON">AUX ECH° III 6°ECHELON</option>
+<option value="AUX ECH° III 7°ECHELON">AUX ECH° III 7°ECHELON</option>
+
+<!-- AUX ECH° IV -->
 <option value="AUX ECH° IV 1°ECHELON">AUX ECH° IV 1°ECHELON</option>
 <option value="AUX ECH° IV 2°ECHELON">AUX ECH° IV 2°ECHELON</option>
 <option value="AUX ECH° IV 3°ECHELON">AUX ECH° IV 3°ECHELON</option>
+<option value="AUX ECH° IV 4°ECHELON">AUX ECH° IV 4°ECHELON</option>
+<option value="AUX ECH° IV 5°ECHELON">AUX ECH° IV 5°ECHELON</option>
+<option value="AUX ECH° IV 6°ECHELON">AUX ECH° IV 6°ECHELON</option>
+<option value="AUX ECH° IV 7°ECHELON">AUX ECH° IV 7°ECHELON</option>
             </select>
         </div>
         
@@ -1049,4 +1108,39 @@ $("#updateForm").submit(function(e){
             reader.readAsDataURL(file);
         }
     });
+</script>
+<script>
+function imprimerFiche(cardId) {
+    var cardElement = document.getElementById(cardId);
+    if (!cardElement) return;
+
+    // Crée une fenêtre temporaire pour l'impression
+    var fenetreImpression = window.open('', '_blank', 'height=800,width=1000');
+    
+    fenetreImpression.document.write('<html><head><title>Fiche Personnel</title>');
+    
+    // Ajout des styles CSS pour garantir une mise en page identique et propre à l'impression
+    fenetreImpression.document.write('<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">');
+    fenetreImpression.document.write('<style>');
+    fenetreImpression.document.write('body { font-family: "Segoe UI", Arial, sans-serif; padding: 30px; background-color: #fff; color: #000; }');
+    fenetreImpression.document.write('.table-custom { width: 100%; border-collapse: collapse; margin-top: 15px; }');
+    fenetreImpression.document.write('.table-custom th, .table-custom td { border: 1px solid #dee2e6; padding: 10px; font-size: 0.95rem; }');
+    fenetreImpression.document.write('.photo-personnel { display: block; margin: 0 auto 15px auto; border: 3px solid #dee2e6; border-radius: 8px; }');
+    fenetreImpression.document.write('.card-actions { display: none !important; }'); // Masquer définitivement les boutons sur le papier
+    fenetreImpression.document.write('tr { page-break-inside: avoid; }'); // Évite les coupures de lignes bizarres entre deux pages
+    fenetreImpression.document.write('</style></head><body>');
+    
+    // Injecte le HTML de la carte ciblée
+    fenetreImpression.document.write(cardElement.innerHTML);
+    
+    fenetreImpression.document.write('</body></html>');
+    fenetreImpression.document.close();
+
+    // Attendre le chargement complet des éléments (comme la photo) avant de lancer l'impression
+    fenetreImpression.onload = function() {
+        fenetreImpression.focus();
+        fenetreImpression.print();
+        fenetreImpression.close();
+    };
+}
 </script>
