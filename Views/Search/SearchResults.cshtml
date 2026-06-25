@@ -1,5 +1,11 @@
 @model List<PROJLRR.Models.Personnel>
 @{
+    // Calcul de l'année scolaire pour le titre des classes tenues
+    int anneeActuelle = DateTime.Now.Year;
+    int moisActuel = DateTime.Now.Month;
+    int debutAnneeScolaire = (moisActuel >= 9) ? anneeActuelle : anneeActuelle - 1;
+    int finAnneeScolaire = debutAnneeScolaire + 1;
+
     Layout = "/Views/Shared/Layout.cshtml";
     ViewData["Title"] = "Résultats de la recherche";
 
@@ -358,6 +364,7 @@
 </div>
 
 <div id="resultsContainer">
+
     @if (Model != null && Model.Any())
     {
         @foreach (var p in Model)
@@ -370,39 +377,82 @@
                                 <img src="@Url.Content(p.Photo)" class="photo-personnel" alt="Photo de @p.NomEtPrenoms" width="150" height="200" />
                             </td>
                         </tr>
-                        <tr><th>MATRICULE :</th> <td class="Matricule">@p.Matricule</td></tr>
-                        <tr><th>NOM ET PRÉNOMS :</th> <td class="nom_prenoms">@p.NomEtPrenoms</td></tr>
-                        <tr><th>CIN :</th> <td class="Cin">@p.Cin</td></tr>
-                        <tr><th>DÉCISION ou NOTE DE SERVICE :</th> <td>@p.Dec</td></tr>
-                        <tr><th>CORPS ET GRADE :</th> <td class="Corps">@p.Corps</td></tr>
-                        <tr><th>MATIRE OU BUREAU :</th> <td class="Matiere">@p.Matiere</td></tr>
-                        <tr><th>DATE DE NAISSANCE :</th> <td class="Datenaiss">@p.Datenaiss</td></tr>
-                        <tr><th>LIEU DE NAISSANCE :</th> <td class="lieunaiss">@p.Lieudenaiss</td></tr>
-                        <tr><th>SEXE :</th> <td>@p.Sexe</td></tr>
-                        <tr><th>STATUT :</th> <td>@p.Statut</td></tr>
-                        <tr><th>DATE D'ENTRÉE DANS L'ADMINISTRATION  :</th> <td class="Datedentre">@p.Datedentre</td></tr>
-                        <tr><th>DATE DE PRISE DE SERVICE AU LYCEE RAHERIVELO RAMAMONJY :</th> <td class="Datedeprise">@p.Datedeprise</td></tr>
-                        <tr><th>DIPLÔME ACADÉMIQUE :</th> <td class="Diplomeac">@p.Diplomeac</td></tr>
-                        <tr><th>DIPLÔME PÉDAGOGIQUE :</th> <td class="Diplomeped">@p.Diplomeped</td></tr>
-                        <tr><th>CONTACT :</th> <td class="Contact">@p.Contact</td></tr>
-                        <tr><th>FONCTION :</th> <td class="Fonction">@p.Fonction</td></tr>
-                        <tr><th>N° DE L'ACTE DU 1°AVANCEMENT:</th> <td class="Perav">@p.Perav</td></tr>
-                        <tr><th>N° DE L'ACTE DU 2°AVANCEMENT:</th> <td class="Demav">@p.Demav</td></tr>
-                        <tr><th>N° DE L'ACTE DU 3°AVANCEMENT:</th> <td class="Temav">@p.Temav</td></tr>
-                        <tr><th>N° DE L'ACTE DU 4°AVANCEMENT:</th> <td class="Qemav">@p.Qemav</td></tr>
-                        <tr><th>N° DE L'ACTE DU 5°AVANCEMENT:</th> <td class="Cemav">@p.Cemav</td></tr>
-                        <tr><th>N° DE L'ACTE DU 6°AVANCEMENT:</th> <td class="Semav">@p.Semav</td></tr>
-                        <tr><th>N° DE L'ACTE DU 7°AVANCEMENT:</th> <td class="Sepmav">@p.Sepmav</td></tr>
-                        <tr><th>N° DE L'ACTE DU 8°AVANCEMENT:</th> <td class="Hemav">@p.Hemav</td></tr>
-                        <tr><th>N° DE L'ACTE DU 9°AVANCEMENT:</th> <td class="Nemav">@p.Nemav</td></tr>
-                        <tr><th>N° DE L'ACTE DU 10°AVANCEMENT:</th> <td class="Dxemav">@p.Dxemav</td></tr>
-                        <tr><th>N° DE L'ACTE DU 11°AVANCEMENT:</th> <td class="Onemav">@p.Onemav</td></tr>
-                        <tr><th>N° DE L'ACTE DU 12°AVANCEMENT:</th> <td class="Dou">@p.Dou</td></tr>
-                        <tr><th>N° DE L'ACTE DU 13°AVANCEMENT:</th> <td class="Trei">@p.Trei</td></tr>
-                        <tr><th>N° DE L'ACTE DU 14°AVANCEMENT:</th> <td class="Quat">@p.Quat</td></tr>
-                        <tr><th>N° DE L'ACTE DU 15°AVANCEMENT:</th> <td class="Quin">@p.Quin</td></tr>
-                        <tr><th>N° DE L'ACTE DU 16°AVANCEMENT:</th> <td class="Seiz">@p.Seiz</td></tr>
-                    </tbody>
+                        
+                       <tr style="background-color: #ebf8ff;">
+    <th colspan="2" style="text-align: left; padding: 12px 10px; font-size: 1.15rem; color: #2b6cb0; font-style: italic; border-bottom: 2px solid #bee3f8; border-left: 5px solid #3182ce;">
+        📁 1. Informations Générales
+    </th>
+</tr>
+<tr><th>MATRICULE :</th> <td class="Matricule">@p.Matricule</td></tr>
+<tr><th>NOM ET PRÉNOMS :</th> <td class="nom_prenoms">@p.NomEtPrenoms</td></tr>
+<tr><th>CIN :</th> <td class="Cin">@p.Cin</td></tr>
+<tr><th>SEXE :</th> <td>@p.Sexe</td></tr>
+<tr><th>DATE DE NAISSANCE :</th> <td class="Datenaiss">@p.Datenaiss</td></tr>
+<tr><th>LIEU DE NAISSANCE :</th> <td class="lieunaiss">@p.Lieudenaiss</td></tr>
+<tr><th>CONTACT :</th> <td class="Contact">@p.Contact</td></tr>
+
+<tr style="background-color: #e6fffa;">
+    <th colspan="2" style="text-align: left; padding: 12px 10px; font-size: 1.15rem; color: #234e52; font-style: italic; border-bottom: 2px solid #b2f5ea; border-left: 5px solid #319795;">
+        💼 2. Parcours & Affectation
+    </th>
+</tr>
+<tr><th>FONCTION :</th> <td class="Fonction">@p.Fonction</td></tr>
+<tr><th>MATIÈRE OU BUREAU :</th> <td class="Matiere">@p.Matiere</td></tr>
+<tr><th>STATUT :</th> <td>@p.Statut</td></tr>
+<tr><th>CORPS :</th> <td class="Corps">@p.Corps</td></tr>
+<tr><th>GRADE :</th> <td class="Grade">@p.Grade</td></tr>
+<tr><th>DÉCISION ou NOTE DE SERVICE :</th> <td>@p.Dec</td></tr>
+<tr><th>DATE D'ENTRÉE DANS L'ADMINISTRATION :</th> <td class="Datedentre">@p.Datedentre</td></tr>
+<tr><th>DATE DE PRISE DE SERVICE AU LYCEE RAHERIVELO RAMAMONJY :</th> <td class="Datedeprise">@p.Datedeprise</td></tr>
+
+<tr style="background-color: #faf5ff;">
+    <th colspan="2" style="text-align: left; padding: 12px 10px; font-size: 1.15rem; color: #553c9a; font-style: italic; border-bottom: 2px solid #e9d8fd; border-left: 5px solid #805ad5;">
+        🎓 3. Diplômes et Qualifications
+    </th>
+</tr>
+<tr><th>SÉRIE DU BACC :</th> <td class="SerieBacc">@p.SerieBacc</td></tr>
+<tr><th>DIPLÔME ACADÉMIQUE :</th> <td class="Diplomeac">@p.Diplomeac</td></tr>
+<tr><th>DIPLÔME PÉDAGOGIQUE :</th> <td class="Diplomeped">@p.Diplomeped</td></tr>
+
+<tr style="background-color: #fffaf0;">
+    <th colspan="2" style="text-align: left; padding: 12px 10px; font-size: 1.15rem; color: #7b341e; font-style: italic; border-bottom: 2px solid #feebc8; border-left: 5px solid #dd6b20;">
+        📈 4. Historique des Avancements d'Échelon
+    </th>
+</tr>
+<tr><th>N° DE L'ACTE DU 1° AVANCEMENT :</th> <td class="Perav">@p.Perav</td></tr>
+<tr><th>N° DE L'ACTE DU 2° AVANCEMENT :</th> <td class="Demav">@p.Demav</td></tr>
+<tr><th>N° DE L'ACTE DU 3° AVANCEMENT :</th> <td class="Temav">@p.Temav</td></tr>
+<tr><th>N° DE L'ACTE DU 4° AVANCEMENT :</th> <td class="Qemav">@p.Qemav</td></tr>
+<tr><th>N° DE L'ACTE DU 5° AVANCEMENT :</th> <td class="Cemav">@p.Cemav</td></tr>
+<tr><th>N° DE L'ACTE DU 6° AVANCEMENT :</th> <td class="Semav">@p.Semav</td></tr>
+<tr><th>N° DE L'ACTE DU 7° AVANCEMENT :</th> <td class="Sepmav">@p.Sepmav</td></tr>
+<tr><th>N° DE L'ACTE DU 8° AVANCEMENT :</th> <td class="Hemav">@p.Hemav</td></tr>
+<tr><th>N° DE L'ACTE DU 9° AVANCEMENT :</th> <td class="Nemav">@p.Nemav</td></tr>
+<tr><th>N° DE L'ACTE DU 10° AVANCEMENT :</th> <td class="Dxemav">@p.Dxemav</td></tr>
+<tr><th>N° DE L'ACTE DU 11° AVANCEMENT :</th> <td class="Onemav">@p.Onemav</td></tr>
+<tr><th>N° DE L'ACTE DU 12° AVANCEMENT :</th> <td class="Dou">@p.Dou</td></tr>
+<tr><th>N° DE L'ACTE DU 13° AVANCEMENT :</th> <td class="Trei">@p.Trei</td></tr>
+<tr><th>N° DE L'ACTE DU 14° AVANCEMENT :</th> <td class="Quat">@p.Quat</td></tr>
+<tr><th>N° DE L'ACTE DU 15° AVANCEMENT :</th> <td class="Quin">@p.Quin</td></tr>
+<tr><th>N° DE L'ACTE DU 16° AVANCEMENT :</th> <td class="Seiz">@p.Seiz</td></tr>
+
+<tr style="background-color: #fff5f5;">
+    <th colspan="2" style="text-align: left; padding: 12px 10px; font-size: 1.15rem; color: #9b2c2c; font-style: italic; border-bottom: 2px solid #fed7d7; border-left: 5px solid #e53e3e;">
+        🏫 5. Classes tenues pour l'année scolaire @debutAnneeScolaire-@finAnneeScolaire
+        <strong style="color: #e53e3e; display: block; margin-top: 4px; font-size: 0.85rem; font-weight: bold; font-style: normal;">
+            (à changer à chaque nouvelle année scolaire)
+        </strong>
+    </th>
+</tr>
+<tr><th>CLASSE TENUE N°1 :</th> <td class="ClasseTenue1">@p.ClasseTenue1</td></tr>
+<tr><th>CLASSE TENUE N°2 :</th> <td class="ClasseTenue2">@p.ClasseTenue2</td></tr>
+<tr><th>CLASSE TENUE N°3 :</th> <td class="ClasseTenue3">@p.ClasseTenue3</td></tr>
+<tr><th>CLASSE TENUE N°4 :</th> <td class="ClasseTenue4">@p.ClasseTenue4</td></tr>
+<tr><th>CLASSE TENUE N°5 :</th> <td class="ClasseTenue5">@p.ClasseTenue5</td></tr>
+<tr><th>CLASSE TENUE N°6 :</th> <td class="ClasseTenue6">@p.ClasseTenue6</td></tr>
+<tr><th>CLASSE TENUE N°7 :</th> <td class="ClasseTenue7">@p.ClasseTenue7</td></tr>
+<tr><th>CLASSE TENUE N°8 :</th> <td class="ClasseTenue8">@p.ClasseTenue8</td></tr>
+                   </tbody>
                 </table>
                 <div class="card-actions">
                     @if (isAdmin)
@@ -429,7 +479,7 @@
     <form id="updateForm" enctype="multipart/form-data">
         <input type="hidden" name="Num" id="editNum" />
         
-        <div class="photo-upload-container">
+        <div class="photo-upload-container" style="margin-bottom: 25px; text-align: center;">
             <label style="display:block; font-weight:bold; margin-bottom:10px;">Photo du personnel :</label>
             <img id="editPhotoPreview" src="" alt="Aperçu" style="width:120px; height:150px; object-fit:cover; border:2px solid #cbd5e1; border-radius: 8px; margin-bottom:10px; display:inline-block;" />
             <br/>
@@ -439,22 +489,44 @@
             </button>
         </div>
 
+        <div class="section-divider"><h4>Informations Générales</h4></div>
+        
         <div class="form-group"><label>Matricule:</label> <input type="text" id="editMatricule" name="Matricule" /></div>
-        <div class="form-group">
-    <label>Nom & Prénoms:</label> 
-    <input type="text" id="editNomEtPrenoms" name="NomEtPrenoms" required style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" />
-</div>
-        
-        <div class="form-group"><label>Cin:</label> <input type="text" id="editCin" name="Cin" /></div>
-       <div class="form-group">
-    <label>Décision ou Note de Service:</label> 
-    <input type="text" id="editDec" name="Dec" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" />
-</div>
         
         <div class="form-group">
-    <label>Corps et Grade:</label> 
-    <input type="text" id="editCorps" name="Corps" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" />
-</div>
+            <label>Nom & Prénoms:</label> 
+            <input type="text" id="editNomEtPrenoms" name="NomEtPrenoms" required style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" />
+        </div>
+        
+        <div class="form-group"><label>Cin (SANS ESPACE):</label> <input type="text" id="editCin" name="Cin" /></div>
+        
+        <div class="form-group">
+            <label>Sexe:</label> 
+            <select id="editSexe" name="Sexe" class="form-control">
+                <option value="H">MASCULIN</option>
+                <option value="F">FEMININ</option>
+            </select>
+        </div>
+        
+        <div class="form-group"><label>Date Naissance:</label> <input type="date" id="editDatenaiss" name="Datenaiss" /></div>
+        
+        <div class="form-group">
+            <label>Lieu Naissance:</label> 
+            <input type="text" id="editLieudenaiss" name="Lieudenaiss" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" />
+        </div>
+        
+        <div class="form-group"><label>Contact:</label> <input type="text" id="editContact" name="Contact" /></div>
+
+        <div class="section-divider"><h4>Parcours & Affectation</h4></div>
+        
+        <div class="form-group">
+            <label>Fonction:</label> 
+            <select id="editFonction" name="Fonction" class="form-control">
+                <option value="PE">PERSONNEL ENSEIGNANT</option>
+                <option value="PA">PERSONNEL ADMINISTRATIF</option>
+            </select>
+        </div>
+        
         <div class="form-group">
             <label>Matière ou Bureau:</label> 
             <select id="editMatiere" name="Matiere" class="form-control">
@@ -494,22 +566,76 @@
             </select>
         </div>
         
-        <div class="form-group"><label>Date Naissance:</label> <input type="date" id="editDatenaiss" name="Datenaiss" /></div>
         <div class="form-group">
-    <label>Lieu Naissance:</label> 
-    <input type="text" id="editLieudenaiss" name="Lieudenaiss" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" />
-</div>
+            <label>Statut:</label> 
+            <select id="editStatut" name="Statut" class="form-control">
+                <option value="EFA">EFA</option>
+                <option value="FONCTIONNAIRE">FONCTIONNAIRE</option>
+                <option value="VACATAIRE">VACATAIRE</option>
+            </select>
+        </div>
         
-        <div class="form-group"><label>Sexe:</label> <select id="editSexe" name="Sexe"><option value="H">HOMME</option><option value="F">FEMME</option></select></div>
-        <div class="form-group"><label>Statut:</label> <select id="editStatut" name="Statut"><option value="EFA">EFA</option><option value="FONCTIONNAIRE">FONCTIONNAIRE</option></select></div>
+        <div class="form-group">
+            <label>Corps:</label> 
+            <input type="text" id="editCorps" name="Corps" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" placeholder="Ex: CONCEPTEURS" />
+        </div>
+
+        <div class="form-group">
+            <label>Grade:</label> 
+            <select id="editGrade" name="Grade" class="form-control">
+             <option value="STAGIAIRE">STAGIAIRE</option>
+<option value="2/1">2/1</option>
+<option value="2/2">2/2</option>
+<option value="2/3">2/3</option>
+<option value="1/1">1/1</option>
+<option value="1/2">1/2</option>
+<option value="1/3">1/3</option>
+<option value="P1">P1</option>
+<option value="P2">P2</option>
+<option value="P3">P3</option>
+<option value="P EX1">P EX1</option>
+<option value="P EX2">P EX2</option>
+<option value="AUX ECH° I 1°ECHELON">AUX ECH° I 1°ECHELON</option>
+<option value="AUX ECH° I 2°ECHELON">AUX ECH° I 2°ECHELON</option>
+<option value="AUX ECH° I 3°ECHELON">AUX ECH° I 3°ECHELON</option>
+<option value="AUX ECH° II 1°ECHELON">AUX ECH° II 1°ECHELON</option>
+<option value="AUX ECH° II 2°ECHELON">AUX ECH° II 2°ECHELON</option>
+<option value="AUX ECH° II 3°ECHELON">AUX ECH° II 3°ECHELON</option>
+<option value="AUX ECH° III 1°ECHELON">AUX ECH° III 1°ECHELON</option>
+<option value="AUX ECH° III 2°ECHELON">AUX ECH° III 2°ECHELON</option>
+<option value="AUX ECH° III 3°ECHELON">AUX ECH° III 3°ECHELON</option>
+<option value="AUX ECH° IV 1°ECHELON">AUX ECH° IV 1°ECHELON</option>
+<option value="AUX ECH° IV 2°ECHELON">AUX ECH° IV 2°ECHELON</option>
+<option value="AUX ECH° IV 3°ECHELON">AUX ECH° IV 3°ECHELON</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>Décision ou Note de Service:</label> 
+            <input type="text" id="editDec" name="Dec" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" />
+        </div>
         
         <div class="form-group"><label>Date d'Entrée dans l'administration:</label> <input type="date" id="editDatedentre" name="Datedentre" /></div>
         <div class="form-group"><label>Date de Prise de Service au Lycee Raherivelo R.:</label> <input type="date" id="editDatedeprise" name="Datedeprise" /></div>
+
+        <div class="section-divider"><h4>Diplômes et Qualifications</h4></div>
+
+        <div class="form-group">
+            <label>Série du Bacc:</label>
+            <select id="editSerieBacc" name="SerieBacc" class="form-control">
+                <option value="A">A</option>
+                <option value="C">C</option>
+                <option value="D">D</option>
+                <option value="L">L</option>
+                <option value="S">S</option>
+                <option value="OSE">OSE</option>
+                <option value="TECHNIQUE">TECHNIQUE</option>
+            </select>
+        </div>
         
-        <div class="form-group mb-3">
+        <div class="form-group">
             <label for="editDiplomeac">Diplôme Académique le plus élevé</label>
             <select id="editDiplomeac" name="Diplomeac" class="form-control">
-                <option value="" disabled selected>Sélectionner le diplôme Académique le plus élevé</option>
                 <option value="BEPC">BEPC</option>
                 <option value="BACC">BACCALAUREAT</option>
                 <option value="DTS">Diplôme de Technicien Supérieur (BACC+2)</option>
@@ -520,86 +646,53 @@
                 <option value="DOCTORAT">DOCTORAT</option>
             </select>
         </div>
-        <div class="form-group mb-3">
+
+        <div class="form-group">
             <label for="editDiplomeped">Diplôme Pédagogique le plus élevé</label>
             <select id="editDiplomeped" name="Diplomeped" class="form-control">
-                <option value="" disabled selected>Sélectionner le diplôme Pédagogique le plus élevé</option>
                 <option value="LAPEN">LAPEN</option>
                 <option value="MAPEN">MAPEN</option>
                 <option value="CAPEN">CAPEN</option>
             </select>
         </div>
-        
-        <div class="form-group"><label>Contact:</label> <input type="text" id="editContact" name="Contact" /></div>
-        <div class="form-group"><label>Fonction:</label> <select id="editFonction" name="Fonction"><option value="PA">PA</option><option value="PE">PE</option></select></div>
-        
+
         <div class="section-divider"><h4>Détails des Avancements</h4></div>
 
-        <div class="form-group">
-    <label>N° de l'acte du 1°Av:</label> 
-    <input type="text" id="editPerav" name="Perav" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" />
-</div>
-<div class="form-group">
-    <label>N° de l'acte du 2°Av:</label> 
-    <input type="text" id="editDemav" name="Demav" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" />
-</div>
-<div class="form-group">
-    <label>N° de l'acte du 3°Av:</label> 
-    <input type="text" id="editTemav" name="Temav" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" />
-</div>
-<div class="form-group">
-    <label>N° de l'acte du 4°Av:</label> 
-    <input type="text" id="editQemav" name="Qemav" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" />
-</div>
-<div class="form-group">
-    <label>N° de l'acte du 5°Av:</label> 
-    <input type="text" id="editCemav" name="Cemav" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" />
-</div>
-<div class="form-group">
-    <label>N° de l'acte du 6°Av:</label> 
-    <input type="text" id="editSemav" name="Semav" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" />
-</div>
-<div class="form-group">
-    <label>N° de l'acte du 7°Av:</label> 
-    <input type="text" id="editSepmav" name="Sepmav" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" />
-</div>
-<div class="form-group">
-    <label>N° de l'acte du 8°Av:</label> 
-    <input type="text" id="editHemav" name="Hemav" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" />
-</div>
-<div class="form-group">
-    <label>N° de l'acte du 9°Av:</label> 
-    <input type="text" id="editNemav" name="Nemav" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" />
-</div>
-<div class="form-group">
-    <label>N° de l'acte du 10°Av:</label> 
-    <input type="text" id="editDxemav" name="Dxemav" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" />
-</div>
-<div class="form-group">
-    <label>N° de l'acte du 11°Av:</label> 
-    <input type="text" id="editOnemav" name="Onemav" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" />
-</div>
-<div class="form-group">
-    <label>N° de l'acte du 12°Av:</label> 
-    <input type="text" id="editDou" name="Dou" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" />
-</div>
-<div class="form-group">
-    <label>N° de l'acte du 13°Av:</label> 
-    <input type="text" id="editTrei" name="Trei" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" />
-</div>
-<div class="form-group">
-    <label>N° de l'acte du 14°Av:</label> 
-    <input type="text" id="editQuat" name="Quat" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" />
-</div>
-<div class="form-group">
-    <label>N° de l'acte du 15°Av:</label> 
-    <input type="text" id="editQuin" name="Quin" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" />
-</div>
-<div class="form-group">
-    <label>N° de l'acte du 16°Av:</label> 
-    <input type="text" id="editSeiz" name="Seiz" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" />
+        <div class="form-group"><label>N° de l'acte du 1°Av:</label> <input type="text" id="editPerav" name="Perav" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" /></div>
+        <div class="form-group"><label>N° de l'acte du 2°Av:</label> <input type="text" id="editDemav" name="Demav" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" /></div>
+        <div class="form-group"><label>N° de l'acte du 3°Av:</label> <input type="text" id="editTemav" name="Temav" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" /></div>
+        <div class="form-group"><label>N° de l'acte du 4°Av:</label> <input type="text" id="editQemav" name="Qemav" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" /></div>
+        <div class="form-group"><label>N° de l'acte du 5°Av:</label> <input type="text" id="editCemav" name="Cemav" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" /></div>
+        <div class="form-group"><label>N° de l'acte du 6°Av:</label> <input type="text" id="editSemav" name="Semav" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" /></div>
+        <div class="form-group"><label>N° de l'acte du 7°Av:</label> <input type="text" id="editSepmav" name="Sepmav" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" /></div>
+        <div class="form-group"><label>N° de l'acte du 8°Av:</label> <input type="text" id="editHemav" name="Hemav" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" /></div>
+        <div class="form-group"><label>N° de l'acte du 9°Av:</label> <input type="text" id="editNemav" name="Nemav" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" /></div>
+        <div class="form-group"><label>N° de l'acte du 10°Av:</label> <input type="text" id="editDxemav" name="Dxemav" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" /></div>
+        <div class="form-group"><label>N° de l'acte du 11°Av:</label> <input type="text" id="editOnemav" name="Onemav" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" /></div>
+        <div class="form-group"><label>N° de l'acte du 12°Av:</label> <input type="text" id="editDou" name="Dou" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" /></div>
+        <div class="form-group"><label>N° de l'acte du 13°Av:</label> <input type="text" id="editTrei" name="Trei" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" /></div>
+        <div class="form-group"><label>N° de l'acte du 14°Av:</label> <input type="text" id="editQuat" name="Quat" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" /></div>
+        <div class="form-group"><label>N° de l'acte du 15°Av:</label> <input type="text" id="editQuin" name="Quin" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" /></div>
+        <div class="form-group"><label>N° de l'acte du 16°Av:</label> <input type="text" id="editSeiz" name="Seiz" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" /></div>  
+
+        <div class="section-divider">
+    <h4>
+        Classes tenues pour l'année scolaire @debutAnneeScolaire-@finAnneeScolaire 
+        <strong style="color: red; display: block; margin-top: 5px; font-size: 0.85rem; font-weight: bold;">
+            (à changer à chaque nouvelle année scolaire)
+        </strong>
+    </h4>
 </div>
         
+        <div class="form-group"><label>Classe tenue N°1:</label> <input type="text" id="editClasseTenue1" name="ClasseTenue1" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" placeholder="Ex: 2ND:4H" /></div>
+        <div class="form-group"><label>Classe tenue N°2:</label> <input type="text" id="editClasseTenue2" name="ClasseTenue2" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" placeholder="Ex: 1L:4H" /></div>
+        <div class="form-group"><label>Classe tenue N°3:</label> <input type="text" id="editClasseTenue3" name="ClasseTenue3" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" placeholder="Ex: 1S:4H" /></div>
+        <div class="form-group"><label>Classe tenue N°4:</label> <input type="text" id="editClasseTenue4" name="ClasseTenue4" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" placeholder="Ex: 1OSE:4H" /></div>
+        <div class="form-group"><label>Classe tenue N°5:</label> <input type="text" id="editClasseTenue5" name="ClasseTenue5" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" placeholder="Ex: TS:4H" /></div>
+        <div class="form-group"><label>Classe tenue N°6:</label> <input type="text" id="editClasseTenue6" name="ClasseTenue6" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" placeholder="Ex: TL:4H" /></div>
+        <div class="form-group"><label>Classe tenue N°7:</label> <input type="text" id="editClasseTenue7" name="ClasseTenue7" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" placeholder="Ex: TOSE:4H" /></div>
+        <div class="form-group"><label>Classe tenue N°8:</label> <input type="text" id="editClasseTenue8" name="ClasseTenue8" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" placeholder="Ex: 2ND:4H" /></div>
+
         <div class="form-actions">
             <button type="submit" class="btn-save-modal">Enregistrer</button>
             <button type="button" id="cancelEdit" class="btn-cancel-modal">Annuler</button>
@@ -684,69 +777,88 @@
         }
 
         // Édition : Remplissage des données et Ouverture du Popup
-        $(document).on('click', '.btn-edit', function (e) {
-            e.preventDefault();
-            let id = $(this).data("id");
-            
-            $.get('/Search/GetPersonnelDetails', { id: id }, function (data) {
-                $("#editNum").val(data.num);
-                $("#editMatricule").val(data.matricule);
-                $("#editNomEtPrenoms").val(data.nomEtPrenoms);
-                $("#editCin").val(data.cin);
-                $("#editDec").val(data.dec);
-                
-                $("#editCorps").val(data.corps).trigger('change');
-                $("#editMatiere").val(data.matiere).trigger('change');
+$(document).on('click', '.btn-edit', function (e) {
+    e.preventDefault();
+    let id = $(this).data("id");
+    
+    $.get('/Search/GetPersonnelDetails', { id: id }, function (data) {
+        // ID Caché
+        $("#editNum").val(data.num);
+        
+        // 1. Informations Générales
+        $("#editMatricule").val(data.matricule);
+        $("#editNomEtPrenoms").val(data.nomEtPrenoms);
+        $("#editCin").val(data.cin);
+        $("#editSexe").val(data.sexe).trigger('change');
+        
+        let dateNaissRaw = data.datenaiss || data.dateNaiss || data.Datenaiss;
+        $("#editDatenaiss").val(formatHTML5Date(dateNaissRaw)).trigger('change');
+        
+        $("#editLieudenaiss").val(data.lieudenaiss);
+        $("#editContact").val(data.contact);
 
-                let dateNaissRaw = data.datenaiss || data.dateNaiss || data.Datenaiss;
-                let dateEntreRaw = data.datedentre || data.dateDentre || data.Datedentre;
-                let datePriseRaw = data.datedeprise || data.dateDeprise || data.Datedeprise;
+        // 2. Parcours & Affectation
+        $("#editFonction").val(data.fonction).trigger('change');
+        $("#editMatiere").val(data.matiere).trigger('change');
+        $("#editStatut").val(data.statut).trigger('change');
+        $("#editCorps").val(data.corps);
+        $("#editGrade").val(data.grade || data.Grade).trigger('change'); // 🌟 Ajout Grade
+        $("#editDec").val(data.dec);
 
-                $("#editDatenaiss").val(formatHTML5Date(dateNaissRaw)).trigger('change');
-                $("#editDatedentre").val(formatHTML5Date(dateEntreRaw)).trigger('change');
-                $("#editDatedeprise").val(formatHTML5Date(datePriseRaw)).trigger('change');
+        let dateEntreRaw = data.datedentre || data.dateDentre || data.Datedentre;
+        let datePriseRaw = data.datedeprise || data.dateDeprise || data.Datedeprise;
+        $("#editDatedentre").val(formatHTML5Date(dateEntreRaw)).trigger('change');
+        $("#editDatedeprise").val(formatHTML5Date(datePriseRaw)).trigger('change');
 
-                $("#editLieudenaiss").val(data.lieudenaiss);
-                $("#editSexe").val(data.sexe).trigger('change');
-                $("#editStatut").val(data.statut).trigger('change');
-                
-                $("#editDiplomeac").val(data.diplomeac).trigger('change');
-                $("#editDiplomeped").val(data.diplomeped).trigger('change');
-                $("#editContact").val(data.contact);
-                $("#editFonction").val(data.fonction).trigger('change');
-                
-                $("#editPerav").val(data.perav);
-                $("#editDemav").val(data.demav);
-                $("#editTemav").val(data.temav);
-                $("#editQemav").val(data.qemav);
-                $("#editCemav").val(data.cemav);
-                $("#editSemav").val(data.semav);
-                $("#editSepmav").val(data.sepmav);
-                $("#editHemav").val(data.hemav);
-                $("#editNemav").val(data.nemav);
-                $("#editDxemav").val(data.dxemav);
-                $("#editOnemav").val(data.onemav);
-                $("#editDou").val(data.dou);
-                $("#editTrei").val(data.trei);
-                $("#editQuat").val(data.quat);
-                $("#editQuin").val(data.quin);
-                $("#editSeiz").val(data.seiz);
+        // 3. Diplômes et Qualifications
+        $("#editSerieBacc").val(data.serieBacc || data.seriebacc || data.SerieBacc).trigger('change'); // 🌟 Ajout Série Bacc
+        $("#editDiplomeac").val(data.diplomeac).trigger('change');
+        $("#editDiplomeped").val(data.diplomeped).trigger('change');
+        
+        // 4. Historique des Avancements
+        $("#editPerav").val(data.perav);
+        $("#editDemav").val(data.demav);
+        $("#editTemav").val(data.temav);
+        $("#editQemav").val(data.qemav);
+        $("#editCemav").val(data.cemav);
+        $("#editSemav").val(data.semav);
+        $("#editSepmav").val(data.sepmav);
+        $("#editHemav").val(data.hemav);
+        $("#editNemav").val(data.nemav);
+        $("#editDxemav").val(data.dxemav);
+        $("#editOnemav").val(data.onemav);
+        $("#editDou").val(data.dou);
+        $("#editTrei").val(data.trei);
+        $("#editQuat").val(data.quat);
+        $("#editQuin").val(data.quin);
+        $("#editSeiz").val(data.seiz);
 
-                if (data.photo) {
-                    $("#editPhotoPreview").attr("src", data.photo);
-                } else {
-                    $("#editPhotoPreview").attr("src", "/images/default.jpg"); 
-                }
-                
-                $("#editPhotoFile").val('');
-                
-                // Appel de la transition d'ouverture du popup
-                openEditModal();
+        // 5. Classes Tenues (🌟 Ajout des 8 classes)
+        $("#editClasseTenue1").val(data.classeTenue1 || data.ClasseTenue1);
+        $("#editClasseTenue2").val(data.classeTenue2 || data.ClasseTenue2);
+        $("#editClasseTenue3").val(data.classeTenue3 || data.ClasseTenue3);
+        $("#editClasseTenue4").val(data.classeTenue4 || data.ClasseTenue4);
+        $("#editClasseTenue5").val(data.classeTenue5 || data.ClasseTenue5);
+        $("#editClasseTenue6").val(data.classeTenue6 || data.ClasseTenue6);
+        $("#editClasseTenue7").val(data.classeTenue7 || data.ClasseTenue7);
+        $("#editClasseTenue8").val(data.classeTenue8 || data.ClasseTenue8);
 
-            }).fail(function (xhr, status, error) {
-                alert("Sécurité serveur : L'action 'GetPersonnelDetails' a renvoyé une erreur " + xhr.status + " (" + error + "). Si vous êtes connecté en tant que non-admin, l'accès doit être également autorisé dans votre fichier SearchController.cs.");
-            });
-        });
+        // Gestion de l'aperçu de la photo
+        if (data.photo) {
+            $("#editPhotoPreview").attr("src", data.photo);
+        } else {
+            $("#editPhotoPreview").attr("src", "/images/default.jpg"); 
+        }
+        
+        $("#editPhotoFile").val('');
+        
+        // Appel de la transition d'ouverture du popup
+        openEditModal();
+
+    }).fail(function (xhr, status, error) {
+        alert("Sécurité serveur : L'action 'GetPersonnelDetails' a renvoyé une erreur " + xhr.status + " (" + error + "). Si vous êtes connecté en tant que non-admin, l'accès doit être également autorisé dans votre fichier SearchController.cs.");
+    });
+});
 
         // Soumission du formulaire
 $("#updateForm").submit(function(e){
@@ -763,7 +875,7 @@ $("#updateForm").submit(function(e){
         contentType: false, 
         success: res => { 
             if (res.success) {
-                // 🔥 Remplacement par SweetAlert2 (Succès temporisé)
+                // 🔥 Message SweetAlert2 (Succès temporisé)
                 Swal.fire({
                     icon: 'success',
                     title: '<span style="color: #166534;">Réussi</span>',
@@ -781,32 +893,48 @@ $("#updateForm").submit(function(e){
                 if ($card.length > 0) {
                     let cacheBuster = new Date().getTime(); 
                     
+                    // Rafraîchissement des images (Aperçu + Carte UI)
                     $("#editPhotoPreview").attr("src", res.photoUrl + "?t=" + cacheBuster);
                     $card.find(".photo-personnel").attr("src", res.photoUrl + "?t=" + cacheBuster);
                     
+                    // 1. Informations Générales
                     $card.find(".Matricule").text($("#editMatricule").val());
                     $card.find(".nom_prenoms").text($("#editNomEtPrenoms").val()); 
                     $card.find(".Cin").text($("#editCin").val());
-                    $card.find(".Corps").text($("#editCorps").val());
-                    $card.find(".Matiere").text($("#editMatiere").val());
-                    $card.find(".Diplomeac").text($("#editDiplomeac").val());
-                    $card.find(".Diplomeped").text($("#editDiplomeped").val());
-                    $card.find(".Contact").text($("#editContact").val());
-                    $card.find(".Fonction").text($("#editFonction").val());
+                    $card.find(".Sexe").text($("#editSexe").val() === "H" ? "MASCULIN" : "FEMININ");
                     
                     let dateNaiss = $("#editDatenaiss").val();
                     if(dateNaiss && dateNaiss.includes("-")) {
                         let d = dateNaiss.split('-'); $card.find(".Datenaiss").text(`${d[2]}/${d[1]}/${d[0]}`);
-                    }
+                    } else { $card.find(".Datenaiss").text(dateNaiss); }
+                    
+                    $card.find(".Lieudenaiss").text($("#editLieudenaiss").val());
+                    $card.find(".Contact").text($("#editContact").val());
+
+                    // 2. Parcours & Affectation
+                    $card.find(".Fonction").text($("#editFonction").val());
+                    $card.find(".Matiere").text($("#editMatiere").val());
+                    $card.find(".Statut").text($("#editStatut").val());
+                    $card.find(".Corps").text($("#editCorps").val());
+                    $card.find(".Grade").text($("#editGrade").val());
+                    $card.find(".Dec").text($("#editDec").val());
+                    
                     let dateEntree = $("#editDatedentre").val();
                     if(dateEntree && dateEntree.includes("-")) {
                         let d = dateEntree.split('-'); $card.find(".Datedentre").text(`${d[2]}/${d[1]}/${d[0]}`);
-                    }
+                    } else { $card.find(".Datedentre").text(dateEntree); }
+                    
                     let datePrise = $("#editDatedeprise").val();
                     if(datePrise && datePrise.includes("-")) {
                         let d = datePrise.split('-'); $card.find(".Datedeprise").text(`${d[2]}/${d[1]}/${d[0]}`);
-                    }
+                    } else { $card.find(".Datedeprise").text(datePrise); }
 
+                    // 3. Diplômes et Qualifications
+                    $card.find(".SerieBacc").text($("#editSerieBacc").val());
+                    $card.find(".Diplomeac").text($("#editDiplomeac").val());
+                    $card.find(".Diplomeped").text($("#editDiplomeped").val());
+                    
+                    // 4. Historique des Avancements
                     $card.find(".Perav").text($("#editPerav").val());
                     $card.find(".Demav").text($("#editDemav").val());
                     $card.find(".Temav").text($("#editTemav").val());
@@ -823,10 +951,20 @@ $("#updateForm").submit(function(e){
                     $card.find(".Quat").text($("#editQuat").val());
                     $card.find(".Quin").text($("#editQuin").val());
                     $card.find(".Seiz").text($("#editSeiz").val());
+
+                    // 5. Classes Tenues
+                    $card.find(".ClasseTenue1").text($("#editClasseTenue1").val());
+                    $card.find(".ClasseTenue2").text($("#editClasseTenue2").val());
+                    $card.find(".ClasseTenue3").text($("#editClasseTenue3").val());
+                    $card.find(".ClasseTenue4").text($("#editClasseTenue4").val());
+                    $card.find(".ClasseTenue5").text($("#editClasseTenue5").val());
+                    $card.find(".ClasseTenue6").text($("#editClasseTenue6").val());
+                    $card.find(".ClasseTenue7").text($("#editClasseTenue7").val());
+                    $card.find(".ClasseTenue8").text($("#editClasseTenue8").val());
                 }
                 closeEditModal();
             } else {
-                // 💥 Remplacement par SweetAlert2 (Erreur renvoyée par le contrôleur)
+                // 💥 Message SweetAlert2 (Échec contrôleur)
                 Swal.fire({
                     icon: 'error',
                     title: 'Échec de la mise à jour',
@@ -836,7 +974,7 @@ $("#updateForm").submit(function(e){
             }
         },
         error: err => {
-            // 💥 Remplacement par SweetAlert2 (Erreur HTTP / Serveur)
+            // 💥 Message SweetAlert2 (Erreur HTTP / Serveur)
             Swal.fire({
                 icon: 'error',
                 title: 'Erreur Serveur',

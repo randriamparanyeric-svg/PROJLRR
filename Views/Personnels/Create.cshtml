@@ -10,258 +10,359 @@
             <h2>Ajouter un personnel</h2>
             <p>Renseignez les informations ci-dessous pour enregistrer un nouveau membre du personnel.</p>
         </div>
+@{
+    // Calcul automatique de l'année scolaire (Début en Septembre, Fin en Juin)
+    int anneeActuelle = DateTime.Now.Year;
+    int moisActuel = DateTime.Now.Month;
+    
+    // Si on est entre septembre (9) et décembre (12), l'année scolaire commence cette année.
+    // Sinon (de janvier à août), elle a commencé l'année précédente.
+    int debutAnneeScolaire = (moisActuel >= 9) ? anneeActuelle : anneeActuelle - 1;
+    int finAnneeScolaire = debutAnneeScolaire + 1;
+}
 
-        <form method="post" asp-action="Create">
-            @Html.AntiForgeryToken()
+<form method="post" asp-action="Create">
+    @Html.AntiForgeryToken()
 
-            <div class="form-section">
-                <div class="form-group mb-4">
-                    <label for="MATRICULE" class="custom-label">Matricule</label>
-                    <input type="text" id="MATRICULE" name="MATRICULE" class="form-control custom-input"
-                           value="@Model.Matricule" placeholder="Ex: 123456 ou EN COURS" />
-                </div>
+    <div class="form-section">
+        <div class="form-group mb-4">
+            <label for="MATRICULE" class="custom-label">Matricule</label>
+            <input type="text" id="MATRICULE" name="MATRICULE" class="form-control custom-input"
+                   value="@Model.Matricule" placeholder="Ex: 123456 ou EN COURS" />
+        </div>
 
-               <div class="form-group mb-4">
-    <label for="NomEtPrenoms" class="custom-label">Nom et Prénoms</label>
-    <input type="text" id="NomEtPrenoms" name="NomEtPrenoms" class="form-control custom-input text-uppercase" value="@Model.NomEtPrenoms" placeholder="Nom complet" oninput="this.value = this.value.toUpperCase()" />
-</div>
+        <div class="form-group mb-4">
+            <label for="NomEtPrenoms" class="custom-label">Nom et Prénoms</label>
+            <input type="text" id="NomEtPrenoms" name="NomEtPrenoms" class="form-control custom-input text-uppercase" value="@Model.NomEtPrenoms" placeholder="Nom complet" oninput="this.value = this.value.toUpperCase()" />
+        </div>
 
-                <div class="form-group mb-4">
-    <label for="CIN" class="custom-label">CIN (SANS ESPACE)</label>
-    <input type="text" id="CIN" name="CIN" class="form-control custom-input" value="@Model.Cin" placeholder="Ex:101112412198" />
-</div>
+        <div class="form-group mb-4">
+            <label for="CIN" class="custom-label">CIN (SANS ESPACE)</label>
+            <input type="text" id="CIN" name="CIN" class="form-control custom-input" value="@Model.Cin" placeholder="Ex:101112412198" />
+        </div>
 
-                <div class="form-group mb-4">
-                    <label for="SEXE" class="custom-label">Sexe</label>
-                    <select id="SEXE" name="SEXE" class="form-control custom-select">
-                        <option value="" disabled selected>Sélectionner le Sexe</option>
-                        <option value="H" selected="@(Model.Sexe == "MASCULIN" ? "selected" : null)">MASCULIN</option>
-                        <option value="F" selected="@(Model.Sexe == "FEMININ" ? "selected" : null)">FEMININ</option>
-                    </select>
-                </div>
+        <div class="form-group mb-4">
+            <label for="SEXE" class="custom-label">Sexe</label>
+            <select id="SEXE" name="SEXE" class="form-control custom-select">
+                <option value="" disabled selected>Sélectionner le Sexe</option>
+                <option value="H" selected="@(Model.Sexe == "MASCULIN" ? "selected" : null)">MASCULIN</option>
+                <option value="F" selected="@(Model.Sexe == "FEMININ" ? "selected" : null)">FEMININ</option>
+            </select>
+        </div>
 
-                <div class="form-group mb-4">
-    <label for="DATENAISS" class="custom-label">Date de naissance</label>
-    <input type="date" id="DATENAISS" name="DATENAISS" class="form-control custom-input"
-           value="@(DateTime.TryParse(Model.Datenaiss, out var d1) ? d1.ToString("yyyy-MM-dd") : "")" />
-</div>
-                <div class="form-group mb-4">
-    <label for="LIEUDENAISS" class="custom-label">Lieu de naissance</label>
-    <input type="text" id="LIEUDENAISS" name="LIEUDENAISS" class="form-control custom-input text-uppercase" value="@Model.Lieudenaiss" placeholder="Ville ou commune" oninput="this.value = this.value.toUpperCase()" />
-</div>
-                <div class="form-group mb-4">
-                    <label for="CONTACT" class="custom-label">Contact</label>
-                    <input type="text" id="CONTACT" name="CONTACT" class="form-control custom-input" value="@Model.Contact" placeholder="Ex: 034 XX XX XX" />
-                </div>
-            </div>
-
-            <div class="form-section-title">Parcours & Affectation</div>
-            <div class="form-section">
-                <div class="form-group mb-4">
-                    <label for="FONCTION" class="custom-label">Fonction</label>
-                    <select id="FONCTION" name="FONCTION" class="form-control custom-select">
-                        <option value="" disabled selected>Sélectionner la fonction</option>
-                        <option value="PE" selected="@(Model.Fonction == "PE" ? "selected" : null)">PERSONNEL ENSEIGNANT</option>
-                        <option value="PA" selected="@(Model.Fonction == "PA" ? "selected" : null)">PERSONNEL ADMINISTRATIF</option>
-                    </select>
-                </div>
-
-                <div class="form-group mb-4">
-                    <label for="MATIERE" class="custom-label">Matière ou Bureau</label>
-                    <select id="MATIERE" name="MATIERE" class="form-control custom-select">
-                        <option value="" disabled selected>Sélectionner une matière</option>
-                        <option value="ALL" selected="@(Model.Matiere == "ALL" ? "selected" : null)">ALLEMAND</option>
-                        <option value="ANG" selected="@(Model.Matiere == "ANG" ? "selected" : null)">ANGLAIS</option>
-                        <option value="EAC" selected="@(Model.Matiere == "EAC" ? "selected" : null)">EDUCATION A LA CITOYENNETE (EAC)</option>
-                        <option value="EPS" selected="@(Model.Matiere == "EPS" ? "selected" : null)">EPS</option>
-                        <option value="FRA" selected="@(Model.Matiere == "FRA" ? "selected" : null)">FRANCAIS</option>
-                        <option value="HG" selected="@(Model.Matiere == "HG" ? "selected" : null)">HISTO-GEO</option>
-                        <option value="MAT" selected="@(Model.Matiere == "MAT" ? "selected" : null)">MATHEMATIQUES</option>
-                        <option value="MLG" selected="@(Model.Matiere == "MLG" ? "selected" : null)">MALAGASY</option>
-                        <option value="PC" selected="@(Model.Matiere == "PC" ? "selected" : null)">PHYSIQUE-CHIMIE</option>
-                        <option value="PHI" selected="@(Model.Matiere == "PHI" ? "selected" : null)">PHILOSOPHIE</option>
-                        <option value="RUS" selected="@(Model.Matiere == "RUS" ? "selected" : null)">RUSSE</option>
-                        <option value="ESP" selected="@(Model.Matiere == "ESP" ? "selected" : null)">ESPAGNOL</option>
-                        <option value="SES" selected="@(Model.Matiere == "SES" ? "selected" : null)">SCIENCE ECONOMIQUE ET SOCIAL (SES)</option>
-                        <option value="SVT" selected="@(Model.Matiere == "SVT" ? "selected" : null)">SCIENCE DE LA VIE ET DE LA TERRE (SVT)</option>
-                        <option value="PROVISEUR" selected="@(Model.Matiere == "PROVISEUR" ? "selected" : null)">PROVISEUR</option>
-                        <option value="PROVISEUR ADJOINT" selected="@(Model.Matiere == "PROVISEUR ADJOINT" ? "selected" : null)">PROVISEUR ADJOINT</option>
-                        <option value="SG" selected="@(Model.Matiere == "SG" ? "selected" : null)">SURVEILLANT GENERAL</option>
-                        <option value="ECONOME" selected="@(Model.Matiere == "ECONOME" ? "selected" : null)">ECONOME</option>
-                        <option value="PROVISORAT" selected="@(Model.Matiere == "PROVISORAT" ? "selected" : null)">PROVISORAT</option>
-                        <option value="SCOLARITE" selected="@(Model.Matiere == "SCOLARITE" ? "selected" : null)">SCOLARITE</option>
-                        <option value="INFO" selected="@(Model.Matiere == "INFO" ? "selected" : null)">INFO</option>
-                        <option value="SURVEILLANT" selected="@(Model.Matiere == "SURVEILLANT" ? "selected" : null)">SURVEILLANT</option>
-                        <option value="COMPTABLE" selected="@(Model.Matiere == "COMPTABLE" ? "selected" : null)">COMPTABLE</option>
-                        <option value="CDI" selected="@(Model.Matiere == "CDI" ? "selected" : null)">CDI</option>
-                        <option value="LV II" selected="@(Model.Matiere == "LV II" ? "selected" : null)">LV II</option>
-                        <option value="CAELF" selected="@(Model.Matiere == "CAELF" ? "selected" : null)">CAELF</option>
-                        <option value="ILO" selected="@(Model.Matiere == "ILO" ? "selected" : null)">ILO</option>
-                        <option value="EXAMEN" selected="@(Model.Matiere == "EXAMEN" ? "selected" : null)">EXAMEN</option>
-                        <option value="LABO PC" selected="@(Model.Matiere == "LABO PC" ? "selected" : null)">LABO PC</option>
-                        <option value="LABO SVT" selected="@(Model.Matiere == "LABO SVT" ? "selected" : null)">LABO SVT</option>
-                        <option value="EMPL DE SERV" selected="@(Model.Matiere == "EMPL DE SERV" ? "selected" : null)">EMPL DE SERV</option>
-                        <option value="INFIRMERIE" selected="@(Model.Matiere == "INFIRMERIE" ? "selected" : null)">INFIRMERIE</option>
-                        <option value="GARDIEN" selected="@(Model.Matiere == "GARDIEN" ? "selected" : null)">GARDIEN</option>
-                    </select>
-                </div>
-
-                <div class="form-group mb-4">
-                    <label for="STATUT" class="custom-label">Statut</label>
-                    <select id="STATUT" name="STATUT" class="form-control custom-select">
-                        <option value="" disabled selected>Sélectionner le Statut</option>
-                        <option value="EFA" selected="@(Model.Statut == "EFA" ? "selected" : null)">EFA</option>
-                        <option value="FONCTIONNAIRE" selected="@(Model.Statut == "FONCTIONNAIRE" ? "selected" : null)">FONCTIONNAIRE</option>
-                        <option value="VACATAIRE" selected="@(Model.Statut == "VACATAIRE" ? "selected" : null)">VACATAIRE</option>
-                    </select>
-                </div>
-
-                <div class="form-group mb-4">
-    <label for="CORPS" class="custom-label">Corps et Grade</label>
-    <input type="text" id="CORPS" name="CORPS" class="form-control custom-input text-uppercase" value="@Model.Corps" placeholder="Ex: CONCEPTEURS 2/1" oninput="this.value = this.value.toUpperCase()" />
-</div>
-
-                <div class="form-group mb-4">
-    <label for="DEC" class="custom-label">N°Décision ou Note de Service(à préciser)</label>
-    <input type="text" id="DEC" name="DEC" class="form-control custom-input text-uppercase" value="@Model.Dec" oninput="this.value = this.value.toUpperCase()" />
-</div>
-
-                <div class="form-group mb-4">
-    <label for="DATEDENTRE" class="custom-label">Date d'entrée dans l'administration</label>
-    <input type="date" id="DATEDENTRE" name="DATEDENTRE" class="form-control custom-input"
-           value="@(DateTime.TryParse(Model.Datedentre, out var d2) ? d2.ToString("yyyy-MM-dd") : "")" />
-</div>
-
-                <div class="form-group mb-4">
-    <label for="DATEDEPRISE" class="custom-label">Date de prise de service au Lycée Raherivelo Ramamonjy</label>
-    <input type="date" id="DATEDEPRISE" name="DATEDEPRISE" class="form-control custom-input"
-           value="@(DateTime.TryParse(Model.Datedeprise, out var d3) ? d3.ToString("yyyy-MM-dd") : "")" />
-</div>
-            </div>
-
-            <div class="form-section-title">Diplômes et Qualifications</div>
-            <div class="form-section">
-                <div class="form-group mb-4">
-                    <label for="DIPLOMEAC" class="custom-label">Diplôme Académique le plus élevé</label>
-                    <select id="DIPLOMEAC" name="DIPLOMEAC" class="form-control custom-select">
-                        <option value="" disabled selected>Sélectionner le diplôme</option>
-                        <option value="BEPC" selected="@(Model.Diplomeac == "BEPC" ? "selected" : null)">BEPC</option>
-                        <option value="BACC" selected="@(Model.Diplomeac == "BACC" ? "selected" : null)">BACCALAUREAT</option>
-                        <option value="DTS" selected="@(Model.Diplomeac == "DTS" ? "selected" : null)">Diplôme de Technicien Supérieur (BACC+2)</option>
-                        <option value="LICENCE" selected="@(Model.Diplomeac == "LICENCE" ? "selected" : null)">LICENCE(BACC+3)</option>
-                        <option value="MAITRISE" selected="@(Model.Diplomeac == "MAITRISE" ? "selected" : null)">MAITRISE(BACC+4)</option>
-                        <option value="MASTER" selected="@(Model.Diplomeac == "MASTER" ? "selected" : null)">MASTER(BACC+5)</option>
-                        <option value="DEA" selected="@(Model.Diplomeac == "DEA" ? "selected" : null)">DEA</option>
-                        <option value="DOCTORAT" selected="@(Model.Diplomeac == "DOCTORAT" ? "selected" : null)">DOCTORAT</option>
-                    </select>
-                </div>
-
-                <div class="form-group mb-4">
-                    <label for="DIPLOMEPED" class="custom-label">Diplôme Pédagogique le plus élevé</label>
-                    <select id="DIPLOMEPED" name="DIPLOMEPED" class="form-control custom-select">
-                        <option value="" disabled selected>Sélectionner le diplôme</option>
-                        <option value="LAPEN" selected="@(Model.Diplomeped == "LAPEN" ? "selected" : null)">LAPEN</option>
-                        <option value="MAPEN" selected="@(Model.Diplomeped == "MAPEN" ? "selected" : null)">MAPEN</option>
-                        <option value="CAPEN" selected="@(Model.Diplomeped == "CAPEN" ? "selected" : null)">CAPEN</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="form-section-title">Historique des Avancements d'Échelon</div>
-            <div class="form-section advancement-grid">
-               <div class="form-group mb-3">
-    <label for="PERAV" class="custom-label">N° de l'acte du 1° AVANCEMENT</label>
-    <input type="text" id="PERAV" name="PERAV" class="form-control custom-input text-uppercase" value="@Model.Perav" oninput="this.value = this.value.toUpperCase()" />
-</div>
-
-<div class="form-group mb-3">
-    <label for="DEMAV" class="custom-label">N°de l'acte du 2° AVANCEMENT</label>
-    <input type="text" id="DEMAV" name="DEMAV" class="form-control custom-input text-uppercase" value="@Model.Demav" oninput="this.value = this.value.toUpperCase()" />
-</div>
-
-<div class="form-group mb-3">
-    <label for="TEMAV" class="custom-label">N° de l'acte du 3° AVANCEMENT</label>
-    <input type="text" id="TEMAV" name="TEMAV" class="form-control custom-input text-uppercase" value="@Model.Temav" oninput="this.value = this.value.toUpperCase()" />
-</div>
-
-<div class="form-group mb-3">
-    <label for="QEMAV" class="custom-label">N° de l'acte du 4° AVANCEMENT</label>
-    <input type="text" id="QEMAV" name="QEMAV" class="form-control custom-input text-uppercase" value="@Model.Qemav" oninput="this.value = this.value.toUpperCase()" />
-</div>
-
-<div class="form-group mb-3">
-    <label for="CEMAV" class="custom-label">N° de l'acte du 5° AVANCEMENT</label>
-    <input type="text" id="CEMAV" name="CEMAV" class="form-control custom-input text-uppercase" value="@Model.Cemav" oninput="this.value = this.value.toUpperCase()" />
-</div>
-
-<div class="form-group mb-3">
-    <label for="SEMAV" class="custom-label">N° de l'acte du 6° AVANCEMENT</label>
-    <input type="text" id="SEMAV" name="SEMAV" class="form-control custom-input text-uppercase" value="@Model.Semav" oninput="this.value = this.value.toUpperCase()" />
-</div>
-
-<div class="form-group mb-3">
-    <label for="SEPMAV" class="custom-label">N° de l'acte du 7° AVANCEMENT</label>
-    <input type="text" id="SEPMAV" name="SEPMAV" class="form-control custom-input text-uppercase" value="@Model.Sepmav" oninput="this.value = this.value.toUpperCase()" />
-</div>
-
-<div class="form-group mb-3">
-    <label for="HEMAV" class="custom-label">N° de l'acte du 8° AVANCEMENT</label>
-    <input type="text" id="HEMAV" name="HEMAV" class="form-control custom-input text-uppercase" value="@Model.Hemav" oninput="this.value = this.value.toUpperCase()" />
-</div>
-
-<div class="form-group mb-3">
-    <label for="NEMAV" class="custom-label">N° de l'acte du 9° AVANCEMENT</label>
-    <input type="text" id="NEMAV" name="NEMAV" class="form-control custom-input text-uppercase" value="@Model.Nemav" oninput="this.value = this.value.toUpperCase()" />
-</div>
-
-<div class="form-group mb-3">
-    <label for="DXEMAV" class="custom-label">N° de l'acte du 10° AVANCEMENT</label>
-    <input type="text" id="DXEMAV" name="DXEMAV" class="form-control custom-input text-uppercase" value="@Model.Dxemav" oninput="this.value = this.value.toUpperCase()" />
-</div>
-
-<div class="form-group mb-3">
-    <label for="ONEMAV" class="custom-label">N° de l'acte du 11° AVANCEMENT</label>
-    <input type="text" id="ONEMAV" name="ONEMAV" class="form-control custom-input text-uppercase" value="@Model.Onemav" oninput="this.value = this.value.toUpperCase()" />
-</div>
-
-<div class="form-group mb-3">
-    <label for="DOU" class="custom-label">N° de l'acte du 12° AVANCEMENT</label>
-    <input type="text" id="DOU" name="DOU" class="form-control custom-input text-uppercase" value="@Model.Dou" oninput="this.value = this.value.toUpperCase()" />
-</div>
-
-<div class="form-group mb-3">
-    <label for="TREI" class="custom-label">N° de l'acte du 13° AVANCEMENT</label>
-    <input type="text" id="TREI" name="TREI" class="form-control custom-input text-uppercase" value="@Model.Trei" oninput="this.value = this.value.toUpperCase()" />
-</div>
-
-<div class="form-group mb-3">
-    <label for="QUAT" class="custom-label">N° de l'acte du 14° AVANCEMENT</label>
-    <input type="text" id="QUAT" name="QUAT" class="form-control custom-input text-uppercase" value="@Model.Quat" oninput="this.value = this.value.toUpperCase()" />
-</div>
-
-<div class="form-group mb-3">
-    <label for="QUIN" class="custom-label">N° de l'acte du 15° AVANCEMENT</label>
-    <input type="text" id="QUIN" name="QUIN" class="form-control custom-input text-uppercase" value="@Model.Quin" oninput="this.value = this.value.toUpperCase()" />
-</div>
-
-<div class="form-group mb-3">
-    <label for="SEIZ" class="custom-label">N° de l'acte du 16° AVANCEMENT</label>
-    <input type="text" id="SEIZ" name="SEIZ" class="form-control custom-input text-uppercase" value="@Model.Seiz" oninput="this.value = this.value.toUpperCase()" />
-</div>
-            </div>
-
-            <div class="form-actions mt-5">
-                <button type="submit" class="btn btn-save">
-                    <i class="fas fa-save me-2"></i> Enregistrer le profil
-                </button>
-                <a href="@Url.Action("Index", "Personnels")" class="btn btn-back">
-                    <i class="fas fa-arrow-left me-2"></i> Retour à la liste
-                </a>
-            </div>
-        </form>
+        <div class="form-group mb-4">
+            <label for="DATENAISS" class="custom-label">Date de naissance</label>
+            <input type="date" id="DATENAISS" name="DATENAISS" class="form-control custom-input"
+                   value="@(DateTime.TryParse(Model.Datenaiss, out var d1) ? d1.ToString("yyyy-MM-dd") : "")" />
+        </div>
+        <div class="form-group mb-4">
+            <label for="LIEUDENAISS" class="custom-label">Lieu de naissance</label>
+            <input type="text" id="LIEUDENAISS" name="LIEUDENAISS" class="form-control custom-input text-uppercase" value="@Model.Lieudenaiss" placeholder="Ville ou commune" oninput="this.value = this.value.toUpperCase()" />
+        </div>
+        <div class="form-group mb-4">
+            <label for="CONTACT" class="custom-label">Contact</label>
+            <input type="text" id="CONTACT" name="CONTACT" class="form-control custom-input" value="@Model.Contact" placeholder="Ex: 034 XX XXX XX" />
+        </div>
     </div>
-</div>
 
+    <div class="form-section-title">Parcours & Affectation</div>
+    <div class="form-section">
+        <div class="form-group mb-4">
+            <label for="FONCTION" class="custom-label">Fonction</label>
+            <select id="FONCTION" name="FONCTION" class="form-control custom-select">
+                <option value="" disabled selected>Sélectionner la fonction</option>
+                <option value="PE" selected="@(Model.Fonction == "PE" ? "selected" : null)">PERSONNEL ENSEIGNANT</option>
+                <option value="PA" selected="@(Model.Fonction == "PA" ? "selected" : null)">PERSONNEL ADMINISTRATIF</option>
+            </select>
+        </div>
+
+        <div class="form-group mb-4">
+            <label for="MATIERE" class="custom-label">Matière ou Bureau</label>
+            <select id="MATIERE" name="MATIERE" class="form-control custom-select">
+                <option value="" disabled selected>Sélectionner une matière</option>
+                <option value="ALL" selected="@(Model.Matiere == "ALL" ? "selected" : null)">ALLEMAND</option>
+                <option value="ANG" selected="@(Model.Matiere == "ANG" ? "selected" : null)">ANGLAIS</option>
+                <option value="EAC" selected="@(Model.Matiere == "EAC" ? "selected" : null)">EDUCATION A LA CITOYENNETE (EAC)</option>
+                <option value="EPS" selected="@(Model.Matiere == "EPS" ? "selected" : null)">EPS</option>
+                <option value="FRA" selected="@(Model.Matiere == "FRA" ? "selected" : null)">FRANCAIS</option>
+                <option value="HG" selected="@(Model.Matiere == "HG" ? "selected" : null)">HISTO-GEO</option>
+                <option value="MAT" selected="@(Model.Matiere == "MAT" ? "selected" : null)">MATHEMATIQUES</option>
+                <option value="MLG" selected="@(Model.Matiere == "MLG" ? "selected" : null)">MALAGASY</option>
+                <option value="PC" selected="@(Model.Matiere == "PC" ? "selected" : null)">PHYSIQUE-CHIMIE</option>
+                <option value="PHI" selected="@(Model.Matiere == "PHI" ? "selected" : null)">PHILOSOPHIE</option>
+                <option value="RUS" selected="@(Model.Matiere == "RUS" ? "selected" : null)">RUSSE</option>
+                <option value="ESP" selected="@(Model.Matiere == "ESP" ? "selected" : null)">ESPAGNOL</option>
+                <option value="SES" selected="@(Model.Matiere == "SES" ? "selected" : null)">SCIENCE ECONOMIQUE ET SOCIAL (SES)</option>
+                <option value="SVT" selected="@(Model.Matiere == "SVT" ? "selected" : null)">SCIENCE DE LA VIE ET DE LA TERRE (SVT)</option>
+                <option value="PROVISEUR" selected="@(Model.Matiere == "PROVISEUR" ? "selected" : null)">PROVISEUR</option>
+                <option value="PROVISEUR ADJOINT" selected="@(Model.Matiere == "PROVISEUR ADJOINT" ? "selected" : null)">PROVISEUR ADJOINT</option>
+                <option value="SG" selected="@(Model.Matiere == "SG" ? "selected" : null)">SURVEILLANT GENERAL</option>
+                <option value="ECONOME" selected="@(Model.Matiere == "ECONOME" ? "selected" : null)">ECONOME</option>
+                <option value="PROVISORAT" selected="@(Model.Matiere == "PROVISORAT" ? "selected" : null)">PROVISORAT</option>
+                <option value="SCOLARITE" selected="@(Model.Matiere == "SCOLARITE" ? "selected" : null)">SCOLARITE</option>
+                <option value="INFO" selected="@(Model.Matiere == "INFO" ? "selected" : null)">INFO</option>
+                <option value="SURVEILLANT" selected="@(Model.Matiere == "SURVEILLANT" ? "selected" : null)">SURVEILLANT</option>
+                <option value="COMPTABLE" selected="@(Model.Matiere == "COMPTABLE" ? "selected" : null)">COMPTABLE</option>
+                <option value="CDI" selected="@(Model.Matiere == "CDI" ? "selected" : null)">CDI</option>
+                <option value="LV II" selected="@(Model.Matiere == "LV II" ? "selected" : null)">LV II</option>
+                <option value="CAELF" selected="@(Model.Matiere == "CAELF" ? "selected" : null)">CAELF</option>
+                <option value="ILO" selected="@(Model.Matiere == "ILO" ? "selected" : null)">ILO</option>
+                <option value="EXAMEN" selected="@(Model.Matiere == "EXAMEN" ? "selected" : null)">EXAMEN</option>
+                <option value="LABO PC" selected="@(Model.Matiere == "LABO PC" ? "selected" : null)">LABO PC</option>
+                <option value="LABO SVT" selected="@(Model.Matiere == "LABO SVT" ? "selected" : null)">LABO SVT</option>
+                <option value="EMPL DE SERV" selected="@(Model.Matiere == "EMPL DE SERV" ? "selected" : null)">EMPL DE SERV</option>
+                <option value="INFIRMERIE" selected="@(Model.Matiere == "INFIRMERIE" ? "selected" : null)">INFIRMERIE</option>
+                <option value="GARDIEN" selected="@(Model.Matiere == "GARDIEN" ? "selected" : null)">GARDIEN</option>
+            </select>
+        </div>
+
+        <div class="form-group mb-4">
+            <label for="STATUT" class="custom-label">Statut</label>
+            <select id="STATUT" name="STATUT" class="form-control custom-select">
+                <option value="" disabled selected>Sélectionner le Statut</option>
+                <option value="EFA" selected="@(Model.Statut == "EFA" ? "selected" : null)">EFA</option>
+                <option value="FONCTIONNAIRE" selected="@(Model.Statut == "FONCTIONNAIRE" ? "selected" : null)">FONCTIONNAIRE</option>
+                <option value="VACATAIRE" selected="@(Model.Statut == "VACATAIRE" ? "selected" : null)">VACATAIRE</option>
+            </select>
+        </div>
+
+        <div class="form-group mb-4">
+            <label for="CORPS" class="custom-label">Corps</label>
+            <input type="text" id="CORPS" name="CORPS" class="form-control custom-input text-uppercase" value="@Model.Corps" placeholder="Ex: CONCEPTEURS" oninput="this.value = this.value.toUpperCase()" />
+        </div>
+
+        <div class="form-group mb-4">
+            <label for="Grade" class="custom-label">Grade</label>
+            <select id="Grade" name="Grade" class="form-control custom-select">
+                <option value="" disabled selected>Sélectionner le Grade</option>
+<option value="STAGIAIRE" selected="@(Model.Grade == "STAGIAIRE" ? "selected" : null)">STAGIAIRE</option>
+<option value="2/1" selected="@(Model.Grade == "2/1" ? "selected" : null)">2/1</option>
+<option value="2/2" selected="@(Model.Grade == "2/2" ? "selected" : null)">2/2</option>
+<option value="2/3" selected="@(Model.Grade == "2/3" ? "selected" : null)">2/3</option>
+<option value="1/1" selected="@(Model.Grade == "1/1" ? "selected" : null)">1/1</option>
+<option value="1/2" selected="@(Model.Grade == "1/2" ? "selected" : null)">1/2</option>
+<option value="1/3" selected="@(Model.Grade == "1/3" ? "selected" : null)">1/3</option>
+<option value="P1" selected="@(Model.Grade == "P1" ? "selected" : null)">P1</option>
+<option value="P2" selected="@(Model.Grade == "P2" ? "selected" : null)">P2</option>
+<option value="P3" selected="@(Model.Grade == "P3" ? "selected" : null)">P3</option>
+<option value="P EX1" selected="@(Model.Grade == "P EX1" ? "selected" : null)">P EX1</option>
+<option value="P EX2" selected="@(Model.Grade == "P EX2" ? "selected" : null)">P EX2</option>
+<option value="AUX ECH° I 1°ECHELON" selected="@(Model.Grade == "AUX ECH° I 1°ECHELON" ? "selected" : null)">AUX ECH° I 1°ECHELON</option>
+<option value="AUX ECH° I 2°ECHELON" selected="@(Model.Grade == "AUX ECH° I 2°ECHELON" ? "selected" : null)">AUX ECH° I 2°ECHELON</option>
+<option value="AUX ECH° I 3°ECHELON" selected="@(Model.Grade == "AUX ECH° I 3°ECHELON" ? "selected" : null)">AUX ECH° I 3°ECHELON</option>
+<option value="AUX ECH° II 1°ECHELON" selected="@(Model.Grade == "AUX ECH° II 1°ECHELON" ? "selected" : null)">AUX ECH° II 1°ECHELON</option>
+<option value="AUX ECH° II 2°ECHELON" selected="@(Model.Grade == "AUX ECH° II 2°ECHELON" ? "selected" : null)">AUX ECH° II 2°ECHELON</option>
+<option value="AUX ECH° II 3°ECHELON" selected="@(Model.Grade == "AUX ECH° II 3°ECHELON" ? "selected" : null)">AUX ECH° II 3°ECHELON</option>
+<option value="AUX ECH° III 1°ECHELON" selected="@(Model.Grade == "AUX ECH° III 1°ECHELON" ? "selected" : null)">AUX ECH° III 1°ECHELON</option>
+<option value="AUX ECH° III 2°ECHELON" selected="@(Model.Grade == "AUX ECH° III 2°ECHELON" ? "selected" : null)">AUX ECH° III 2°ECHELON</option>
+<option value="AUX ECH° III 3°ECHELON" selected="@(Model.Grade == "AUX ECH° III 3°ECHELON" ? "selected" : null)">AUX ECH° III 3°ECHELON</option>
+<option value="AUX ECH° IV 1°ECHELON" selected="@(Model.Grade == "AUX ECH° IV 1°ECHELON" ? "selected" : null)">AUX ECH° IV 1°ECHELON</option>
+<option value="AUX ECH° IV 2°ECHELON" selected="@(Model.Grade == "AUX ECH° IV 2°ECHELON" ? "selected" : null)">AUX ECH° IV 2°ECHELON</option>
+<option value="AUX ECH° IV 3°ECHELON" selected="@(Model.Grade == "AUX ECH° IV 3°ECHELON" ? "selected" : null)">AUX ECH° IV 3°ECHELON</option>
+            </select>
+        </div>
+
+        <div class="form-group mb-4">
+            <label for="DEC" class="custom-label">N°Décision ou Note de Service(à préciser)</label>
+            <input type="text" id="DEC" name="DEC" class="form-control custom-input text-uppercase" value="@Model.Dec" oninput="this.value = this.value.toUpperCase()" />
+        </div>
+
+        <div class="form-group mb-4">
+            <label for="DATEDENTRE" class="custom-label">Date d'entrée dans l'administration</label>
+            <input type="date" id="DATEDENTRE" name="DATEDENTRE" class="form-control custom-input"
+                   value="@(DateTime.TryParse(Model.Datedentre, out var d2) ? d2.ToString("yyyy-MM-dd") : "")" />
+        </div>
+
+        <div class="form-group mb-4">
+            <label for="DATEDEPRISE" class="custom-label">Date de prise de service au Lycée Raherivelo Ramamonjy</label>
+            <input type="date" id="DATEDEPRISE" name="DATEDEPRISE" class="form-control custom-input"
+                   value="@(DateTime.TryParse(Model.Datedeprise, out var d3) ? d3.ToString("yyyy-MM-dd") : "")" />
+        </div>
+    </div>
+
+    <div class="form-section-title">Diplômes et Qualifications</div>
+    <div class="form-section">
+        <div class="form-group mb-4">
+            <label for="SerieBacc" class="custom-label">Série du Bacc</label>
+            <select id="SerieBacc" name="SerieBacc" class="form-control custom-select">
+                <option value="" disabled selected>Sélectionner la série</option>
+                <option value="A" selected="@(Model.SerieBacc == "A" ? "selected" : null)">A</option>
+                <option value="C" selected="@(Model.SerieBacc == "C" ? "selected" : null)">C</option>
+                <option value="D" selected="@(Model.SerieBacc == "D" ? "selected" : null)">D</option>
+                <option value="L" selected="@(Model.SerieBacc == "L" ? "selected" : null)">L</option>
+                <option value="S" selected="@(Model.SerieBacc == "S" ? "selected" : null)">S</option>
+                <option value="OSE" selected="@(Model.SerieBacc == "OSE" ? "selected" : null)">OSE</option>
+                <option value="TECHNIQUE" selected="@(Model.SerieBacc == "TECHNIQUE" ? "selected" : null)">TECHNIQUE</option>
+            </select>
+        </div>
+
+        <div class="form-group mb-4">
+            <label for="DIPLOMEAC" class="custom-label">Diplôme Académique le plus élevé</label>
+            <select id="DIPLOMEAC" name="DIPLOMEAC" class="form-control custom-select">
+                <option value="" disabled selected>Sélectionner le diplôme</option>
+                <option value="BEPC" selected="@(Model.Diplomeac == "BEPC" ? "selected" : null)">BEPC</option>
+                <option value="BACC" selected="@(Model.Diplomeac == "BACC" ? "selected" : null)">BACCALAUREAT</option>
+                <option value="DTS" selected="@(Model.Diplomeac == "DTS" ? "selected" : null)">Diplôme de Technicien Supérieur (BACC+2)</option>
+                <option value="LICENCE" selected="@(Model.Diplomeac == "LICENCE" ? "selected" : null)">LICENCE(BACC+3)</option>
+                <option value="MAITRISE" selected="@(Model.Diplomeac == "MAITRISE" ? "selected" : null)">MAITRISE(BACC+4)</option>
+                <option value="MASTER" selected="@(Model.Diplomeac == "MASTER" ? "selected" : null)">MASTER(BACC+5)</option>
+                <option value="DEA" selected="@(Model.Diplomeac == "DEA" ? "selected" : null)">DEA</option>
+                <option value="DOCTORAT" selected="@(Model.Diplomeac == "DOCTORAT" ? "selected" : null)">DOCTORAT</option>
+            </select>
+        </div>
+
+        <div class="form-group mb-4">
+            <label for="DIPLOMEPED" class="custom-label">Diplôme Pédagogique le plus élevé</label>
+            <select id="DIPLOMEPED" name="DIPLOMEPED" class="form-control custom-select">
+                <option value="" disabled selected>Sélectionner le diplôme</option>
+                <option value="LAPEN" selected="@(Model.Diplomeped == "LAPEN" ? "selected" : null)">LAPEN</option>
+                <option value="MAPEN" selected="@(Model.Diplomeped == "MAPEN" ? "selected" : null)">MAPEN</option>
+                <option value="CAPEN" selected="@(Model.Diplomeped == "CAPEN" ? "selected" : null)">CAPEN</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="form-section-title">Historique des Avancements d'Échelon</div>
+    <div class="form-section advancement-grid">
+        <div class="form-group mb-3">
+            <label for="PERAV" class="custom-label">N° de l'acte du 1° AVANCEMENT</label>
+            <input type="text" id="PERAV" name="PERAV" class="form-control custom-input text-uppercase" value="@Model.Perav" oninput="this.value = this.value.toUpperCase()" />
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="DEMAV" class="custom-label">N°de l'acte du 2° AVANCEMENT</label>
+            <input type="text" id="DEMAV" name="DEMAV" class="form-control custom-input text-uppercase" value="@Model.Demav" oninput="this.value = this.value.toUpperCase()" />
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="TEMAV" class="custom-label">N° de l'acte du 3° AVANCEMENT</label>
+            <input type="text" id="TEMAV" name="TEMAV" class="form-control custom-input text-uppercase" value="@Model.Temav" oninput="this.value = this.value.toUpperCase()" />
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="QEMAV" class="custom-label">N° de l'acte du 4° AVANCEMENT</label>
+            <input type="text" id="QEMAV" name="QEMAV" class="form-control custom-input text-uppercase" value="@Model.Qemav" oninput="this.value = this.value.toUpperCase()" />
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="CEMAV" class="custom-label">N° de l'acte du 5° AVANCEMENT</label>
+            <input type="text" id="CEMAV" name="CEMAV" class="form-control custom-input text-uppercase" value="@Model.Cemav" oninput="this.value = this.value.toUpperCase()" />
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="SEMAV" class="custom-label">N° de l'acte du 6° AVANCEMENT</label>
+            <input type="text" id="SEMAV" name="SEMAV" class="form-control custom-input text-uppercase" value="@Model.Semav" oninput="this.value = this.value.toUpperCase()" />
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="SEPMAV" class="custom-label">N° de l'acte du 7° AVANCEMENT</label>
+            <input type="text" id="SEPMAV" name="SEPMAV" class="form-control custom-input text-uppercase" value="@Model.Sepmav" oninput="this.value = this.value.toUpperCase()" />
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="HEMAV" class="custom-label">N° de l'acte du 8° AVANCEMENT</label>
+            <input type="text" id="HEMAV" name="HEMAV" class="form-control custom-input text-uppercase" value="@Model.Hemav" oninput="this.value = this.value.toUpperCase()" />
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="NEMAV" class="custom-label">N° de l'acte du 9° AVANCEMENT</label>
+            <input type="text" id="NEMAV" name="NEMAV" class="form-control custom-input text-uppercase" value="@Model.Nemav" oninput="this.value = this.value.toUpperCase()" />
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="DXEMAV" class="custom-label">N° de l'acte du 10° AVANCEMENT</label>
+            <input type="text" id="DXEMAV" name="DXEMAV" class="form-control custom-input text-uppercase" value="@Model.Dxemav" oninput="this.value = this.value.toUpperCase()" />
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="ONEMAV" class="custom-label">N° de l'acte du 11° AVANCEMENT</label>
+            <input type="text" id="ONEMAV" name="ONEMAV" class="form-control custom-input text-uppercase" value="@Model.Onemav" oninput="this.value = this.value.toUpperCase()" />
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="DOU" class="custom-label">N° de l'acte du 12° AVANCEMENT</label>
+            <input type="text" id="DOU" name="DOU" class="form-control custom-input text-uppercase" value="@Model.Dou" oninput="this.value = this.value.toUpperCase()" />
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="TREI" class="custom-label">N° de l'acte du 13° AVANCEMENT</label>
+            <input type="text" id="TREI" name="TREI" class="form-control custom-input text-uppercase" value="@Model.Trei" oninput="this.value = this.value.toUpperCase()" />
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="QUAT" class="custom-label">N° de l'acte du 14° AVANCEMENT</label>
+            <input type="text" id="QUAT" name="QUAT" class="form-control custom-input text-uppercase" value="@Model.Quat" oninput="this.value = this.value.toUpperCase()" />
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="QUIN" class="custom-label">N° de l'acte du 15° AVANCEMENT</label>
+            <input type="text" id="QUIN" name="QUIN" class="form-control custom-input text-uppercase" value="@Model.Quin" oninput="this.value = this.value.toUpperCase()" />
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="SEIZ" class="custom-label">N° de l'acte du 16° AVANCEMENT</label>
+            <input type="text" id="SEIZ" name="SEIZ" class="form-control custom-input text-uppercase" value="@Model.Seiz" oninput="this.value = this.value.toUpperCase()" />
+        </div>
+    </div>
+
+    <!-- 🌟 SECTION MODIFIÉE AVEC LE MESSAGE EN GRAS ET EN ROUGE 🌟 -->
+    <div class="form-section-title">
+    Classes tenues pour l'année scolaire @debutAnneeScolaire-@finAnneeScolaire 
+    <strong style="color: red; display: block; margin-top: 5px; font-size: 0.95rem;">
+        (à changer à chaque nouvelle année scolaire)
+    </strong>
+</div>
+    <div class="form-section class-tenue-grid">
+        <div class="form-group mb-3">
+            <label for="ClasseTenue1" class="custom-label">Classe tenue N°1 avec horaire hebdo</label>
+            <input type="text" id="ClasseTenue1" name="ClasseTenue1" class="form-control custom-input text-uppercase" value="@Model.ClasseTenue1" placeholder="Ex: 2ND:4H" oninput="this.value = this.value.toUpperCase()" />
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="ClasseTenue2" class="custom-label">Classe tenue N°2 avec horaire hebdo</label>
+            <input type="text" id="ClasseTenue2" name="ClasseTenue2" class="form-control custom-input text-uppercase" value="@Model.ClasseTenue2" placeholder="Ex: 1L:4H" oninput="this.value = this.value.toUpperCase()" />
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="ClasseTenue3" class="custom-label">Classe tenue N°3 avec horaire hebdo</label>
+            <input type="text" id="ClasseTenue3" name="ClasseTenue3" class="form-control custom-input text-uppercase" value="@Model.ClasseTenue3" placeholder="Ex: 1S:4H" oninput="this.value = this.value.toUpperCase()" />
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="ClasseTenue4" class="custom-label">Classe tenue N°4 avec horaire hebdo</label>
+            <input type="text" id="ClasseTenue4" name="ClasseTenue4" class="form-control custom-input text-uppercase" value="@Model.ClasseTenue4" placeholder="Ex: 1OSE:4H" oninput="this.value = this.value.toUpperCase()" />
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="ClasseTenue5" class="custom-label">Classe tenue N°5 avec horaire hebdo</label>
+            <input type="text" id="ClasseTenue5" name="ClasseTenue5" class="form-control custom-input text-uppercase" value="@Model.ClasseTenue5" placeholder="Ex: TS:4H" oninput="this.value = this.value.toUpperCase()" />
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="ClasseTenue6" class="custom-label">Classe tenue N°6 avec horaire hebdo</label>
+            <input type="text" id="ClasseTenue6" name="ClasseTenue6" class="form-control custom-input text-uppercase" value="@Model.ClasseTenue6" placeholder="Ex: TL:4H" oninput="this.value = this.value.toUpperCase()" />
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="ClasseTenue7" class="custom-label">Classe tenue N°7 avec horaire hebdo</label>
+            <input type="text" id="ClasseTenue7" name="ClasseTenue7" class="form-control custom-input text-uppercase" value="@Model.ClasseTenue7" placeholder="Ex: TOSE:4H" oninput="this.value = this.value.toUpperCase()" />
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="ClasseTenue8" class="custom-label">Classe tenue N°8 avec horaire hebdo</label>
+            <input type="text" id="ClasseTenue8" name="ClasseTenue8" class="form-control custom-input text-uppercase" value="@Model.ClasseTenue8" placeholder="Ex: 2ND:4H" oninput="this.value = this.value.toUpperCase()" />
+        </div>
+    </div>
+
+    <div class="form-actions mt-5">
+        <button type="submit" class="btn btn-save">
+            <i class="fas fa-save me-2"></i> Enregistrer le profil
+        </button>
+        <a href="@Url.Action("Index", "Personnels")" class="btn btn-back">
+            <i class="fas fa-arrow-left me-2"></i> Retour à la liste
+        </a>
+    </div>
+</form>
 <style>
     /* --- Structure Générale --- */
     .form-container {
@@ -278,7 +379,8 @@
         box-shadow: 0 4px 25px rgba(0, 0, 0, 0.04);
         padding: 40px;
         width: 100%;
-        max-width: 650px; /* Largeur optimale pour un formulaire à un seul champ par ligne */
+        max-width: 650px;
+        /* Largeur optimale pour un formulaire à un seul champ par ligne */
         border: 1px solid #e2e8f0;
     }
 
@@ -324,7 +426,8 @@
         letter-spacing: 0.5px;
     }
 
-    .custom-input, .custom-select {
+    .custom-input,
+    .custom-select {
         background-color: #ffffff;
         border: 1.5px solid #cbd5e1;
         border-radius: 8px;
@@ -333,11 +436,13 @@
         color: #1e293b;
         transition: all 0.2s ease-in-out;
         width: 100%;
-        display: block; /* Force le retour à la ligne strict */
+        display: block;
+        /* Force le retour à la ligne strict */
         box-shadow: none !important;
     }
 
-    .custom-input:focus, .custom-select:focus {
+    .custom-input:focus,
+    .custom-select:focus {
         background-color: #fff;
         border-color: #3b82f6;
         box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
@@ -355,7 +460,8 @@
     /* --- Boutons d'actions --- */
     .form-actions {
         display: flex;
-        flex-direction: column; /* Alignés verticalement à 100% de large */
+        flex-direction: column;
+        /* Alignés verticalement à 100% de large */
         gap: 12px;
         margin-top: 30px;
     }
@@ -406,7 +512,7 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        
+
         // 1. GESTION DES DOUBLONS (venant du C#)
         var duplicateMsg = "@Html.Raw(TempData["DuplicateError"] ?? "")";
         if (duplicateMsg.trim() !== "") {
@@ -434,11 +540,11 @@
     document.querySelector('form').addEventListener('submit', function (event) {
         var fonctionSelect = document.getElementById('FONCTION');
         var sexeSelect = document.getElementById('SEXE');
-        
+
         // Vérification de la Fonction
         if (!fonctionSelect || fonctionSelect.value === "" || fonctionSelect.value === null) {
-            event.preventDefault(); 
-            
+            event.preventDefault();
+
             Swal.fire({
                 icon: 'error',
                 title: 'Champ obligatoire',
@@ -452,7 +558,7 @@
         // Vérification du Sexe
         if (!sexeSelect || sexeSelect.value === "" || sexeSelect.value === null) {
             event.preventDefault();
-            
+
             Swal.fire({
                 icon: 'error',
                 title: 'Champ obligatoire',
@@ -463,20 +569,20 @@
             return;
         }
         // --- CONVERSION DES DATES EN JJ/MM/AAAA POUR LA BASE DE DONNÉES ---
-    // Ce bloc s'exécute uniquement si toutes les validations précédentes ont réussi
-    ['DATENAISS', 'DATEDENTRE', 'DATEDEPRISE'].forEach(function(id) {
-        var dateInput = document.getElementById(id);
-        if (dateInput && dateInput.value) {
-            var parts = dateInput.value.split('-'); // Découpe le format 'aaaa-mm-jj'
-            if (parts.length === 3) {
-                // Reformate en 'jj/mm/aaaa'
-                var formattedDate = parts[2] + '/' + parts[1] + '/' + parts[0];
-                
-                // Change temporairement le type en texte pour accepter le format slashé
-                dateInput.type = 'text'; 
-                dateInput.value = formattedDate;
+        // Ce bloc s'exécute uniquement si toutes les validations précédentes ont réussi
+        ['DATENAISS', 'DATEDENTRE', 'DATEDEPRISE'].forEach(function (id) {
+            var dateInput = document.getElementById(id);
+            if (dateInput && dateInput.value) {
+                var parts = dateInput.value.split('-'); // Découpe le format 'aaaa-mm-jj'
+                if (parts.length === 3) {
+                    // Reformate en 'jj/mm/aaaa'
+                    var formattedDate = parts[2] + '/' + parts[1] + '/' + parts[0];
+
+                    // Change temporairement le type en texte pour accepter le format slashé
+                    dateInput.type = 'text';
+                    dateInput.value = formattedDate;
+                }
             }
-        }
-    });
+        });
     });
 </script>

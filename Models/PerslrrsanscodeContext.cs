@@ -92,6 +92,18 @@ public partial class PerslrrsanscodeContext : DbContext
             entity.Property(e => e.Temav).HasColumnType("TEXT").HasColumnName("TEMAV");
             entity.Property(e => e.Trei).HasColumnType("TEXT").HasColumnName("TREI");
 
+            // ─── MAPPAGE DES NOUVELLES COLONNES AJOUTÉES ───
+            entity.Property(e => e.Grade).HasColumnType("TEXT").HasColumnName("GRADE");
+            entity.Property(e => e.SerieBacc).HasColumnType("TEXT").HasColumnName("SERIE_BACC");
+            entity.Property(e => e.ClasseTenue1).HasColumnType("TEXT").HasColumnName("CLASSE_TENUE_1");
+            entity.Property(e => e.ClasseTenue2).HasColumnType("TEXT").HasColumnName("CLASSE_TENUE_2");
+            entity.Property(e => e.ClasseTenue3).HasColumnType("TEXT").HasColumnName("CLASSE_TENUE_3");
+            entity.Property(e => e.ClasseTenue4).HasColumnType("TEXT").HasColumnName("CLASSE_TENUE_4");
+            entity.Property(e => e.ClasseTenue5).HasColumnType("TEXT").HasColumnName("CLASSE_TENUE_5");
+            entity.Property(e => e.ClasseTenue6).HasColumnType("TEXT").HasColumnName("CLASSE_TENUE_6");
+            entity.Property(e => e.ClasseTenue7).HasColumnType("TEXT").HasColumnName("CLASSE_TENUE_7");
+            entity.Property(e => e.ClasseTenue8).HasColumnType("TEXT").HasColumnName("CLASSE_TENUE_8");
+
             // ─── NOUVELLE COLONNE DE SYNCHRONISATION (LAST WRITE PERSONNEL) ───
             entity.Property(e => e.DateModif).HasColumnType("TEXT").HasColumnName("DateModif");
         });

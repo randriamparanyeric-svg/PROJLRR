@@ -78,6 +78,29 @@ public partial class Personnel
     public string? Photo { get; set; }
 
     // ==========================================================================
+    // NOUVELLES COLONNES AJOUTÉES
+    // ==========================================================================
+    public string? Grade { get; set; }
+
+    public string? SerieBacc { get; set; }
+
+    public string? ClasseTenue1 { get; set; }
+
+    public string? ClasseTenue2 { get; set; }
+
+    public string? ClasseTenue3 { get; set; }
+
+    public string? ClasseTenue4 { get; set; }
+
+    public string? ClasseTenue5 { get; set; }
+
+    public string? ClasseTenue6 { get; set; }
+
+    public string? ClasseTenue7 { get; set; }
+
+    public string? ClasseTenue8 { get; set; }
+
+    // ==========================================================================
     // COLONNE DE SYNCHRONISATION : Capture la date et l'heure de modification
     // ==========================================================================
     public DateTime? DateModif { get; set; }

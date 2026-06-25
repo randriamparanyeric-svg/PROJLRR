@@ -133,11 +133,11 @@ public async Task<IActionResult> Create(Personnel personnel)
         public async Task<IActionResult> TableauPersonnels() =>
             View(await _context.Personnels.OrderBy(p => p.NomEtPrenoms).ToListAsync());
             
-            [HttpGet]
+           [HttpGet]
 public async Task<IActionResult> ExporterExcel()
 {
     // 1. Récupération des données depuis la base de données
-  var personnelsDb = await _context.Personnels
+    var personnelsDb = await _context.Personnels
         .AsNoTracking()
         .OrderBy(p => p.Matricule) // <--- ICI : Trie du plus petit au plus grand matricule
         .ToListAsync();
@@ -181,7 +181,19 @@ public async Task<IActionResult> ExporterExcel()
             Trei = p.Trei,
             Quat = p.Quat,
             Quin = p.Quin,
-            Seiz = p.Seiz
+            Seiz = p.Seiz,
+            
+            // ─── EXTENSION : NOUVELLES COLONNES POUR L'EXPORT EXCEL ───
+            Grade = p.Grade,
+            SerieBacc = p.SerieBacc,
+            ClasseTenue1 = p.ClasseTenue1,
+            ClasseTenue2 = p.ClasseTenue2,
+            ClasseTenue3 = p.ClasseTenue3,
+            ClasseTenue4 = p.ClasseTenue4,
+            ClasseTenue5 = p.ClasseTenue5,
+            ClasseTenue6 = p.ClasseTenue6,
+            ClasseTenue7 = p.ClasseTenue7,
+            ClasseTenue8 = p.ClasseTenue8
         });
     }
 
