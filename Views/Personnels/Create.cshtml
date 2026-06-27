@@ -234,29 +234,36 @@
         </div>
 
         <div class="form-group mb-4">
-            <label for="DIPLOMEAC" class="custom-label">Diplôme Académique le plus élevé</label>
-            <select id="DIPLOMEAC" name="DIPLOMEAC" class="form-control custom-select">
-                <option value="" disabled selected>Sélectionner le diplôme</option>
-                <option value="BEPC" selected="@(Model.Diplomeac == "BEPC" ? "selected" : null)">BEPC</option>
-                <option value="BACC" selected="@(Model.Diplomeac == "BACC" ? "selected" : null)">BACCALAUREAT</option>
-                <option value="DTS" selected="@(Model.Diplomeac == "DTS" ? "selected" : null)">Diplôme de Technicien Supérieur (BACC+2)</option>
-                <option value="LICENCE" selected="@(Model.Diplomeac == "LICENCE" ? "selected" : null)">LICENCE(BACC+3)</option>
-                <option value="MAITRISE" selected="@(Model.Diplomeac == "MAITRISE" ? "selected" : null)">MAITRISE(BACC+4)</option>
-                <option value="MASTER" selected="@(Model.Diplomeac == "MASTER" ? "selected" : null)">MASTER(BACC+5)</option>
-                <option value="DEA" selected="@(Model.Diplomeac == "DEA" ? "selected" : null)">DEA</option>
-                <option value="DOCTORAT" selected="@(Model.Diplomeac == "DOCTORAT" ? "selected" : null)">DOCTORAT</option>
-            </select>
-        </div>
+    <label for="DIPLOMEAC" class="custom-label">Diplôme Académique le plus élevé</label>
+    <select id="DIPLOMEAC" name="DIPLOMEAC" class="form-control custom-select">
+       <option value="" disabled selected="@(string.IsNullOrEmpty(Model?.Diplomeac))">Sélectionner le diplôme</option>
+        <option value="SANS DIPLOME" selected="@(Model?.Diplomeac == "SANS DIPLOME" ? "selected" : null)">SANS DIPLÔME</option>
+        <option value="CEPE" selected="@(Model?.Diplomeac == "CEPE" ? "selected" : null)">CEPE</option>
+        <option value="BEPC / CFEPCES" selected="@(Model?.Diplomeac == "BEPC / CFEPCES" ? "selected" : null)">BEPC / CFEPCES</option>
+        <option value="BACC" selected="@(Model?.Diplomeac == "BACC" ? "selected" : null)">BACC</option>
+        <option value="BACC+2 / DTS" selected="@(Model?.Diplomeac == "BACC+2 / DTS" ? "selected" : null)">BACC+2 / DTS</option>
+        <option value="BACC+3 / LICENCE" selected="@(Model?.Diplomeac == "BACC+3 / LICENCE" ? "selected" : null)">BACC+3 / LICENCE (inclut LICENCE)</option>
+        <option value="BACC+4 / MAITRISE / MASTER 1" selected="@(Model?.Diplomeac == "BACC+4 / MAITRISE / MASTER 1" ? "selected" : null)">BACC+4 / MAITRISE / MASTER 1 (inclut MAITRISE)</option>
+        <option value="BACC+5 OU 6 / DEA / MASTER 2" selected="@(Model?.Diplomeac == "BACC+5 OU 6 / DEA / MASTER 2" ? "selected" : null)">BACC+5 ou 6 / DEA / MASTER 2 (inclut MASTER, MASTER II et MASTER II EN SCIENCE DE L'EDUCATION)</option>
+        <option value="DOCTORAT" selected="@(Model?.Diplomeac == "DOCTORAT" ? "selected" : null)">DOCTORAT</option>
+    </select>
+</div>
 
-        <div class="form-group mb-4">
-            <label for="DIPLOMEPED" class="custom-label">Diplôme Pédagogique le plus élevé</label>
-            <select id="DIPLOMEPED" name="DIPLOMEPED" class="form-control custom-select">
-                <option value="" disabled selected>Sélectionner le diplôme</option>
-                <option value="LAPEN" selected="@(Model.Diplomeped == "LAPEN" ? "selected" : null)">LAPEN</option>
-                <option value="MAPEN" selected="@(Model.Diplomeped == "MAPEN" ? "selected" : null)">MAPEN</option>
-                <option value="CAPEN" selected="@(Model.Diplomeped == "CAPEN" ? "selected" : null)">CAPEN</option>
-            </select>
-        </div>
+       <div class="form-group mb-4">
+    <label for="DIPLOMEPED" class="custom-label">Diplôme Pédagogique le plus élevé</label>
+    <select id="DIPLOMEPED" name="DIPLOMEPED" class="form-control custom-select">
+        <option value="" disabled selected="@(string.IsNullOrEmpty(Model?.Diplomeped))">Sélectionner le diplôme</option>
+        <option value="CAP-CAP/EB-CAP/EP" selected="@(Model?.Diplomeped == "CAP-CAP/EB-CAP/EP" ? "selected" : null)">CAP-CAP/EB-CAP/EP</option>
+        <option value="CAP/EPS" selected="@(Model?.Diplomeped == "CAP/EPS" ? "selected" : null)">CAP/EPS</option>
+        <option value="CFF/ESS" selected="@(Model?.Diplomeped == "CFF/ESS" ? "selected" : null)">CFF/ESS</option>
+        <option value="CFFP/EC" selected="@(Model?.Diplomeped == "CFFP/EC" ? "selected" : null)">CFFP/EC</option>
+        <option value="CFFP/ESS" selected="@(Model?.Diplomeped == "CFFP/ESS" ? "selected" : null)">CFFP/ESS</option>
+        <option value="LAPEN" selected="@(Model?.Diplomeped == "LAPEN" ? "selected" : null)">LAPEN</option>
+        <option value="MAPEN" selected="@(Model?.Diplomeped == "MAPEN" ? "selected" : null)">MAPEN</option>
+        <option value="CAPEN" selected="@(Model?.Diplomeped == "CAPEN" ? "selected" : null)">CAPEN</option>
+        <option value="AUTRES" selected="@(Model?.Diplomeped == "AUTRES" ? "selected" : null)">AUTRES</option>
+    </select>
+</div>
     </div>
 
     <div class="form-section-title">Historique des Avancements d'Échelon</div>

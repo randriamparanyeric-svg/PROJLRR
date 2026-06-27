@@ -682,6 +682,7 @@
         <div class="form-group">
             <label>Série du Bacc:</label>
             <select id="editSerieBacc" name="SerieBacc" class="form-control">
+                <option value="">--AUCUN--</option>
                 <option value="A">A</option>
                 <option value="C">C</option>
                 <option value="D">D</option>
@@ -692,28 +693,37 @@
             </select>
         </div>
         
-        <div class="form-group">
-            <label for="editDiplomeac">Diplôme Académique le plus élevé</label>
-            <select id="editDiplomeac" name="Diplomeac" class="form-control">
-                <option value="BEPC">BEPC</option>
-                <option value="BACC">BACCALAUREAT</option>
-                <option value="DTS">Diplôme de Technicien Supérieur (BACC+2)</option>
-                <option value="LICENCE">LICENCE(BACC+3)</option>
-                <option value="MAITRISE">MAITRISE(BACC+4)</option>
-                <option value="MASTER">MASTER(BACC+5)</option>
-                <option value="DEA">DEA</option>
-                <option value="DOCTORAT">DOCTORAT</option>
-            </select>
-        </div>
+       <div class="form-group">
+    <label for="editDiplomeac">Diplôme Académique le plus élevé</label>
+    <select id="editDiplomeac" name="Diplomeac" class="form-control">
+        <option value="">--AUCUN--</option>
+        <option value="SANS DIPLOME">SANS DIPLÔME</option>
+        <option value="CEPE">CEPE</option>
+        <option value="BEPC / CFEPCES">BEPC / CFEPCES</option>
+        <option value="BACC">BACC</option>
+        <option value="BACC+2 / DTS">BACC+2 / DTS</option>
+        <option value="BACC+3 / LICENCE">BACC+3 / LICENCE (inclut LICENCE)</option>
+        <option value="BACC+4 / MAITRISE / MASTER 1">BACC+4 / MAITRISE / MASTER 1 (inclut MAITRISE)</option>
+        <option value="BACC+5 OU 6 / DEA / MASTER 2">BACC+5 ou 6 / DEA / MASTER 2 (inclut MASTER, MASTER II et MASTER II EN SCIENCE DE L'EDUCATION)</option>
+        <option value="DOCTORAT">DOCTORAT</option>
+    </select>
+</div>
 
         <div class="form-group">
-            <label for="editDiplomeped">Diplôme Pédagogique le plus élevé</label>
-            <select id="editDiplomeped" name="Diplomeped" class="form-control">
-                <option value="LAPEN">LAPEN</option>
-                <option value="MAPEN">MAPEN</option>
-                <option value="CAPEN">CAPEN</option>
-            </select>
-        </div>
+    <label for="editDiplomeped">Diplôme Pédagogique le plus élevé</label>
+    <select id="editDiplomeped" name="Diplomeped" class="form-control">
+        <option value="">--AUCUN--</option>
+        <option value="CAP-CAP/EB-CAP/EP">CAP-CAP/EB-CAP/EP</option>
+        <option value="CAP/EPS">CAP/EPS</option>
+        <option value="CFF/ESS">CFF/ESS</option>
+        <option value="CFFP/EC">CFFP/EC</option>
+        <option value="CFFP/ESS">CFFP/ESS</option>
+        <option value="LAPEN">LAPEN</option>
+        <option value="MAPEN">MAPEN</option>
+        <option value="CAPEN">CAPEN</option>
+        <option value="AUTRES">AUTRES</option>
+    </select>
+</div>
 
         <div class="section-divider"><h4>Détails des Avancements</h4></div>
 
