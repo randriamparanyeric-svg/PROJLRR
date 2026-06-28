@@ -144,96 +144,105 @@ public async Task<IActionResult> UpdatePersonnel([FromForm] Personnel updatedPer
         if (parts.Length == 3) updatedPersonnel.Datedeprise = $"{parts[2]}/{parts[1]}/{parts[0]}";
     }
 
-    // --- 🔔 DÉTECTION DE TOUS LES ÉCARTS (POUR ENSEIGNANTS ET ADMINS) ---
-    bool isAdmin = User.IsInRole("Admin");
-    List<string> changements = new List<string>();
+   // --- 🔔 DÉTECTION DE TOUS LES ÉCARTS (POUR ENSEIGNANTS ET ADMINS) ---
+bool isAdmin = User.IsInRole("Admin");
+List<string> changements = new List<string>();
 
-    if (existing.Matricule != updatedPersonnel.Matricule) changements.Add($"Matricule : '{existing.Matricule}' ➡️ '{updatedPersonnel.Matricule}'");
-    if (existing.NomEtPrenoms != updatedPersonnel.NomEtPrenoms) changements.Add($"Nom & Prénoms : '{existing.NomEtPrenoms}' ➡️ '{updatedPersonnel.NomEtPrenoms}'");
-    if (existing.Cin != updatedPersonnel.Cin) changements.Add($"CIN : '{existing.Cin}' ➡️ '{updatedPersonnel.Cin}'");
-    if (existing.Dec != updatedPersonnel.Dec) changements.Add($"Dec : '{existing.Dec}' ➡️ '{updatedPersonnel.Dec}'");
-    if (existing.Corps != updatedPersonnel.Corps) changements.Add($"Corps : '{existing.Corps}' ➡️ '{updatedPersonnel.Corps}'");
-    if (existing.Matiere != updatedPersonnel.Matiere) changements.Add($"Matière : '{existing.Matiere}' ➡️ '{updatedPersonnel.Matiere}'");
-    if (existing.Datenaiss != updatedPersonnel.Datenaiss) changements.Add($"Date Naiss : '{existing.Datenaiss}' ➡️ '{updatedPersonnel.Datenaiss}'");
-    if (existing.Lieudenaiss != updatedPersonnel.Lieudenaiss) changements.Add($"Lieu Naiss : '{existing.Lieudenaiss}' ➡️ '{updatedPersonnel.Lieudenaiss}'");
-    if (existing.Sexe != updatedPersonnel.Sexe) changements.Add($"Sexe : '{existing.Sexe}' ➡️ '{updatedPersonnel.Sexe}'");
-    if (existing.Statut != updatedPersonnel.Statut) changements.Add($"Statut : '{existing.Statut}' ➡️ '{updatedPersonnel.Statut}'");
-    if (existing.Datedentre != updatedPersonnel.Datedentre) changements.Add($"Date Entrée : '{existing.Datedentre}' ➡️ '{updatedPersonnel.Datedentre}'");
-    if (existing.Datedeprise != updatedPersonnel.Datedeprise) changements.Add($"Date Prise : '{existing.Datedeprise}' ➡️ '{updatedPersonnel.Datedeprise}'");
-    if (existing.Diplomeac != updatedPersonnel.Diplomeac) changements.Add($"Diplôme Ac. : '{existing.Diplomeac}' ➡️ '{updatedPersonnel.Diplomeac}'");
-    if (existing.Diplomeped != updatedPersonnel.Diplomeped) changements.Add($"Diplôme Péd. : '{existing.Diplomeped}' ➡️ '{updatedPersonnel.Diplomeped}'");
-    if (existing.Contact != updatedPersonnel.Contact) changements.Add($"Contact : '{existing.Contact}' ➡️ '{updatedPersonnel.Contact}'");
-    if (existing.Fonction != updatedPersonnel.Fonction) changements.Add($"Fonction : '{existing.Fonction}' ➡️ '{updatedPersonnel.Fonction}'");
-    
-    // 🌟 Ajout du Suivi Grade et Série Bacc
-    if (existing.Grade != updatedPersonnel.Grade) changements.Add($"Grade : '{existing.Grade}' ➡️ '{updatedPersonnel.Grade}'");
-    if (existing.SerieBacc != updatedPersonnel.SerieBacc) changements.Add($"Série Bacc : '{existing.SerieBacc}' ➡️ '{updatedPersonnel.SerieBacc}'");
+// ⚡ FONCTION LOCALE : Compare proprement deux valeurs sans faux positifs (gère null, vide et espaces)
+bool EstModifie(object avant, object apres)
+{
+    string strAvant = (avant?.ToString() ?? "").Trim();
+    string strApres = (apres?.ToString() ?? "").Trim();
+    return strAvant != strApres;
+}
 
-    // --- Historique des Avancements ---
-    if (existing.Perav != updatedPersonnel.Perav) changements.Add($"Perav : '{existing.Perav}' ➡️ '{updatedPersonnel.Perav}'");
-    if (existing.Demav != updatedPersonnel.Demav) changements.Add($"Demav : '{existing.Demav}' ➡️ '{updatedPersonnel.Demav}'");
-    if (existing.Temav != updatedPersonnel.Temav) changements.Add($"Temav : '{existing.Temav}' ➡️ '{updatedPersonnel.Temav}'");
-    if (existing.Qemav != updatedPersonnel.Qemav) changements.Add($"Qemav : '{existing.Qemav}' ➡️ '{updatedPersonnel.Qemav}'");
-    if (existing.Cemav != updatedPersonnel.Cemav) changements.Add($"Cemav : '{existing.Cemav}' ➡️ '{updatedPersonnel.Cemav}'");
-    if (existing.Semav != updatedPersonnel.Semav) changements.Add($"Semav : '{existing.Semav}' ➡️ '{updatedPersonnel.Semav}'");
-    if (existing.Sepmav != updatedPersonnel.Sepmav) changements.Add($"Sepmav : '{existing.Sepmav}' ➡️ '{updatedPersonnel.Sepmav}'");
-    if (existing.Hemav != updatedPersonnel.Hemav) changements.Add($"Hemav : '{existing.Hemav}' ➡️ '{updatedPersonnel.Hemav}'");
-    if (existing.Nemav != updatedPersonnel.Nemav) changements.Add($"Nemav : '{existing.Nemav}' ➡️ '{updatedPersonnel.Nemav}'");
-    if (existing.Dxemav != updatedPersonnel.Dxemav) changements.Add($"Dxemav : '{existing.Dxemav}' ➡️ '{updatedPersonnel.Dxemav}'");
-    if (existing.Onemav != updatedPersonnel.Onemav) changements.Add($"Onemav : '{existing.Onemav}' ➡️ '{updatedPersonnel.Onemav}'");
-    if (existing.Dou != updatedPersonnel.Dou) changements.Add($"Dou : '{existing.Dou}' ➡️ '{updatedPersonnel.Dou}'");
-    if (existing.Trei != updatedPersonnel.Trei) changements.Add($"Trei : '{existing.Trei}' ➡️ '{updatedPersonnel.Trei}'");
-    if (existing.Quat != updatedPersonnel.Quat) changements.Add($"Quat : '{existing.Quat}' ➡️ '{updatedPersonnel.Quat}'");
-    if (existing.Quin != updatedPersonnel.Quin) changements.Add($"Quin : '{existing.Quin}' ➡️ '{updatedPersonnel.Quin}'");
-    if (existing.Seiz != updatedPersonnel.Seiz) changements.Add($"Seiz : '{existing.Seiz}' ➡️ '{updatedPersonnel.Seiz}'");
+// 1. Informations Générales
+if (EstModifie(existing.Matricule, updatedPersonnel.Matricule)) changements.Add($"Matricule : '{existing.Matricule}' ➡️ '{updatedPersonnel.Matricule}'");
+if (EstModifie(existing.NomEtPrenoms, updatedPersonnel.NomEtPrenoms)) changements.Add($"Nom & Prénoms : '{existing.NomEtPrenoms}' ➡️ '{updatedPersonnel.NomEtPrenoms}'");
+if (EstModifie(existing.Cin, updatedPersonnel.Cin)) changements.Add($"CIN : '{existing.Cin}' ➡️ '{updatedPersonnel.Cin}'");
+if (EstModifie(existing.Dec, updatedPersonnel.Dec)) changements.Add($"Dec : '{existing.Dec}' ➡️ '{updatedPersonnel.Dec}'");
+if (EstModifie(existing.Corps, updatedPersonnel.Corps)) changements.Add($"Corps : '{existing.Corps}' ➡️ '{updatedPersonnel.Corps}'");
+if (EstModifie(existing.Matiere, updatedPersonnel.Matiere)) changements.Add($"Matière : '{existing.Matiere}' ➡️ '{updatedPersonnel.Matiere}'");
+if (EstModifie(existing.Datenaiss, updatedPersonnel.Datenaiss)) changements.Add($"Date Naiss : '{existing.Datenaiss}' ➡️ '{updatedPersonnel.Datenaiss}'");
+if (EstModifie(existing.Lieudenaiss, updatedPersonnel.Lieudenaiss)) changements.Add($"Lieu Naiss : '{existing.Lieudenaiss}' ➡️ '{updatedPersonnel.Lieudenaiss}'");
+if (EstModifie(existing.Sexe, updatedPersonnel.Sexe)) changements.Add($"Sexe : '{existing.Sexe}' ➡️ '{updatedPersonnel.Sexe}'");
+if (EstModifie(existing.Statut, updatedPersonnel.Statut)) changements.Add($"Statut : '{existing.Statut}' ➡️ '{updatedPersonnel.Statut}'");
+if (EstModifie(existing.Datedentre, updatedPersonnel.Datedentre)) changements.Add($"Date Entrée : '{existing.Datedentre}' ➡️ '{updatedPersonnel.Datedentre}'");
+if (EstModifie(existing.Datedeprise, updatedPersonnel.Datedeprise)) changements.Add($"Date Prise : '{existing.Datedeprise}' ➡️ '{updatedPersonnel.Datedeprise}'");
+if (EstModifie(existing.Diplomeac, updatedPersonnel.Diplomeac)) changements.Add($"Diplôme Ac. : '{existing.Diplomeac}' ➡️ '{updatedPersonnel.Diplomeac}'");
+if (EstModifie(existing.Diplomeped, updatedPersonnel.Diplomeped)) changements.Add($"Diplôme Péd. : '{existing.Diplomeped}' ➡️ '{updatedPersonnel.Diplomeped}'");
+if (EstModifie(existing.Contact, updatedPersonnel.Contact)) changements.Add($"Contact : '{existing.Contact}' ➡️ '{updatedPersonnel.Contact}'");
+if (EstModifie(existing.Fonction, updatedPersonnel.Fonction)) changements.Add($"Fonction : '{existing.Fonction}' ➡️ '{updatedPersonnel.Fonction}'");
 
-    // 🌟 Ajout du Suivi des 8 Classes tenues
-    if (existing.ClasseTenue1 != updatedPersonnel.ClasseTenue1) changements.Add($"Classe 1 : '{existing.ClasseTenue1}' ➡️ '{updatedPersonnel.ClasseTenue1}'");
-    if (existing.ClasseTenue2 != updatedPersonnel.ClasseTenue2) changements.Add($"Classe 2 : '{existing.ClasseTenue2}' ➡️ '{updatedPersonnel.ClasseTenue2}'");
-    if (existing.ClasseTenue3 != updatedPersonnel.ClasseTenue3) changements.Add($"Classe 3 : '{existing.ClasseTenue3}' ➡️ '{updatedPersonnel.ClasseTenue3}'");
-    if (existing.ClasseTenue4 != updatedPersonnel.ClasseTenue4) changements.Add($"Classe 4 : '{existing.ClasseTenue4}' ➡️ '{updatedPersonnel.ClasseTenue4}'");
-    if (existing.ClasseTenue5 != updatedPersonnel.ClasseTenue5) changements.Add($"Classe 5 : '{existing.ClasseTenue5}' ➡️ '{updatedPersonnel.ClasseTenue5}'");
-    if (existing.ClasseTenue6 != updatedPersonnel.ClasseTenue6) changements.Add($"Classe 6 : '{existing.ClasseTenue6}' ➡️ '{updatedPersonnel.ClasseTenue6}'");
-    if (existing.ClasseTenue7 != updatedPersonnel.ClasseTenue7) changements.Add($"Classe 7 : '{existing.ClasseTenue7}' ➡️ '{updatedPersonnel.ClasseTenue7}'");
-    if (existing.ClasseTenue8 != updatedPersonnel.ClasseTenue8) changements.Add($"Classe 8 : '{existing.ClasseTenue8}' ➡️ '{updatedPersonnel.ClasseTenue8}'");
-    
-    if (PhotoFile != null && PhotoFile.Length > 0)
-        changements.Add("Nouvelle photo de profil téléversée");
+// 🌟 Suivi Grade et Série Bacc
+if (EstModifie(existing.Grade, updatedPersonnel.Grade)) changements.Add($"Grade : '{existing.Grade}' ➡️ '{updatedPersonnel.Grade}'");
+if (EstModifie(existing.SerieBacc, updatedPersonnel.SerieBacc)) changements.Add($"Série Bacc : '{existing.SerieBacc}' ➡️ '{updatedPersonnel.SerieBacc}'");
 
-    if (changements.Count > 0)
+// --- Historique des Avancements ---
+if (EstModifie(existing.Perav, updatedPersonnel.Perav)) changements.Add($"Perav : '{existing.Perav}' ➡️ '{updatedPersonnel.Perav}'");
+if (EstModifie(existing.Demav, updatedPersonnel.Demav)) changements.Add($"Demav : '{existing.Demav}' ➡️ '{updatedPersonnel.Demav}'");
+if (EstModifie(existing.Temav, updatedPersonnel.Temav)) changements.Add($"Temav : '{existing.Temav}' ➡️ '{updatedPersonnel.Temav}'");
+if (EstModifie(existing.Qemav, updatedPersonnel.Qemav)) changements.Add($"Qemav : '{existing.Qemav}' ➡️ '{updatedPersonnel.Qemav}'");
+if (EstModifie(existing.Cemav, updatedPersonnel.Cemav)) changements.Add($"Cemav : '{existing.Cemav}' ➡️ '{updatedPersonnel.Cemav}'");
+if (EstModifie(existing.Semav, updatedPersonnel.Semav)) changements.Add($"Semav : '{existing.Semav}' ➡️ '{updatedPersonnel.Semav}'");
+if (EstModifie(existing.Sepmav, updatedPersonnel.Sepmav)) changements.Add($"Sepmav : '{existing.Sepmav}' ➡️ '{updatedPersonnel.Sepmav}'");
+if (EstModifie(existing.Hemav, updatedPersonnel.Hemav)) changements.Add($"Hemav : '{existing.Hemav}' ➡️ '{updatedPersonnel.Hemav}'");
+if (EstModifie(existing.Nemav, updatedPersonnel.Nemav)) changements.Add($"Nemav : '{existing.Nemav}' ➡️ '{updatedPersonnel.Nemav}'");
+if (EstModifie(existing.Dxemav, updatedPersonnel.Dxemav)) changements.Add($"Dxemav : '{existing.Dxemav}' ➡️ '{updatedPersonnel.Dxemav}'");
+if (EstModifie(existing.Onemav, updatedPersonnel.Onemav)) changements.Add($"Onemav : '{existing.Onemav}' ➡️ '{updatedPersonnel.Onemav}'");
+if (EstModifie(existing.Dou, updatedPersonnel.Dou)) changements.Add($"Dou : '{existing.Dou}' ➡️ '{updatedPersonnel.Dou}'");
+if (EstModifie(existing.Trei, updatedPersonnel.Trei)) changements.Add($"Trei : '{existing.Trei}' ➡️ '{updatedPersonnel.Trei}'");
+if (EstModifie(existing.Quat, updatedPersonnel.Quat)) changements.Add($"Quat : '{existing.Quat}' ➡️ '{updatedPersonnel.Quat}'");
+if (EstModifie(existing.Quin, updatedPersonnel.Quin)) changements.Add($"Quin : '{existing.Quin}' ➡️ '{updatedPersonnel.Quin}'");
+if (EstModifie(existing.Seiz, updatedPersonnel.Seiz)) changements.Add($"Seiz : '{existing.Seiz}' ➡️ '{updatedPersonnel.Seiz}'");
+
+// 🌟 Suivi des 8 Classes tenues
+if (EstModifie(existing.ClasseTenue1, updatedPersonnel.ClasseTenue1)) changements.Add($"Classe 1 : '{existing.ClasseTenue1}' ➡️ '{updatedPersonnel.ClasseTenue1}'");
+if (EstModifie(existing.ClasseTenue2, updatedPersonnel.ClasseTenue2)) changements.Add($"Classe 2 : '{existing.ClasseTenue2}' ➡️ '{updatedPersonnel.ClasseTenue2}'");
+if (EstModifie(existing.ClasseTenue3, updatedPersonnel.ClasseTenue3)) changements.Add($"Classe 3 : '{existing.ClasseTenue3}' ➡️ '{updatedPersonnel.ClasseTenue3}'");
+if (EstModifie(existing.ClasseTenue4, updatedPersonnel.ClasseTenue4)) changements.Add($"Classe 4 : '{existing.ClasseTenue4}' ➡️ '{updatedPersonnel.ClasseTenue4}'");
+if (EstModifie(existing.ClasseTenue5, updatedPersonnel.ClasseTenue5)) changements.Add($"Classe 5 : '{existing.ClasseTenue5}' ➡️ '{updatedPersonnel.ClasseTenue5}'");
+if (EstModifie(existing.ClasseTenue6, updatedPersonnel.ClasseTenue6)) changements.Add($"Classe 6 : '{existing.ClasseTenue6}' ➡️ '{updatedPersonnel.ClasseTenue6}'");
+if (EstModifie(existing.ClasseTenue7, updatedPersonnel.ClasseTenue7)) changements.Add($"Classe 7 : '{existing.ClasseTenue7}' ➡️ '{updatedPersonnel.ClasseTenue7}'");
+if (EstModifie(existing.ClasseTenue8, updatedPersonnel.ClasseTenue8)) changements.Add($"Classe 8 : '{existing.ClasseTenue8}' ➡️ '{updatedPersonnel.ClasseTenue8}'");
+
+if (PhotoFile != null && PhotoFile.Length > 0)
+    changements.Add("Nouvelle photo de profil téléversée");
+
+// 🔔 Création de la notification uniquement s'il y a de réels changements alternatifs
+if (changements.Count > 0)
+{
+    string nomUtilisateur = User.Identity?.Name ?? (isAdmin ? "Un administrateur" : "Un enseignant");
+    string titreUser = isAdmin ? "L'administrateur" : "L'enseignant";
+    string detailsTexte = string.Join(", ", changements);
+
+    var notification = new Notification
     {
-        // Identification dynamique de l'auteur et de son titre
-        string nomUtilisateur = User.Identity?.Name ?? (isAdmin ? "Un administrateur" : "Un enseignant");
-        string titreUser = isAdmin ? "L'administrateur" : "L'enseignant";
-        string detailsTexte = string.Join(", ", changements);
+        Message = $"{titreUser} **{nomUtilisateur}** a modifié la fiche de **{existing.NomEtPrenoms ?? existing.Matricule}** [{detailsTexte}].",
+        DateCreation = DateTime.Now,
+        IsRead = false,
+        ModifiePar = nomUtilisateur
+    };
 
-        var notification = new Notification
-        {
-            Message = $"{titreUser} **{nomUtilisateur}** a modifié la fiche de **{existing.NomEtPrenoms ?? existing.Matricule}** [{detailsTexte}].",
-            DateCreation = DateTime.Now,
-            IsRead = false,
-            ModifiePar = nomUtilisateur
-        };
+    _context.Notifications.Add(notification);
+}
 
-        _context.Notifications.Add(notification);
-    }
+// Mise à jour automatique de toutes les propriétés converties
+_context.Entry(existing).CurrentValues.SetValues(updatedPersonnel);
 
-    // Mise à jour automatique de toutes les propriétés converties
-    _context.Entry(existing).CurrentValues.SetValues(updatedPersonnel);
-
-    try
-    {
-        await _context.SaveChangesAsync();
-        return Ok(new { 
-            success = true, 
-            message = "Modification réussie", 
-            photoUrl = updatedPersonnel.Photo 
-        });
-    }
-    catch (Exception ex)
-    {
-        return StatusCode(500, new { success = false, message = ex.Message });
-    }
+            try
+            {
+                await _context.SaveChangesAsync();
+                return Ok(new {
+                    success = true,
+                    message = "Modification réussie",
+                    photoUrl = updatedPersonnel.Photo
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = ex.Message });
+            }
 }
         // =================================================================
         // 4. SUPPRESSION ET ARCHIVAGE AUTOMATIQUE

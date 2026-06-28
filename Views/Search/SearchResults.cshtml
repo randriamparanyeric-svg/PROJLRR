@@ -502,9 +502,13 @@
         
         <div class="photo-upload-container" style="margin-bottom: 25px; text-align: center;">
             <label style="display:block; font-weight:bold; margin-bottom:10px;">Photo du personnel :</label>
-            <img id="editPhotoPreview" src="" alt="Aperçu" style="width:120px; height:150px; object-fit:cover; border:2px solid #cbd5e1; border-radius: 8px; margin-bottom:10px; display:inline-block;" />
-            <br/>
-            <input type="file" id="editPhotoFile" name="PhotoFile" accept="image/*" style="display: none;" />
+            
+            <img id="editPhotoPreview" src="" alt="Aperçu" style="width:120px; height:150px; object-fit:cover; border:2px solid #cbd5e1; border-radius: 8px; margin-bottom:5px; display:inline-block;" />
+            
+            <span id="compressionStatus" style="display:block; font-size:12px; color:#22c55e; margin-bottom:10px; font-weight:bold; min-height: 18px;"></span>
+            
+            <input type="file" id="editPhotoFile" name="PhotoFile" accept="image/jpeg, image/png, image/webp" style="display: none;" />
+            
             <button type="button" id="btnTriggerUpload" style="background-color: #007bff; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold;">
                 📁 Choisir une photo
             </button>
@@ -929,12 +933,18 @@ $(document).on('click', '.btn-edit', function (e) {
     });
 });
 
-        // Soumission du formulaire
+       // Soumission du formulaire mise à jour avec gestion de la photo optimisée
 $("#updateForm").submit(function(e){
     e.preventDefault();
     
     let formData = new FormData(this);
     let personnelNum = $("#editNum").val(); 
+    
+    // ⚡ AJOUT : Si une photo a été compressée par le Canvas, on l'injecte dans le formulaire
+    // Cela remplace le fichier lourd d'origine par la version ultra-légère
+    if (typeof compressedPhotoBlob !== 'undefined' && compressedPhotoBlob) {
+        formData.set('PhotoFile', compressedPhotoBlob, 'photo_personnel.jpg');
+    }
     
     $.ajax({ 
         url: '/Search/UpdatePersonnel', 
@@ -962,7 +972,7 @@ $("#updateForm").submit(function(e){
                 if ($card.length > 0) {
                     let cacheBuster = new Date().getTime(); 
                     
-                    // Rafraîchissement des images (Aperçu + Carte UI)
+                    // Rafraîchissement des images (Aperçu + Carte UI) avec élimination du cache
                     $("#editPhotoPreview").attr("src", res.photoUrl + "?t=" + cacheBuster);
                     $card.find(".photo-personnel").attr("src", res.photoUrl + "?t=" + cacheBuster);
                     
@@ -1031,6 +1041,13 @@ $("#updateForm").submit(function(e){
                     $card.find(".ClasseTenue7").text($("#editClasseTenue7").val());
                     $card.find(".ClasseTenue8").text($("#editClasseTenue8").val());
                 }
+                
+                // ⚡ AJOUT : Nettoyage après succès pour éviter les soumissions accidentelles futures
+                if ($("#compressionStatus").length > 0) {
+                    $("#compressionStatus").text(''); // Efface le texte "Photo optimisée (XX Ko)"
+                }
+                compressedPhotoBlob = null; // Vide la mémoire tampon du fichier
+                
                 closeEditModal();
             } else {
                 // 💥 Message SweetAlert2 (Échec contrôleur)
@@ -1102,22 +1119,6 @@ $("#updateForm").submit(function(e){
             if (!$(e.target).closest("#PersonnelNom, #suggestions").length) $("#suggestions").empty(); 
         });
     });
-
-    // Gestion de l'upload et de l'aperçu photo
-    $(document).on('click', '#btnTriggerUpload', function () {
-        $("#editPhotoFile").click();
-    });
-
-    $(document).on('change', '#editPhotoFile', function () {
-        let file = this.files[0];
-        if (file) {
-            let reader = new FileReader();
-            reader.onload = function (e) {
-                $('#editPhotoPreview').attr('src', e.target.result);
-            };
-            reader.readAsDataURL(file);
-        }
-    });
 </script>
 <script>
 function imprimerFiche(cardId) {
@@ -1129,16 +1130,17 @@ function imprimerFiche(cardId) {
     
     fenetreImpression.document.write('<html><head><title>Fiche Personnel</title>');
     
-    // Ajout des styles CSS pour garantir une mise en page identique et propre à l'impression
-    fenetreImpression.document.write('<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">');
-    fenetreImpression.document.write('<style>');
-    fenetreImpression.document.write('body { font-family: "Segoe UI", Arial, sans-serif; padding: 30px; background-color: #fff; color: #000; }');
-    fenetreImpression.document.write('.table-custom { width: 100%; border-collapse: collapse; margin-top: 15px; }');
-    fenetreImpression.document.write('.table-custom th, .table-custom td { border: 1px solid #dee2e6; padding: 10px; font-size: 0.95rem; }');
-    fenetreImpression.document.write('.photo-personnel { display: block; margin: 0 auto 15px auto; border: 3px solid #dee2e6; border-radius: 8px; }');
-    fenetreImpression.document.write('.card-actions { display: none !important; }'); // Masquer définitivement les boutons sur le papier
-    fenetreImpression.document.write('tr { page-break-inside: avoid; }'); // Évite les coupures de lignes bizarres entre deux pages
-    fenetreImpression.document.write('</style></head><body>');
+   // Ajout des styles CSS pour garantir une mise en page identique et propre à l'impression
+// ⚡ Modification : Utilisation du chemin local pour le mode hors ligne
+fenetreImpression.document.write('<link rel="stylesheet" href="/lib/bootstrap/dist/css/bootstrap.min.css">');
+fenetreImpression.document.write('<style>');
+fenetreImpression.document.write('body { font-family: "Segoe UI", Arial, sans-serif; padding: 30px; background-color: #fff; color: #000; }');
+fenetreImpression.document.write('.table-custom { width: 100%; border-collapse: collapse; margin-top: 15px; }');
+fenetreImpression.document.write('.table-custom th, .table-custom td { border: 1px solid #dee2e6; padding: 10px; font-size: 0.95rem; }');
+fenetreImpression.document.write('.photo-personnel { display: block; margin: 0 auto 15px auto; border: 3px solid #dee2e6; border-radius: 8px; }');
+fenetreImpression.document.write('.card-actions { display: none !important; }'); // Masquer définitivement les boutons sur le papier
+fenetreImpression.document.write('tr { page-break-inside: avoid; }'); // Évite les coupures de lignes bizarres entre deux pages
+fenetreImpression.document.write('</style></head><body>');
     
     // Injecte le HTML de la carte ciblée
     fenetreImpression.document.write(cardElement.innerHTML);
@@ -1153,4 +1155,56 @@ function imprimerFiche(cardId) {
         fenetreImpression.close();
     };
 }
+// Variable globale qui stockera la version ultra-légère de la photo
+let compressedPhotoBlob = null;
+
+// Déclencheur du bouton masqué
+$(document).on('click', '#btnTriggerUpload', function () {
+    $("#editPhotoFile").click();
+});
+
+// Événement dès qu'une photo est sélectionnée
+$(document).on('change', '#editPhotoFile', function () {
+    let file = this.files[0];
+    if (file) {
+        // 🚀 ACCÉLÉRATION 1 : Aperçu local instantané (sans aucune attente réseau)
+        let objectUrl = URL.createObjectURL(file);
+        $('#editPhotoPreview').attr('src', objectUrl);
+        $("#compressionStatus").css("color", "#eab308").text("⚡ Optimisation en cours...");
+
+        // 🚀 ACCÉLÉRATION 2 : Compression par Canvas HTML5
+        let reader = new FileReader();
+        reader.onload = function (e) {
+            let img = new Image();
+            img.src = e.target.result;
+            img.onload = function () {
+                let canvas = document.createElement('canvas');
+                
+                // Dimensions idéales pour un trombinoscope (max 400px de large)
+                let maxWidth = 400; 
+                let scaleSize = maxWidth / img.width;
+                
+                if (img.width > maxWidth) {
+                    canvas.width = maxWidth;
+                    canvas.height = img.height * scaleSize;
+                } else {
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                }
+
+                let ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                // Conversion de l'image lourde en JPEG performant (Qualité 75%)
+                canvas.toBlob(function (blob) {
+                    compressedPhotoBlob = blob; // Stockage du fichier optimisé prêt pour l'envoi AJAX
+                    
+                    let sizeInKo = (blob.size / 1024).toFixed(1);
+                    $("#compressionStatus").css("color", "#22c55e").text("✅ Photo prête et optimisée (" + sizeInKo + " Ko)");
+                }, 'image/jpeg', 0.75);
+            };
+        };
+        reader.readAsDataURL(file);
+    }
+});
 </script>
