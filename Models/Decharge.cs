@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema; // 👈 Assurez-vous d'avoir ceci
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PROJLRR.Models;
 
 public partial class Decharge
 {
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.None)] 
-    public int Id { get; set; }
+   [Key]
+[DatabaseGenerated(DatabaseGeneratedOption.Identity)] // Remplacez None par Identity
+public int Id { get; set; }
 
     public string? PersonnelNom { get; set; }
     public string? ArticleNom { get; set; }
@@ -20,6 +20,14 @@ public partial class Decharge
     public long? DateDecharge { get; set; }
 
     public string? SignaturePath { get; set; }
+
+    // 🟢 AJOUTÉ : Traçabilité pour la synchronisation Last Write Wins
+    public DateTime? DateModif { get; set; } = DateTime.Now;
+    public long? GroupeId { get; set; }
+
+    // 🟢 AJOUTÉ : Indicateur d'état pour la validation sélective à l'écran (Ignoré par la BDD)
+    [NotMapped]
+    public bool IsModified { get; set; } = false;
 
     // 🔥 Propriété magique pour l'affichage (Non stockée en BDD)
     [NotMapped]

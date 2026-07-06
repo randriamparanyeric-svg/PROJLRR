@@ -17,7 +17,7 @@ namespace PROJLRR.Controllers
             _dbContext = dbContext;
         }
 
-       [HttpGet("Decharge/Index")]
+      [HttpGet("Decharge/Index")]
 public IActionResult Index()
 {
     // 1. Récupération des données avec une LEFT JOIN (inclut tout le monde)
@@ -70,6 +70,9 @@ public IActionResult Index()
         .GroupBy(d => new { d.PersonnelNom, d.Matricule, d.Matiere, Date = d.DateDechargeReal.Date })
         .Select(g => new DechargeFusionnee
         {
+            // 🟢 AJOUTÉ : Permet de donner un Id de référence au bouton de modification (Crayon)
+            Id = g.First().Id,
+
             SignaturePath = g.First().SignaturePath,
             PersonnelNom = g.Key.PersonnelNom,
             MATRICULE = g.Key.Matricule,
@@ -106,7 +109,6 @@ public IActionResult Index()
 
     return View(dechargesFusionnees);
 }
-
         [HttpGet("Decharge/IndexBis")]
 public IActionResult IndexBis()
 {
@@ -522,5 +524,171 @@ public JsonResult SearchPersonnel(string search)
                 .OrderBy(a => a.Nom)
                 .ToList();
         }
+  [HttpGet("Decharge/Edit/{id}")]
+public IActionResult Edit(int id)
+{
+    // 1. Récupération de la ligne source pour avoir la référence (Nom et Date)
+    var dechargeSource = _dbContext.Decharges.FirstOrDefault(d => d.Id == id);
+    if (dechargeSource == null) return NotFound();
+
+    // 2. Normalisation de la date pour la recherche
+    // On convertit les Ticks en date, puis en chaîne "AnnéeMoisJourHeureMinute"
+    // Cela permet d'ignorer les différences de secondes/millisecondes lors de la recherche.
+    var dateRef = new DateTime(dechargeSource.DateDecharge ?? DateTime.Now.Ticks);
+    string dateStr = dateRef.ToString("yyyyMMddHHmm");
+
+    // 3. Récupération de TOUT le groupe
+    // On utilise AsEnumerable() pour pouvoir traiter la date en mémoire 
+    // et ignorer les variations de Ticks.
+    var articlesDuGroupe = _dbContext.Decharges
+        .AsEnumerable() 
+        .Where(d => d.PersonnelNom == dechargeSource.PersonnelNom 
+                 && new DateTime(d.DateDecharge ?? 0).ToString("yyyyMMddHHmm") == dateStr)
+        .ToList();
+
+    // 4. Construction du modèle
+    var model = new MultiDechargeViewModel
+    {
+        PersonnelNom = dechargeSource.PersonnelNom,
+        DateDecharge = dateRef, // On garde la date originale pour l'affichage
+        SignaturePath = dechargeSource.SignaturePath,
+        Articles = articlesDuGroupe.Select(d => new DechargeArticle
+        {
+            ArticleNom = d.ArticleNom,
+            Quantite = d.Quantite ?? 0,
+            Unite = d.Unite
+        }).ToList()
+    };
+
+    ViewBag.Personnel = GetPersonnel();
+    ViewBag.Articles = GetArticles();
+    
+    return View(model);
+}
+[HttpPost("Decharge/Edit/{id}")]
+[ValidateAntiForgeryToken]
+public IActionResult Edit(int id, MultiDechargeViewModel model)
+{
+    // 1. Identification de l'ancien groupe (pour suppression et calcul stock)
+    var anciennesDecharges = _dbContext.Decharges
+        .Where(d => d.PersonnelNom == model.PersonnelNom 
+                 && d.DateDecharge == model.DateDecharge.Ticks)
+        .ToList();
+
+    string signatureFinalPath = model.SignaturePath; // On conserve l'existant par défaut
+
+    // --- LOGIQUE SIGNATURE (Identique à votre Add) ---
+    if (!string.IsNullOrEmpty(model.SignatureData))
+    {
+        try
+        {
+            var base64Data = model.SignatureData.Replace("data:image/png;base64,", "");
+            byte[] imageBytes = Convert.FromBase64String(base64Data);
+            string fileName = Guid.NewGuid().ToString() + ".png";
+            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "signatures", fileName);
+            Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+            System.IO.File.WriteAllBytes(filePath, imageBytes);
+            signatureFinalPath = "/signatures/" + fileName;
+        }
+        catch (Exception ex)
+        {
+            ModelState.AddModelError("", "Erreur de signature : " + ex.Message);
+        }
     }
+    // (Ajoutez ici votre logique else if pour le matricule si vous souhaitez la garder)
+
+    if (!ModelState.IsValid)
+    {
+        ViewBag.Personnel = GetPersonnel();
+        ViewBag.Articles = GetArticles();
+        return View(model);
+    }
+
+    // 2. Validation Stock
+    var articlesAValider = new List<(PROJLRR.Models.Article ArticleData, PROJLRR.Models.DechargeArticle Item)>();
+
+    foreach (var article in model.Articles)
+    {
+        if (string.IsNullOrWhiteSpace(article.ArticleNom) || article.Quantite <= 0) continue;
+
+        var articleData = _dbContext.Articles.FirstOrDefault(a => a.Nom == article.ArticleNom);
+        if (articleData == null) { ModelState.AddModelError("", $"Article {article.ArticleNom} introuvable."); continue; }
+
+        // CRUCIAL : On rend les quantités de l'ancienne décharge au stock avant de valider
+        int ancienneQuantite = anciennesDecharges.FirstOrDefault(d => d.ArticleNom == article.ArticleNom)?.Quantite ?? 0;
+        int stockReelDispo = (articleData.Quantite ?? 0) + ancienneQuantite;
+        int stockSec = articleData.StockSec ?? 0;
+
+        if (article.Quantite > stockReelDispo)
+        {
+            ModelState.AddModelError("", $"Quantité insuffisante pour {article.ArticleNom}.");
+            continue;
+        }
+        
+        // Vérification du seuil de sécurité
+        if ((stockReelDispo - article.Quantite) < stockSec)
+        {
+            ModelState.AddModelError("", $"Alerte stock sécurité pour {article.ArticleNom}.");
+            continue;
+        }
+
+        articlesAValider.Add((articleData, article));
+    }
+
+    if (!ModelState.IsValid)
+    {
+        ViewBag.Personnel = GetPersonnel();
+        ViewBag.Articles = GetArticles();
+        return View(model);
+    }
+
+    // 3. MISE À JOUR TRANSACTIONNELLE (Suppression puis Insertion)
+    using var transaction = _dbContext.Database.BeginTransaction();
+    try
+{
+    // 1. Suppression des anciennes lignes
+    _dbContext.Decharges.RemoveRange(anciennesDecharges);
+    _dbContext.SaveChanges(); // Applique la suppression dans la base
+
+    // --- RECTIFICATION : On vide la mémoire du contexte ---
+    // Cette ligne force EF Core à "oublier" les objets supprimés 
+    // pour éviter les conflits lors de l'insertion suivante.
+    _dbContext.ChangeTracker.Clear();
+
+    // 2. Ajout des nouvelles lignes
+    foreach (var specs in articlesAValider)
+    {
+        var decharge = new Decharge
+        {
+            // IMPORTANT : Ne définissez PAS l'ID ici si votre colonne est en auto-incrément.
+            // Laissez la base de données gérer l'ID automatiquement.
+            PersonnelNom = model.PersonnelNom,
+            ArticleNom = specs.Item.ArticleNom,
+            Quantite = specs.Item.Quantite,
+            Unite = specs.Item.Unite,
+            DateDecharge = model.DateDecharge.Ticks,
+            SignaturePath = signatureFinalPath,
+            DateModif = DateTime.Now 
+        };
+        _dbContext.Decharges.Add(decharge);
+    }
+
+    // 3. Enregistrement final
+    _dbContext.SaveChanges();
+    transaction.Commit();
+
+
+        TempData["SuccessMessage"] = "Modification enregistrée avec succès !";
+        return RedirectToAction("Index"); // Redirigez vers votre liste
+    }
+    catch (Exception ex)
+    {
+        transaction.Rollback();
+        ModelState.AddModelError("", "Erreur base de données : " + ex.Message);
+        ViewBag.Personnel = GetPersonnel();
+        ViewBag.Articles = GetArticles();
+        return View(model);
+    }
+}
+   }
 }

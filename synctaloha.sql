@@ -1,6 +1,6 @@
 -- ==========================================================================
--- SCRIPT DE SYNCHRONISATION INTEGRALE OPTIMISÉE V3.9
--- CONFIGURATION : ERIC GERALDIN  (LAST WRITE WINS GLOBAL)
+-- SCRIPT DE SYNCHRONISATION INTEGRALE OPTIMISÉE V3.8
+-- CONFIGURATION : ERIC GERALDIN  (LAST WRITE WINS)
 -- ==========================================================================
 
 -- Liaison temporaire avec la base de données téléchargée depuis le Cloud
@@ -8,53 +8,29 @@ ATTACH DATABASE 'C:/Users/HP/Downloads/PERSLRRSANSCODE.db' AS internet;
 
 
 -- ==========================================================================
--- ÉTAPE 1 : SYNCHRONISATION DES DECHARGES (LAST WRITE WINS)
+-- ÉTAPE 1 : SYNCHRONISATION DES DECHARGES (PRIORITÉ ABSOLUE)
 -- ==========================================================================
+-- NOTE : Les décharges sont des transactions historiques immuables. 
+-- Pas besoin de "Last Write", on se contente de combler les trous des deux côtés.
 
--- A1. PUSH (PC -> Cloud) : On met à jour le Cloud si le PC a une modif plus récente
-UPDATE internet.DECHARGE
-SET 
-    Quantite = d.Quantite,
-    Unite = d.Unite,
-    SignaturePath = d.SignaturePath,
-    DateModif = d.DateModif
-FROM main.DECHARGE d
-WHERE internet.DECHARGE.PersonnelNom = d.PersonnelNom
-  AND internet.DECHARGE.ArticleNom = d.ArticleNom
-  AND internet.DECHARGE.DateDecharge = d.DateDecharge
-  AND (internet.DECHARGE.DateModif IS NULL OR d.DateModif > internet.DECHARGE.DateModif);
-
--- A2. PULL (Cloud -> PC) : On met à jour le PC si le Cloud a une modif plus récente
-UPDATE main.DECHARGE
-SET 
-    Quantite = i.Quantite,
-    Unite = i.Unite,
-    SignaturePath = i.SignaturePath,
-    DateModif = i.DateModif
-FROM internet.DECHARGE i
-WHERE main.DECHARGE.PersonnelNom = i.PersonnelNom
-  AND main.DECHARGE.ArticleNom = i.ArticleNom
-  AND main.DECHARGE.DateDecharge = i.DateDecharge
-  AND (main.DECHARGE.DateModif IS NULL OR i.DateModif > main.DECHARGE.DateModif);
-
--- B. Insertion vers Cloud : Si une nouvelle décharge a été créée sur le PC
-INSERT INTO internet.DECHARGE (PersonnelNom, ArticleNom, Quantite, Unite, DateDecharge, SignaturePath, DateModif)
-SELECT PersonnelNom, ArticleNom, Quantite, Unite, DateDecharge, SignaturePath, DateModif FROM main.DECHARGE
-WHERE NOT EXISTS (
-    SELECT 1 FROM internet.DECHARGE 
-    WHERE internet.DECHARGE.PersonnelNom = main.DECHARGE.PersonnelNom
-      AND internet.DECHARGE.ArticleNom = main.DECHARGE.ArticleNom
-      AND internet.DECHARGE.DateDecharge = main.DECHARGE.DateDecharge
-);
-
--- C. Insertion vers PC : Si une nouvelle décharge a été créée sur le Cloud
-INSERT INTO main.DECHARGE (PersonnelNom, ArticleNom, Quantite, Unite, DateDecharge, SignaturePath, DateModif)
-SELECT PersonnelNom, ArticleNom, Quantite, Unite, DateDecharge, SignaturePath, DateModif FROM internet.DECHARGE
+-- A. Réception : On récupère sur le PC les nouvelles décharges saisies sur le Cloud
+INSERT INTO main.DECHARGE (PersonnelNom, ArticleNom, Quantite, Unite, DateDecharge, SignaturePath)
+SELECT PersonnelNom, ArticleNom, Quantite, Unite, DateDecharge, SignaturePath FROM internet.DECHARGE
 WHERE NOT EXISTS (
     SELECT 1 FROM main.DECHARGE 
     WHERE main.DECHARGE.PersonnelNom = internet.DECHARGE.PersonnelNom
       AND main.DECHARGE.ArticleNom = internet.DECHARGE.ArticleNom
       AND main.DECHARGE.DateDecharge = internet.DECHARGE.DateDecharge
+);
+
+-- B. Envoi : On envoie sur le Cloud les nouvelles décharges saisies en local sur le PC
+INSERT INTO internet.DECHARGE (PersonnelNom, ArticleNom, Quantite, Unite, DateDecharge, SignaturePath)
+SELECT PersonnelNom, ArticleNom, Quantite, Unite, DateDecharge, SignaturePath FROM main.DECHARGE
+WHERE NOT EXISTS (
+    SELECT 1 FROM internet.DECHARGE 
+    WHERE internet.DECHARGE.PersonnelNom = main.DECHARGE.PersonnelNom
+      AND internet.DECHARGE.ArticleNom = main.DECHARGE.ArticleNom
+      AND internet.DECHARGE.DateDecharge = main.DECHARGE.DateDecharge
 );
 
 

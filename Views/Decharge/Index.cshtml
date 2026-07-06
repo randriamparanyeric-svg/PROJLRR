@@ -52,6 +52,7 @@
                     <th class="col-articles">ARTICLES DÉCHARGÉS</th>
                     <th class="col-date">DATE DE DÉCHARGE</th>
                     <th class="col-sign">SIGNATURE</th>
+                    <th class="col-actions no-print" style="width: 60px; text-align: center;">ACTION</th>
                 </tr>
             </thead>
             <tbody>
@@ -73,6 +74,14 @@
                                 <span class="badge-unsigned">Non signée</span>
                             }
                         </td>
+                        <td class="col-actions no-print" style="text-align: center;">
+                            <a href="@Url.Action("Edit", "Decharge", new { id = decharge.Id })" 
+                               class="btn-modern btn-warning" 
+                               style="padding: 4px 8px; font-size: 13px; text-decoration: none;" 
+                               title="Modifier cette décharge">
+                                <span>✏️</span>
+                            </a>
+                        </td>
                     </tr>
                 }
             </tbody>
@@ -84,67 +93,68 @@
 
 <script>
    function imprimerTableau() {
-        const contenu = document.getElementById('tableau').innerHTML;
-        const pageImpression = window.open('', '_blank', 'width=1000,height=750');
-        
-        if (!pageImpression) {
-            alert("Veuillez autoriser les fenêtres pop-ups pour imprimer.");
-            return;
-        }
-
-        const html = `
-            <!DOCTYPE html>
-            <html lang="fr">
-            <head>
-                <meta charset="UTF-8">
-                <title>Registre des Décharges</title>
-                <style>
-                    /* L'échappement @@ gère la confusion avec le moteur Razor */
-                    @@page { 
-                        margin: 0; 
-                    }
-                    
-                    body { 
-                        font-family: 'Segoe UI', Arial, sans-serif; 
-                        margin: 0; 
-                        padding: 0; 
-                        color: #0f172a; 
-                        background: #fff; 
-                    }
-                    
-                    h2 { text-align: center; font-size: 18px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #0f172a; padding-bottom: 8px; margin-top: 20px; margin-bottom: 20px; }
-                    table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-                    th, td { border: 1px solid #94a3b8; padding: 10px; font-size: 12px; vertical-align: middle; text-align: center; word-wrap: break-word; }
-                    th { background-color: #f1f5f9; font-weight: bold; color: #334155; }
-                    .text-left { text-align: left !important; }
-                    .col-perso { width: 22%; font-weight: 600; }
-                    .col-bureau { width: 15%; }
-                    .col-matr { width: 11%; font-family: monospace; }
-                    .col-articles { width: 28%; text-align: left; }
-                    .col-date { width: 12%; font-family: monospace; }
-                    .col-sign { width: 12%; }
-                    img { max-height: 40px; max-width: 100%; object-fit: contain; }
-                    .badge-unsigned { color: #94a3b8; font-style: italic; font-size: 11px; }
-                </style>
-            </head>
-            <body>
-                <h2>REGISTRE DES DÉCHARGES MATÉRIELS PAR PERSONNEL</h2>
-                ${contenu}
-            </body>
-            </html>
-        `;
-
-        pageImpression.document.open();
-        pageImpression.document.write(html);
-        pageImpression.document.close();
-
-        pageImpression.onload = function () {
-            pageImpression.focus();
-            pageImpression.print();
-            pageImpression.close();
-        };
+    const contenu = document.getElementById('tableau').innerHTML;
+    const pageImpression = window.open('', '_blank', 'width=1000,height=750');
+    
+    if (!pageImpression) {
+        alert("Veuillez autoriser les fenêtres pop-ups pour imprimer.");
+        return;
     }
 
+    const html = `
+        <!DOCTYPE html>
+        <html lang="fr">
+        <head>
+            <meta charset="UTF-8">
+            <title>Registre des Décharges</title>
+            <style>
+                /* L'échappement @@ gère la confusion avec le moteur Razor */
+                @@page { 
+                    margin: 0; 
+                }
+                
+                body { 
+                    font-family: 'Segoe UI', Arial, sans-serif; 
+                    margin: 0; 
+                    padding: 0; 
+                    color: #0f172a; 
+                    background: #fff; 
+                }
+                
+                h2 { text-align: center; font-size: 18px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #0f172a; padding-bottom: 8px; margin-top: 20px; margin-bottom: 20px; }
+                table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+                th, td { border: 1px solid #94a3b8; padding: 10px; font-size: 12px; vertical-align: middle; text-align: center; word-wrap: break-word; }
+                th { background-color: #f1f5f9; font-weight: bold; color: #334155; }
+                
+                .no-print { display: none !important; }
+
+                .text-left { text-align: left !important; }
+                .col-perso { width: 22%; font-weight: 600; }
+                .col-bureau { width: 15%; }
+                .col-matr { width: 11%; font-family: monospace; }
+                .col-articles { width: 28%; text-align: left; }
+                .col-date { width: 12%; font-family: monospace; }
+                .col-sign { width: 12%; }
+                img { max-height: 40px; max-width: 100%; object-fit: contain; }
+                .badge-unsigned { color: #94a3b8; font-style: italic; font-size: 11px; }
+            </style>
+        </head>
+        <body>
+            <h2>REGISTRE DES DÉCHARGES MATÉRIELS PAR PERSONNEL</h2>
+            ${contenu} </body>
+        </html>
+    `;
+
+    pageImpression.document.open();
+    pageImpression.document.write(html);
+    pageImpression.document.close();
+
+    pageImpression.onload = function () {
+        pageImpression.focus();
+        pageImpression.print();
+        pageImpression.close();
+    };
+}
     function filtrerListe(nom) {
         let searchValue = nom.toLowerCase().trim();
         $(".dechargeRow").each(function () {

@@ -1,0 +1,382 @@
+@model PROJLRR.Models.MultiDechargeViewModel
+
+@{
+    Layout = "/Views/Shared/Layout.cshtml";
+    ViewData["Title"] = "Modifier la Décharge";
+}
+
+<link rel="stylesheet" href="~/css/stylecanva.css" />
+<link rel="stylesheet" href="~/css/select2.min.css" />
+
+<style>
+    select.select2-hidden-accessible {
+        display: none !important;
+        opacity: 0 !important;
+        position: absolute !important;
+        width: 1px !important;
+        height: 1px !important;
+        overflow: hidden !important;
+    }
+    .select2-container--default .select2-selection--single {
+        height: 38px;
+        border: 1px solid #ced4da;
+        border-radius: 0.375rem;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 36px;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 36px;
+    }
+</style>
+
+<div class="container mt-4">
+    <h2 class="mb-4">@ViewData["Title"]</h2>
+    <div asp-validation-summary="All" class="text-danger fw-bold mb-3"></div>
+
+    <form method="post" asp-controller="Decharge" asp-action="Edit" id="dechargeForm">
+        
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="GroupeId" />
+        <input type="hidden" asp-for="SignaturePath" />
+
+        <div class="card mb-4 shadow-sm">
+            <div class="card-body">
+                <div class="form-group position-relative">
+                    <label for="PersonnelNom" class="form-label fw-bold">Nom du Personnel</label>
+                    <input type="text" class="form-control form-control-lg" id="PersonnelNom" name="PersonnelNom"
+                           required autocomplete="off" value="@Model?.PersonnelNom" placeholder="Saisissez un nom..." />
+                    <div id="suggestions" class="list-group shadow" style="position: absolute; z-index: 1000; width: 100%;"></div>
+                </div>
+
+                <div id="historique-personnel" class="mt-3" style="display:none;">
+                    <div class="card border-info">
+                        <div class="card-header bg-info text-white py-1 px-2" style="font-size: 0.9em;">
+                            <strong>Dernières décharges effectuées :</strong>
+                        </div>
+                        <div class="card-body p-0">
+                            <table class="table table-sm table-striped mb-0" style="font-size: 0.85em;">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Article</th>
+                                        <th>Quantité</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="historique-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4 shadow-sm">
+            <div class="card-body">
+                <h4 class="card-title mb-3">Articles à décharger</h4>
+                <div id="articles-container">
+                    @if (Model?.Articles != null && Model.Articles.Any())
+                    {
+                        for (int i = 0; i < Model.Articles.Count; i++)
+                        {
+                            <div class="article-row row g-2 align-items-center mb-2">
+                                <input type="hidden" name="Articles.Index" value="@i" />
+                                <input type="hidden" name="Articles[@i].IsModified" class="line-changed" value="false" />
+
+                                <div class="col-12 col-sm-6">
+                                    <select class="form-control article-select" name="Articles[@i].ArticleNom" required>
+                                        <option value="@Model.Articles[i].ArticleNom" selected>@Model.Articles[i].ArticleNom</option>
+                                    </select>
+                                </div>
+                                <div class="col-4 col-sm-2">
+                                    <input type="number" class="form-control qty-input" name="Articles[@i].Quantite"
+                                           value="@Model.Articles[i].Quantite" min="1" required />
+                                </div>
+                                <div class="col-4 col-sm-2">
+                                    <input type="text" class="form-control bg-light" name="Articles[@i].Unite" 
+                                           value="@Model.Articles[i].Unite" readonly />
+                                </div>
+                                <div class="col-4 col-sm-2 text-center">
+                                    <button type="button" class="btn btn-danger remove-article w-100">Suppr.</button>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+                <button type="button" id="add-article" class="btn btn-outline-secondary btn-sm mt-2" disabled>Initialisation...</button>
+            </div>
+        </div>
+
+        <div class="card mb-4 shadow-sm">
+            <div class="card-body">
+                <label for="DateDecharge" class="form-label fw-bold">Date et Heure de l'opération</label>
+                <input type="datetime-local" class="form-control" id="DateDecharge" name="DateDecharge"
+                       value="@(Model?.DateDecharge.ToString("yyyy-MM-ddTHH:mm"))" required />
+            </div>
+        </div>
+
+        <div class="card mb-4 shadow-sm">
+            <div class="card-body d-flex flex-column align-items-center text-center">
+                <label class="form-label fw-bold mb-3">Validation & Signature</label>
+                
+                <div class="form-group mb-3" style="max-width: 400px; width: 100%;">
+                    <label for="Matricule" class="text-muted d-block mb-1" style="font-size: 0.85em;">
+                        Optionnel : Entrez votre matricule pour charger votre signature
+                    </label>
+                    <input type="text" class="form-control text-center" id="Matricule" name="Matricule" value="@Model?.Matricule" autocomplete="off" />
+                </div>
+
+                <div class="signature-wrapper" style="max-width: 400px; width: 100%;">
+                    <div class="border rounded bg-white position-relative mx-auto" style="width: 400px; height: 200px; overflow: hidden;">
+                        <canvas id="signature-pad" width="400" height="200" style="position: absolute; top:0; left:0; z-index: 1;"></canvas>
+                        
+                        <img id="signature-preview" src="@Model?.SignaturePath" alt="Signature existante" 
+                             style="@(string.IsNullOrEmpty(Model?.SignaturePath) ? "display: none;" : "display: block;") position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; background: rgba(240, 253, 244, 0.96); z-index: 5; border: 2px solid #22c55e;" />
+                    </div>
+                    <div class="mt-2">
+                        <button type="button" id="clear-signature" class="btn btn-sm btn-outline-success">Effacer / Dessiner manuellement</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <input type="hidden" id="SignatureData" name="SignatureData" />
+
+        <div class="text-center mt-4 mb-5">
+            <button type="submit" id="btnSubmit" class="btn btn-primary btn-lg px-5 mb-3 shadow" disabled>Enregistrer les modifications</button>
+            <br />
+            <a href="@Url.Action("Index", "Decharge")" class="btn btn-outline-secondary btn-sm">Retour à la liste</a>
+        </div>
+    </form>
+</div>
+
+<script src="~/js/jquery.min.js"></script>
+<script src="~/js/select2.min.js"></script>
+<script src="~/js/sweetalert2.all.min.js"></script>
+<script src="~/js/signature_pad.min.js"></script>
+
+<script>
+$(document).ready(function () {
+    let ensembleArticles = []; 
+    let indexCompteur = @(Model?.Articles?.Count ?? 0);
+
+    // 🟢 MÉMORISATION DES VALEURS INITIALES POUR LE TRAQUEUR DE MODIFICATIONS
+    $("#PersonnelNom").data("original", $("#PersonnelNom").val());
+    $("#DateDecharge").data("original", $("#DateDecharge").val());
+    $("#Matricule").data("original", $("#Matricule").val());
+    const nbArticlesInitial = $(".article-row").length;
+
+    // Sauvegarde des états de départ pour chaque ligne d'article chargée
+    $(".article-row").each(function () {
+        let $select = $(this).find(".article-select");
+        let $qty = $(this).find(".qty-input");
+        $select.data("original", $select.val());
+        $qty.data("original", $qty.val());
+    });
+
+    // 🟢 FONCTION GLOBALE DE VÉRIFICATION DU FORMULAIRE
+    function verifierModificationsFormulaire() {
+        let formModifie = false;
+
+        // 1. Vérification des champs généraux
+        if ($("#PersonnelNom").val() !== $("#PersonnelNom").data("original")) formModifie = true;
+        if ($("#DateDecharge").val() !== $("#DateDecharge").data("original")) formModifie = true;
+        if ($("#Matricule").val() !== $("#Matricule").data("original")) formModifie = true;
+
+        // 2. Vérification si des lignes ont été ajoutées ou supprimées
+        if ($(".article-row").length !== nbArticlesInitial) formModifie = true;
+
+        // 3. Parcours et analyse de chaque ligne d'article
+        $(".article-row").each(function () {
+            let $row = $(this);
+            let $select = $row.find(".article-select");
+            let $qty = $row.find(".qty-input");
+            let $hiddenFlag = $row.find(".line-changed");
+
+            // Si c'est une ligne ajoutée dynamiquement
+            if ($select.data("original") === undefined) {
+                formModifie = true;
+                $hiddenFlag.val("true");
+            } else {
+                let articleChange = $select.val() !== $select.data("original");
+                let quantiteChange = $qty.val() !== $qty.data("original");
+
+                if (articleChange || quantiteChange) {
+                    $hiddenFlag.val("true");
+                    formModifie = true;
+                    $row.css("background-color", "#fffde7"); // Surlignage jaune pastel
+                } else {
+                    $hiddenFlag.val("false");
+                    $row.css("background-color", "");
+                }
+            }
+        });
+
+        // 4. Activation ou blocage du bouton de soumission
+        $("#btnSubmit").prop("disabled", !formModifie);
+    }
+
+    // 🟢 ÉCOUTEURS D'ÉVÉNEMENTS POUR DÉLENCHER LA VÉRIFICATION EN TEMPS RÉEL
+    $(document).on("input change", "#PersonnelNom, #DateDecharge, #Matricule", verifierModificationsFormulaire);
+    $(document).on("input", ".qty-input", verifierModificationsFormulaire);
+    $(document).on("change", ".article-select", verifierModificationsFormulaire);
+
+    function chargerHistoriqueRecents(nomPersonnel) {
+        if (!nomPersonnel || nomPersonnel.length < 2) { 
+            $("#historique-personnel").hide(); 
+            return; 
+        }
+        $.ajax({
+            url: "/Decharge/GetDerniereDechargePersonnel",
+            type: "GET",
+            data: { nom: nomPersonnel },
+            success: function (donnees) {
+                let tableauBody = $("#historique-body").empty();
+                if (donnees && donnees.length > 0) {
+                    donnees.forEach(x => {
+                        tableauBody.append(`<tr><td>${x.article}</td><td>${x.quantite} ${x.unite}</td><td>${x.date}</td></tr>`);
+                    });
+                    $("#historique-personnel").fadeIn();
+                } else { 
+                    $("#historique-personnel").hide(); 
+                }
+            }
+        });
+    }
+
+    function hydraterSelectDArticle(selectCible) {
+        let valeurActuelle = selectCible.val(); 
+        if (selectCible.hasClass("select2-hidden-accessible")) {
+            selectCible.select2("destroy");
+        }
+        selectCible.next('.select2-container').remove();
+        selectCible.empty().append('<option value="">Rechercher un article...</option>');
+        
+        ensembleArticles.forEach(function (art) {
+            let texteLabel = art.nom + ' (' + art.quantite + ' ' + art.unite + ')';
+            let isSelected = (art.nom === valeurActuelle) ? "selected" : "";
+            selectCible.append(`<option value="${art.nom}" data-unite="${art.unite}" ${isSelected}>${texteLabel}</option>`);
+        });
+        
+        selectCible.select2({ width: '100%', placeholder: "Rechercher un article..." });
+    }
+
+    // Chargement du catalogue global
+    $.ajax({
+        url: "/Decharge/GetArt",
+        type: "GET",
+        success: function (resultat) {
+            ensembleArticles = resultat;
+            $(".article-select").each(function() {
+                hydraterSelectDArticle($(this));
+            });
+            $("#add-article").prop('disabled', false).text("+ Ajouter un article");
+        }
+    });
+
+    $("#add-article").click(function () {
+        // 🟢 CORRIGÉ : Ajout de Articles.Index pour la nouvelle ligne créée dynamiquement
+        let structureLigne = `
+        <div class="article-row row g-2 align-items-center mb-2">
+            <input type="hidden" name="Articles.Index" value="${indexCompteur}" />
+            <input type="hidden" name="Articles[${indexCompteur}].IsModified" class="line-changed" value="true" />
+            <div class="col-12 col-sm-6">
+                <select class="form-control article-select" name="Articles[${indexCompteur}].ArticleNom" required></select>
+            </div>
+            <div class="col-4 col-sm-2">
+                <input type="number" class="form-control qty-input" name="Articles[${indexCompteur}].Quantite" value="1" min="1" required />
+            </div>
+            <div class="col-4 col-sm-2">
+                <input type="text" class="form-control bg-light" name="Articles[${indexCompteur}].Unite" readonly />
+            </div>
+            <div class="col-4 col-sm-2 text-center">
+                <button type="button" class="btn btn-danger remove-article w-100">Suppr.</button>
+            </div>
+        </div>`;
+        
+        let $nouvelleLigne = $(structureLigne);
+        $("#articles-container").append($nouvelleLigne);
+        hydraterSelectDArticle($nouvelleLigne.find(".article-select"));
+        indexCompteur++;
+        
+        verifierModificationsFormulaire(); // Calcul suite à l'ajout
+    });
+
+    $(document).on("click", ".remove-article", function () {
+        $(this).closest(".article-row").remove();
+        verifierModificationsFormulaire(); // Calcul suite à la suppression
+    });
+
+    $(document).on("change", ".article-select", function () {
+        let uniteMesure = $(this).find(":selected").data("unite") || "";
+        $(this).closest(".article-row").find("input[name$='.Unite']").val(uniteMesure);
+    });
+
+    // Auto-chargement de l'historique au démarrage si le nom est présent
+    let nomInitial = $("#PersonnelNom").val().trim();
+    if(nomInitial.length >= 2) {
+        chargerHistoriqueRecents(nomInitial);
+    }
+
+    // Gestion autocomplete personnel
+    $("#PersonnelNom").keyup(function () {
+        let saisie = $(this).val().trim();
+        if (saisie.length >= 2) {  
+            $.ajax({
+                url: "/Decharge/SearchPersonnel",
+                type: "GET",
+                data: { search: saisie },
+                success: function (reponse) {
+                    let conteneurSuggestions = $("#suggestions").empty();
+                    reponse.forEach(p => {
+                        conteneurSuggestions.append(`<a href="#" class="list-group-item list-group-item-action item-de-suggestion" data-name="${p.nom}">${p.nom}</a>`);
+                    });
+                }
+            });
+        } else { 
+            $("#suggestions").empty(); 
+            $("#historique-personnel").hide(); 
+        }
+    });
+
+    $(document).on("click", ".item-de-suggestion", function (e) {
+        e.preventDefault();
+        let nomRetenu = $(this).data("name");
+        $("#PersonnelNom").val(nomRetenu).trigger("change");  
+        $("#suggestions").empty();
+        chargerHistoriqueRecents(nomRetenu);
+    });
+
+    // Gestion Signature Canvas
+    var canvasElement = document.getElementById("signature-pad");
+    var signaturePadEngine = new SignaturePad(canvasElement);
+
+    // Si l'utilisateur dessine sur la zone, on active la modification du formulaire
+    signaturePadEngine.onEnd = function () {
+        verifierModificationsFormulaire();
+    };
+
+    $("#clear-signature").click(function () {
+        signaturePadEngine.clear();
+        $("#signature-preview").fadeOut().attr("src", ""); 
+        verifierModificationsFormulaire();
+    });
+
+    $("#dechargeForm").submit(function(e){
+        let estCalqueApercuVisible = $("#signature-preview").is(":visible");
+        let aUneSignatureExistante = $("#signature-preview").attr("src") !== "";
+
+        if (signaturePadEngine.isEmpty() && (!estCalqueApercuVisible || !aUneSignatureExistante)) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Validation bloquée',
+                text: 'Une signature manuscrite ou préenregistrée est requise.',
+                confirmButtonColor: '#0284c7'
+            });
+            e.preventDefault();
+        } 
+        else if (!signaturePadEngine.isEmpty()) {
+            $("#SignatureData").val(signaturePadEngine.toDataURL());
+        }
+    });
+});
+</script>
