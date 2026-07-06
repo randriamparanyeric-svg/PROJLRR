@@ -443,5 +443,21 @@
             return true;
         }
     </script>
+    @if (TempData["SuccessMessage"] != null)
+{
+    <script>
+        // On attend que la page soit prête
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                icon: 'success',
+                title: 'Opération réussie',
+                text: '@Html.Raw(TempData["SuccessMessage"])',
+                confirmButtonColor: '#4f46e5', // Correspond à votre --primary-color
+                background: '#ffffff',
+                confirmButtonText: 'OK'
+            });
+        });
+    </script>
+}
 </body>
 </html>
