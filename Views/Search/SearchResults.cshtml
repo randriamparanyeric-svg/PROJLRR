@@ -15,7 +15,7 @@
 }
 
 <style>
-.btn-print {
+ .btn-print {
     background-color: #17a2b8; /* Couleur Cyan / Info professionnelle */
     color: white;
     border: none;
@@ -343,14 +343,13 @@
     </svg>
     
     <span style="color: #713f12; font-size: 14px; font-weight: 500; line-height: 1.5; text-align: center;">
-        Pour toute modification ou mise à jour de vos renseignements, veuillez cliquer sur le bouton jaune 
+        Pour toute mise à jour de vos renseignements, utilisez le bouton jaune 
         <strong style="background-color: #fef08a; padding: 3px 8px; border-radius: 5px; color: #854d0e; font-size: 13px; border: 1px solid #fde047; font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,0.05); display: inline-block; margin: 0 3px;">
             ✏️ Modifier
         </strong> 
-        situé en bas de la page.
+        ou le bouton gris pour télécharger votre certificat administratif, situés en bas de page.
     </span>
 </div>
-
 <div class="search-container">
     <form id="searchForm" onsubmit="return false;">
         <div style="text-align: left; margin-bottom: 8px;">
@@ -487,22 +486,25 @@
             data-datedentre="@p.Datedentre"
             data-dateprise="@p.Datedeprise"
             data-cin="@p.Cin">
-        📄 Générer Certificat
+        📄 Générer Certificat Administratif
     </button>
     
-    @if (isAdmin)
-    {
-        <button type="button" class="btn-delete btn-delete-card" data-id="@p.Num">🗑 Archiver</button>
-    }
-    else
-    {
-        <button type="button" class="btn-delete" disabled style="background-color: #e9ecef; color: #777; border: none; padding: 10px 15px; cursor: not-allowed; opacity: 0.6; border-radius: 8px;">🗑 Archiver</button>
-    }
-</div>
+     @if (isAdmin)
+     {
+         <button type="button" class="btn-delete btn-delete-card" data-id="@p.Num">🗑 Archiver</button>
+     }
+     else
+     {
+          <button type="button" class="btn-delete" disabled style="background-color: #e9ecef; color: #777; border: none; padding: 10px 15px; cursor: not-allowed; opacity: 0.6; border-radius: 8px;">🗑 Archiver</button>
+      }
+      </div>
             </div>
         }
     }
-</div>
+    else
+    {
+        <p style="text-align:center; font-size: 1.1rem; color: #6c757d; margin-top: 40px;">Aucun résultat trouvé pour la recherche.</p>
+    }
 <div id="modalOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; overflow-y: auto; padding: 20px;">
     
     <div id="modalContent" style="background: white; max-width: 900px; margin: 40px auto; padding: 20px; border-radius: 8px; position: relative;">
@@ -543,7 +545,7 @@
             certifie que le nommé : <span id="cert_nom"></span>
             
             <p>MATRICULE : <span id="cert_matricule"></span></p>
-            <p>Corps et Grade : <span id="cert_corps"></span> / <span id="cert_grade"></span></p>
+            <p>Corps et Grade : <span id="cert_corps"></span>&nbsp<span id="cert_grade"></span></p>
             <p>BUDGET : GENERAL &nbsp&nbsp&nbsp CHAPITRE: <span id="cert_chapitre"></span></p>
             <p>Date et lieu de naissance: <span id="cert_datenaiss"></span> à <span id="cert_lieunaiss"></span></p>
             <p>CIN : <span id="cert_cin"></span> du <span id="cert_datecin"></span> à <span id="cert_lieu"></span></p>
@@ -552,13 +554,13 @@
             <p>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbspEn foi de quoi, la présente Certificat lui est délivré pour servir et valoir ce que de droit.</p>
             <p style="text-align: right;"><em>Fianarantsoa, le <span id="cert_date"></span></em></p>
             
-            <button onclick="imprimerCertificat()" style="background-color: green; color: white; border: none; padding: 10px 15px; cursor: pointer;">
-    Imprimer le Certificat
+            <button onclick="imprimerCertificat()" style="background-color: #28a745; color: white; padding: 10px; border: none; cursor: pointer;">
+    ⬇️ Imprimer Certificat
 </button>
         </div>
     </div>
 </div>
-<div class="modal-overlay" id="modalOverlay"></div>
+<div class="modal-overlay" id="modalOverlaymodif"></div>
 
 <div id="editPersonnelForm">
     <h3 style="text-align:center; margin-bottom:25px; font-weight: 700; color: #1e293b;">Modifier renseignement du personnel</h3>
@@ -844,6 +846,7 @@
         asp-fallback-test="window.jQuery"
         crossorigin="anonymous">
 </script>
+<script src="~/js/html2pdf.bundle.min.js"></script>
 <script>
     $(document).ready(function () {
         const IS_ADMIN = @(isAdmin ? "true" : "false");
@@ -851,13 +854,13 @@
 
         // Fonctions d'affichage/masquage du Popup
         function openEditModal() {
-            $("#modalOverlay").fadeIn(300);
+            $("#modalOverlaymodif").fadeIn(300);
             $("#editPersonnelForm").fadeIn(300);
             $("body").css("overflow", "hidden"); // Empêche le défilement de la page arrière
         }
 
         function closeEditModal() {
-            $("#modalOverlay").fadeOut(200);
+            $("#modalOverlaymodif").fadeOut(200);
             $("#editPersonnelForm").fadeOut(200);
             $("body").css("overflow", "auto");
         }
@@ -1008,8 +1011,8 @@ $("#updateForm").submit(function(e){
     
     // ⚡ AJOUT : Si une photo a été compressée par le Canvas, on l'injecte dans le formulaire
     // Cela remplace le fichier lourd d'origine par la version ultra-légère
-    if (typeof compressedPhotoBlob !== 'undefined' && compressedPhotoBlob) {
-        formData.set('PhotoFile', compressedPhotoBlob, 'photo_personnel.jpg');
+    if (typeof myAppPhoto !== 'undefined' && myAppPhoto) {
+        formData.set('PhotoFile', myAppPhoto, 'photo_personnel.jpg');
     }
     
     $.ajax({ 
@@ -1112,7 +1115,7 @@ $("#updateForm").submit(function(e){
                 if ($("#compressionStatus").length > 0) {
                     $("#compressionStatus").text(''); // Efface le texte "Photo optimisée (XX Ko)"
                 }
-                compressedPhotoBlob = null; // Vide la mémoire tampon du fichier
+                myAppPhoto = null; // Vide la mémoire tampon du fichier
                 
                 closeEditModal();
             } else {
@@ -1177,7 +1180,7 @@ $("#updateForm").submit(function(e){
         });
         
         // Fermeture du Popup lors du clic sur l'annulation ou à côté du modal
-        $("#cancelEdit, #modalOverlay").click(function() {
+        $("#cancelEdit, #modalOverlaymodif").click(function() {
             closeEditModal();
         });
 
@@ -1222,7 +1225,7 @@ fenetreImpression.document.write('</style></head><body>');
     };
 }
 // Variable globale qui stockera la version ultra-légère de la photo
-let compressedPhotoBlob = null;
+let myAppPhoto = null;
 
 // Déclencheur du bouton masqué
 $(document).on('click', '#btnTriggerUpload', function () {
@@ -1263,7 +1266,7 @@ $(document).on('change', '#editPhotoFile', function () {
 
                 // Conversion de l'image lourde en JPEG performant (Qualité 75%)
                 canvas.toBlob(function (blob) {
-                    compressedPhotoBlob = blob; // Stockage du fichier optimisé prêt pour l'envoi AJAX
+                    myAppPhoto = blob; // Stockage du fichier optimisé prêt pour l'envoi AJAX
                     
                     let sizeInKo = (blob.size / 1024).toFixed(1);
                     $("#compressionStatus").css("color", "#22c55e").text("✅ Photo prête et optimisée (" + sizeInKo + " Ko)");
@@ -1362,7 +1365,7 @@ function closeModal() {
 }
 
 function imprimerCertificat() {
-    // 1. Récupérer le contenu HTML du certificat
+    // 1. Récupérer le contenu HTML
     var divContent = document.getElementById("certificate").innerHTML;
 
     // 2. Ouvrir une nouvelle fenêtre
@@ -1371,15 +1374,14 @@ function imprimerCertificat() {
     // 3. Écrire le contenu
     win.document.write('<html><head><title>Impression Certificat</title>');
     
-    // 4. Style CSS avec marges réduites et interligne 1.5
     win.document.write('<style>');
-    // Padding : 20px (haut/bas) 10px (gauche/droite). Changez 10px pour réduire encore plus.
-    win.document.write('body { font-family: "Times New Roman", serif; padding: 20px 10px; line-height: 1.5; }'); 
+   
+    win.document.write('body { font-family: "Times New Roman", serif; padding: 0; margin: 5mm; line-height: 1.5; color: #000; }'); 
     
     win.document.write('img { max-width: 100%; height: auto; }');
     win.document.write('.btn, button { display: none !important; }'); 
     win.document.write('h4 { text-align: center; font-weight: bold; margin-bottom: 20px; }');
-    win.document.write('p { margin: 5px 0; }'); // Espacement entre les paragraphes
+    win.document.write('p { margin: 5px 0; }'); 
     win.document.write('</style>');
     
     win.document.write('</head><body>');
@@ -1388,7 +1390,7 @@ function imprimerCertificat() {
     
     win.document.close();
 
-    // 5. Lancer l'impression
+    // 4. Lancer l'impression
     win.focus();
     setTimeout(function() {
         win.print();
