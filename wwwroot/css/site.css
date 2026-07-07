@@ -35,16 +35,58 @@ body {
     background-color: #0056b3;
 }
 
+/* 🖨️ BLOC D'IMPRESSION CORRIGÉ (À remplacer) */
 @media print {
-    #certificate button {
-        display: none; /* Cache tous les boutons lors de l'impression */
+    /* 1. On masque absolument tout le reste de la page */
+    body {
+        background: white !important;
     }
-    #certificate { 
-        margin-top: 0;
-        padding-top: 0;
+    body > *:not(#modalOverlay) {
+        display: none !important;
+    }
+
+    /* 2. On isole le certificat */
+    #certificate {
+        display: block !important;
+        visibility: visible !important;
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        /* On annule les héritages de votre site */
+        float: none !important;
+        border: none !important;
+        box-shadow: none !important;
+        background: white !important;
+    }
+
+    /* 3. On force la police et la lisibilité */
+    #certificate * {
+        font-family: 'Times New Roman', serif !important;
+        color: black !important;
+        float: none !important; /* Important pour éviter les colonnes */
+    }
+
+    /* 4. On gère les images pour éviter qu'elles ne cassent la mise en page */
+    #certificate img {
+        max-width: 100% !important;
+        height: auto !important;
+        display: block !important;
+    }
+
+    /* 5. On masque définitivement tous les boutons et le formulaire */
+    button, #formSection, #modalOverlay button {
+        display: none !important;
+    }
+
+    /* 6. On force le format A4 */
+    @page {
+        size: A4 portrait;
+        margin: 1cm; /* Marge propre de 1cm tout autour */
     }
 }
-
 /* Personnalisation de la couleur de fond de la navbar */
 .navbar {
     background-color: #007bff;

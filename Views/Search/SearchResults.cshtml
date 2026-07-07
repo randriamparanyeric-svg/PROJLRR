@@ -471,27 +471,93 @@
                 
                 <!-- Section des Boutons réorganisée -->
                 <div class="card-actions">
-                    <!-- Accessible à tous -->
-                    <button type="button" class="btn-edit btn-edit-card" data-id="@p.Num">✏️Modifier</button>
-                    
-                    <!-- Nouveau Bouton Imprimer inséré au milieu (Accessible à tous) -->
-                    <button type="button" class="btn-print btn-print-card" onclick="imprimerFiche('card-@p.Num')">🖨️ Imprimer la fiche</button>
-                    
-                    <!-- Restriction sur l'archivage uniquement -->
-                    @if (isAdmin)
-                    {
-                        <button type="button" class="btn-delete btn-delete-card" data-id="@p.Num">🗑 Archiver</button>
-                    }
-                    else
-                    {
-                        <button type="button" class="btn-delete" disabled style="background-color: #e9ecef; color: #777; border: none; padding: 10px 15px; cursor: not-allowed; opacity: 0.6; border-radius: 8px;">🗑 Archiver</button>
-                    }
-                </div>
+    <button type="button" class="btn-edit btn-edit-card" data-id="@p.Num">✏️Modifier</button>
+    
+    <button type="button" class="btn-print btn-print-card" onclick="imprimerFiche('card-@p.Num')">🖨️ Imprimer la fiche</button>
+    
+    <button type="button" class="btn-certif" 
+            style="background-color: #6c757d; color: white; border: none; padding: 10px 15px; cursor: pointer; border-radius: 8px; margin: 0 5px;"
+            onclick="openCertModal(this)"
+            data-nom="@p.NomEtPrenoms" 
+            data-matricule="@p.Matricule" 
+            data-corps="@p.Corps"
+            data-grade="@p.Grade"
+            data-datenaiss="@p.Datenaiss"
+            data-lieunaiss="@p.Lieudenaiss"
+            data-datedentre="@p.Datedentre"
+            data-dateprise="@p.Datedeprise"
+            data-cin="@p.Cin">
+        📄 Générer Certificat
+    </button>
+    
+    @if (isAdmin)
+    {
+        <button type="button" class="btn-delete btn-delete-card" data-id="@p.Num">🗑 Archiver</button>
+    }
+    else
+    {
+        <button type="button" class="btn-delete" disabled style="background-color: #e9ecef; color: #777; border: none; padding: 10px 15px; cursor: not-allowed; opacity: 0.6; border-radius: 8px;">🗑 Archiver</button>
+    }
+</div>
             </div>
         }
     }
 </div>
+<div id="modalOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; overflow-y: auto; padding: 20px;">
+    
+    <div id="modalContent" style="background: white; max-width: 900px; margin: 40px auto; padding: 20px; border-radius: 8px; position: relative;">
+        
+        <button onclick="closeModal()" style="position: absolute; top: 10px; right: 10px; border: none; background: #dc3545; color: white; padding: 8px 12px; cursor: pointer; border-radius: 4px;">Fermer</button>
 
+        <div id="formSection" style="margin-bottom: 30px; border-bottom: 2px solid #eee; padding-bottom: 20px;">
+            <h4 style="margin-top:0;">Configuration du Certificat</h4>
+            <label>Lieu de Delivranve CIN :</label> <input type="text" id="inputLieu" class="form-control" style="width: 100%; margin-bottom: 10px;" />
+            <label>Date de Delivrance CIN :</label> <input type="date" id="inputdatecin" class="form-control" style="width: 100%; margin-bottom: 10px;" />
+            <label>CHAPITRE :</label> 
+            <select id="inputchapitre" class="form-control" style="width: 100%; margin-bottom: 20px;">
+                <option value="00 810 110">00 810 110</option>
+                <option value="00 811 130">00 811 130</option>
+            </select>
+            <button onclick="genererCertificat()" style="background: #007bff; color: white; border: none; padding: 10px 20px; cursor: pointer; width: 100%;">Générer le certificat</button>
+        </div>
+
+        <div id="certificate" style="display: none; margin-left: 50px; padding-top: 0px; margin-top: 0px; font-family: 'Times New Roman'">
+            <div style="text-align: left; font-size: 12px; line-height: 1; font-family: 'Times New Roman'" >
+                &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<img src="/uploads/REP.jpg" alt="Description de l'image" style="width: 20%; height: auto;"><br>
+                &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<img src="/uploads/MEN.png" alt="Description de l'image" style="width: 8%; height: auto;"><br>
+                <p style="font-weight: bold; margin: 0;">MINISTERE DE L’EDUCATION NATIONALE</p>
+                <p style="margin: 0;">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp***************</p>
+                <p style="font-weight: bold; margin: 0;">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbspSECRETARIAT GENERAL</p>
+                <p style="margin: 0;">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp*************</p>
+                <p style="font-weight: bold; margin: 0;">DIRECTION REGIONALE DE L’EDUCATION <br> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbspNATIONALE HAUTE MATSIATRA</p>
+                <p style="margin: 0;">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp*************</p>
+                <p style="font-weight: bold; margin: 0;">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbspCIRCONSCRIPTION SCOLAIRE <br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp DE FIANARANTSOA</p>
+                <p style="margin: 0;">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp*********</p>
+                <br>
+                <p style="margin: 0; font-weight: bold;font-size: 13px;">&nbsp&nbsp&nbsp&nbsp&nbsp<u>N°.....................-CISCO/F/Div.GRH/P</u> </p>
+            </div> <br>
+            <h4 style="text-align: center; font-weight: bold; margin: 0 ; font-family: 'Times New Roman'">CERTIFICAT ADMINISTRATIF</h4>
+            <p style="text-align: center; font-weight: bold; font-weight: bold; margin: 0;">************************</p>
+            
+            <p>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbspJe soussigné, CHEF DE LA CIRCONSCRIPTION SCOLAIRE DE FIANARANTSOA,<br>
+            certifie que le nommé : <span id="cert_nom"></span>
+            
+            <p>MATRICULE : <span id="cert_matricule"></span></p>
+            <p>Corps et Grade : <span id="cert_corps"></span> / <span id="cert_grade"></span></p>
+            <p>BUDGET : GENERAL &nbsp&nbsp&nbsp CHAPITRE: <span id="cert_chapitre"></span></p>
+            <p>Date et lieu de naissance: <span id="cert_datenaiss"></span> à <span id="cert_lieunaiss"></span></p>
+            <p>CIN : <span id="cert_cin"></span> du <span id="cert_datecin"></span> à <span id="cert_lieu"></span></p>
+            <p>Continue à servir le Ministère de L’Education Nationale, depuis le <span id="cert_datedentre"></span> date d’entrée</span></p>dans l’Administration, et actuellement en service au Lycée RAHERIVELO RAMAMONJY CISCO</span></p>
+            FIANARANTSOA depuis le <span id="cert_dateprise"></span>, date de prise de service jusqu’à ce jour.<br>
+            <p>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbspEn foi de quoi, la présente Certificat lui est délivré pour servir et valoir ce que de droit.</p>
+            <p style="text-align: right;"><em>Fianarantsoa, le <span id="cert_date"></span></em></p>
+            
+            <button onclick="imprimerCertificat()" style="background-color: green; color: white; border: none; padding: 10px 15px; cursor: pointer;">
+    Imprimer le Certificat
+</button>
+        </div>
+    </div>
+</div>
 <div class="modal-overlay" id="modalOverlay"></div>
 
 <div id="editPersonnelForm">
@@ -1207,4 +1273,126 @@ $(document).on('change', '#editPhotoFile', function () {
         reader.readAsDataURL(file);
     }
 });
+
+// --- LOGIQUE POUR EMPÊCHER LA FERMETURE INTEMPESTIVE ---
+// 1. Bloquer le clic à l'intérieur de la boîte blanche
+document.getElementById('modalContent').addEventListener('click', function(e) {
+    e.stopPropagation(); 
+});
+
+// 2. Fermer uniquement si on clique sur le fond gris (l'overlay)
+document.getElementById('modalOverlay').addEventListener('click', function() {
+    closeModal();
+});
+
+
+// --- LOGIQUE FONCTIONNELLE ---
+// Empêcher la fermeture si on clique DANS la boîte blanche
+document.getElementById('modalContent').addEventListener('click', function(e) {
+    e.stopPropagation(); 
+});
+
+// Fermer uniquement si on clique sur le fond gris (l'overlay)
+document.getElementById('modalOverlay').addEventListener('click', function() {
+    closeModal();
+});
+
+function openCertModal(btn) {
+    // 1. Récupération des données
+    var nom = btn.getAttribute("data-nom");
+    var matricule = btn.getAttribute("data-matricule");
+    var corps = btn.getAttribute("data-corps");
+    var grade = btn.getAttribute("data-grade"); 
+    var datenaiss = btn.getAttribute("data-datenaiss");
+    var lieunaiss = btn.getAttribute("data-lieunaiss");
+    var datedentre = btn.getAttribute("data-datedentre");
+    var dateprise = btn.getAttribute("data-dateprise"); 
+    var cin = btn.getAttribute("data-cin");
+
+    // 2. Vérification
+    console.log("Corps:", corps, "| Grade:", grade);
+
+    // 3. Injection dans les balises HTML
+    document.getElementById("cert_nom").textContent = nom;
+    document.getElementById("cert_matricule").textContent = matricule;
+    document.getElementById("cert_corps").textContent = corps;
+    
+    // CORRECTION ICI : On utilise la variable 'grade' au lieu de 'corps'
+    document.getElementById("cert_grade").textContent = grade; 
+    
+    document.getElementById("cert_datenaiss").textContent = datenaiss;
+    document.getElementById("cert_lieunaiss").textContent = lieunaiss;
+    document.getElementById("cert_datedentre").textContent = datedentre;
+    document.getElementById("cert_dateprise").textContent = dateprise; 
+    document.getElementById("cert_cin").textContent = cin;
+
+    // 4. Affichage
+    document.getElementById("modalOverlay").style.display = "block";
+    document.getElementById("certificate").style.display = "block";
+}
+function genererCertificat() {
+    // 1. Correction de la date CIN (format jj/mm/aaaa)
+    var dateBrute = document.getElementById('inputdatecin').value;
+    var dateFormatee = "";
+    if (dateBrute) {
+        var parts = dateBrute.split('-'); 
+        dateFormatee = parts[2] + "/" + parts[1] + "/" + parts[0];
+    }
+
+    // 2. Application des valeurs
+    document.getElementById('cert_lieu').innerText = document.getElementById('inputLieu').value;
+    document.getElementById('cert_datecin').innerText = dateFormatee;
+    document.getElementById('cert_chapitre').innerText = document.getElementById('inputchapitre').value;
+
+    // 3. Date du jour au format "07 Juillet 2026"
+    var date = new Date();
+    var options = { day: '2-digit', month: 'long', year: 'numeric' };
+    var dateFr = date.toLocaleDateString('fr-FR', options);
+    // Force la majuscule sur la première lettre du mois
+    dateFr = dateFr.replace(/(\s[a-z])/, (match) => match.toUpperCase());
+    document.getElementById('cert_date').innerText = dateFr;
+
+    // 4. Bascule d'affichage
+    document.getElementById('formSection').style.display = 'none';
+    document.getElementById('certificate').style.display = 'block';
+}
+
+function closeModal() {
+    document.getElementById('modalOverlay').style.display = 'none';
+}
+
+function imprimerCertificat() {
+    // 1. Récupérer le contenu HTML du certificat
+    var divContent = document.getElementById("certificate").innerHTML;
+
+    // 2. Ouvrir une nouvelle fenêtre
+    var win = window.open('', '', 'height=800,width=800');
+
+    // 3. Écrire le contenu
+    win.document.write('<html><head><title>Impression Certificat</title>');
+    
+    // 4. Style CSS avec marges réduites et interligne 1.5
+    win.document.write('<style>');
+    // Padding : 20px (haut/bas) 10px (gauche/droite). Changez 10px pour réduire encore plus.
+    win.document.write('body { font-family: "Times New Roman", serif; padding: 20px 10px; line-height: 1.5; }'); 
+    
+    win.document.write('img { max-width: 100%; height: auto; }');
+    win.document.write('.btn, button { display: none !important; }'); 
+    win.document.write('h4 { text-align: center; font-weight: bold; margin-bottom: 20px; }');
+    win.document.write('p { margin: 5px 0; }'); // Espacement entre les paragraphes
+    win.document.write('</style>');
+    
+    win.document.write('</head><body>');
+    win.document.write(divContent); 
+    win.document.write('</body></html>');
+    
+    win.document.close();
+
+    // 5. Lancer l'impression
+    win.focus();
+    setTimeout(function() {
+        win.print();
+        win.close(); 
+    }, 500); 
+}
 </script>
