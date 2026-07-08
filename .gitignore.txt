@@ -1,0 +1,16 @@
+# Dossiers de compilation
+bin/
+obj/
+
+# Fichiers temporaires Visual Studio
+.vs/
+*.user
+*.suo
+
+# Fichiers de dépendances (souvent téléchargés)
+packages/
+
+# Fichiers zip et autres archives de build
+*.zip
+*.tar
+*.gz
