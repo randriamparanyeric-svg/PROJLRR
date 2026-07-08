@@ -1,12 +1,18 @@
+// 1. TOUTES les directives 'using' en haut
 using Microsoft.EntityFrameworkCore;
 using PROJLRR.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.Authentication;
+using QuestPDF.Infrastructure;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
-
+// --- CONFIGURATION DE QUESTPDF ---
+// À placer ici pour être initialisé au démarrage de l'app
+QuestPDF.Settings.License = LicenseType.Community;
 // --- 1. SERVICES ---
 
 // MODIFICATION : Ajout du Verrouillage Global des Contrôleurs

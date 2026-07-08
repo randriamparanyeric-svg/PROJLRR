@@ -9,21 +9,133 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 using Microsoft.AspNetCore.Http;
+// --- AJOUTS POUR QUESTPDF ---
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 
 namespace PROJLRR.Controllers
 {
     public class SearchController : Controller
     {
         private readonly PerslrrsanscodeContext _context;
+        private readonly IWebHostEnvironment _env; // 1. Déclaration du champ
 
         // 🧠 Mémoire vive globale pour suivre la présence en ligne des enseignants en temps réel
         private static readonly ConcurrentDictionary<string, DateTime> UtilisateursEnLigne = new ConcurrentDictionary<string, DateTime>();
 
-        public SearchController(PerslrrsanscodeContext context)
+        public SearchController(PerslrrsanscodeContext context, IWebHostEnvironment env)
         {
             _context = context;
+            _env = env;
         }
 
+        // =================================================================
+        // 0. GÉNÉRATION CERTIFICAT (NOUVEAU)
+        // =================================================================
+     [Authorize]
+public IActionResult TelechargerCertificat(int id, string lieuCIN, string dateCIN, string chapitre)
+{
+    var p = _context.Personnels.Find(id);
+    if (p == null) return NotFound("Personnel non trouvé.");
+
+    string repPath = Path.Combine(_env.WebRootPath, "uploads", "REP.jpg"); // Drapeau central
+    string menPath = Path.Combine(_env.WebRootPath, "uploads", "MEN.png"); // Logo MEN
+
+    var document = Document.Create(container =>
+    {
+        container.Page(page =>
+        {
+            page.Size(PageSizes.A4);
+            page.Margin(1.5f, Unit.Centimetre);
+            page.DefaultTextStyle(x => x.FontSize(12).FontFamily(Fonts.TimesNewRoman));
+
+           // --- HEADER : STRUCTURE VERTICALE CORRIGÉE ---
+page.Header().Column(col => 
+{
+    // 1. Logo REP centré en haut
+    if (System.IO.File.Exists(repPath))
+        col.Item().AlignCenter().Width(100).Image(repPath);
+
+    if (System.IO.File.Exists(menPath))
+        col.Item()
+           .AlignCenter()
+           .PaddingRight(9.5f, Unit.Centimetre) // C'est ici que vous décalez le logo
+           .PaddingTop(5)
+           .Width(30)
+           .Image(menPath);
+
+    // 3. Bloc de texte : Le style est appliqué ici, sur le conteneur parent
+    col.Item()
+   .PaddingTop(10)
+   .PaddingLeft(20)
+   .DefaultTextStyle(x => x.FontSize(10).FontFamily(Fonts.TimesNewRoman)) 
+   .Column(textCol => 
+   {
+       textCol.Spacing(2); 
+       textCol.Item().AlignLeft().Text("MINISTERE DE L’EDUCATION NATIONALE").SemiBold();
+       textCol.Item().PaddingLeft(65).AlignLeft().Text("*************").SemiBold();
+       textCol.Item().PaddingLeft(45).AlignLeft().Text("SECRETARIAT GENERAL").SemiBold();
+       textCol.Item().PaddingLeft(65).AlignLeft().Text("*************").SemiBold();
+       
+       // SÉPARATION ICI :
+       textCol.Item().AlignLeft().Text("DIRECTION REGIONALE DE L’EDUCATION").SemiBold();
+       textCol.Item().PaddingLeft(30).AlignLeft().Text("NATIONALE HAUTE MATSIATRA").SemiBold();
+       
+       textCol.Item().PaddingLeft(65).AlignLeft().Text("*************").SemiBold();
+       
+       // Même chose ici si vous voulez aligner avec la partie précédente
+       textCol.Item().PaddingLeft(30).AlignLeft().Text("CIRCONSCRIPTION SCOLAIRE").SemiBold();
+       textCol.Item().PaddingLeft(50).AlignLeft().Text("DE FIANARANTSOA").SemiBold();
+       
+       textCol.Item().PaddingLeft(65).AlignLeft().Text("*************").SemiBold();
+       textCol.Item().PaddingTop(5).PaddingLeft(25).AlignLeft().Text("N°.....................-CISCO/F/Div.GRH/P").SemiBold().Underline();
+   });
+});
+            // --- CONTENT : Corps du certificat ---
+            page.Content().PaddingTop(20).Column(c =>
+            {
+                c.Item().AlignCenter().Text("CERTIFICAT ADMINISTRATIF").FontSize(14).SemiBold();
+                c.Item().AlignCenter().Text("************************");
+                
+                c.Item().PaddingTop(20).PaddingLeft(20).Column(c2 =>
+                {
+                   c2.Spacing(8);
+                    c2.Item().PaddingLeft(2, Unit.Centimetre).Text("Je soussigné, CHEF DE LA CIRCONSCRIPTION SCOLAIRE DE FIANARANTSOA, ");
+                    c2.Item().Text("certifie que le nommé : " + p.NomEtPrenoms);
+                    c2.Item().Text($"MATRICULE : {p.Matricule}");
+                    c2.Item().Text($"Corps et Grade : {p.Corps} {p.Grade}");
+                    c2.Item().Text($"BUDGET : GENERAL    CHAPITRE: {chapitre}");
+                    c2.Item().Text($"Date et lieu de naissance: {p.Datenaiss} à {p.Lieudenaiss}");
+                    if (DateTime.TryParse(dateCIN, out DateTime dateValue))
+{
+    c2.Item().Text($"CIN : {p.Cin} du {dateValue:dd/MM/yyyy} à {lieuCIN}");
+}
+else
+{
+    // Au cas où la date est invalide, on affiche le texte brut ou un message d'erreur
+    c2.Item().Text($"CIN : {p.Cin} du {dateCIN} à {lieuCIN}"); 
+}
+                    c2.Item().Text("Continue à servir le Ministère de L’Education Nationale, depuis le " + p.Datedentre + " date d’entrée");
+                    c2.Item().Text("dans l’administration, et actuellement en service au Lycée RAHERIVELO RAMAMONJY CISCO"); 
+                    c2.Item().Text("FIANARANTSOA depuis le " + p.Datedeprise + ", date de prise de service jusqu’à ce jour.");
+                    c2.Item().PaddingLeft(2, Unit.Centimetre).Text("En foi de quoi, la présente Certificat lui est délivré pour servir et valoir ce que de droit.");
+                    // 2. La date placée juste en dessous, alignée à droite
+c2.Item()
+  .PaddingTop(20) // Ajoute un espace entre la phrase et la date
+  .AlignRight()   // Pousse le texte vers la droite
+  .PaddingRight(20) // Optionnel : donne une petite marge par rapport au bord droit
+  .Text($"Fianarantsoa, le {DateTime.Now.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("fr-FR"))}")
+  .Italic();
+                });
+            });
+
+          
+        });
+    });
+
+    return File(document.GeneratePdf(), "application/pdf", $"Certificat_Administratif de_{p.NomEtPrenoms}.pdf");
+}
         // =================================================================
         // 1. RECHERCHE PRINCIPALE (Vue complète) - Optimisé AsNoTracking
         // =================================================================
