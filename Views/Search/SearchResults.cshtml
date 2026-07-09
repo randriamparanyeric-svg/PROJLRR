@@ -520,6 +520,7 @@
 
 <label>CHAPITRE :</label> 
 <select id="inputchapitre" class="form-control" style="width: 100%; margin-bottom: 20px;">
+    <option value="" disabled selected>Veuillez sélectionner...</option>
     <option value="00 810 110">00 810 110</option>
     <option value="00 811 130">00 811 130</option>
 </select>
@@ -531,7 +532,7 @@
 <div id="popupLoader" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 9999; justify-content: center; align-items: center; color: white;">
     <div style="background: white; padding: 20px; border-radius: 8px; color: #333; text-align: center; box-shadow: 0px 0px 10px rgba(0,0,0,0.3);">
         <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
-        <p style="margin-top: 15px; font-weight: bold;">Génération du PDF en cours...</p>
+        <p style="margin-top: 15px; font-weight: bold;">Téléchargement du PDF en cours...</p>
     </div>
 </div>
 <div id="messageErreur" style="color: red; margin-top: 10px; display: none; text-align: center; font-weight: bold;">
@@ -1282,18 +1283,20 @@ function genererCertificat() {
     const chapitre = document.getElementById("inputchapitre").value;
     
     const btn = document.getElementById("btnTelecharger");
-    const popup = document.getElementById("popupLoader"); // On cible le popup
+    const popup = document.getElementById("popupLoader");
     const msgErreur = document.getElementById("messageErreur");
 
-    // 2. Validation
-    if (lieu === "" || date === "") {
+    // 2. Validation (Ajout de chapitre === "")
+    // Si l'un des trois est vide, on arrête tout.
+    if (lieu === "" || date === "" || chapitre === "") {
+        msgErreur.textContent = "Veuillez remplir tous les champs et sélectionner un chapitre.";
         msgErreur.style.display = "block";
-        return;
+        return; 
     }
 
     // 3. Affichage du popup
     msgErreur.style.display = "none";
-    popup.style.display = "flex"; // On utilise 'flex' pour centrer le contenu
+    popup.style.display = "flex"; 
     btn.disabled = true;
 
     // 4. Transfert des données
@@ -1307,7 +1310,7 @@ function genererCertificat() {
     
     // 6. Fermeture après délai
     setTimeout(() => {
-        closeModal();          // Ferme votre fenêtre de saisie
+        closeModal();           // Ferme votre fenêtre de saisie
         popup.style.display = "none"; // Cache le popup
         btn.disabled = false;
     }, 5000);
