@@ -15,6 +15,42 @@
 }
 
 <style>
+/* Container des boutons */
+.card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px; /* Espace entre les boutons */
+    padding: 10px;
+}
+
+/* Style de base pour tous les boutons */
+.card-actions button {
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap; /* Empêche le texte de se couper */
+}
+/* Ajout de la couleur spécifique pour le bouton certificat */
+.btn-certif {
+    background-color: #6c757d; /* Couleur grise (Changez ce code pour une autre couleur) */
+    color: white;              /* Texte blanc */
+}
+
+/* Effet visuel optionnel quand on passe la souris dessus */
+.btn-certif:hover {
+    background-color: #5a6268; 
+}
+
+/* Adaptation Mobile */
+@@media (max-width: 600px) {
+    .card-actions {
+        flex-direction: column; /* Empile les boutons */
+    }
+    .card-actions button {
+        width: 100%; /* Boutons prennent toute la largeur */
+    }
+}
  .btn-print {
     background-color: #17a2b8; /* Couleur Cyan / Info professionnelle */
     color: white;
@@ -342,13 +378,16 @@
         <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 111.063.852l-.708 2.836a.75.75 0 001.063.852l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
     </svg>
     
-    <span style="color: #713f12; font-size: 14px; font-weight: 500; line-height: 1.5; text-align: center;">
-        Pour toute mise à jour de vos renseignements, utilisez le bouton jaune 
-        <strong style="background-color: #fef08a; padding: 3px 8px; border-radius: 5px; color: #854d0e; font-size: 13px; border: 1px solid #fde047; font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,0.05); display: inline-block; margin: 0 3px;">
-            ✏️ Modifier
-        </strong> 
-        ou le bouton gris pour télécharger votre certificat administratif, situés en bas de page.
-    </span>
+   <span style="color: #713f12; font-size: 14px; font-weight: 500; line-height: 1.5;">
+    Pour mettre à jour vos renseignements, utilisez le bouton jaune 
+    <strong style="background-color: #fef08a; padding: 3px 8px; border-radius: 5px; color: #854d0e; font-size: 13px; border: 1px solid #fde047; font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,0.05); display: inline-block; margin: 0 3px;">
+        ✏️ Modifier
+    </strong>. 
+    </br> Pour télécharger votre certificat administratif, utilisez le bouton gris 
+    <strong style="background-color: #6c757d; padding: 3px 8px; border-radius: 5px; color: white; font-size: 13px; border: 1px solid #d1d5db; font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,0.05); display: inline-block; margin: 0 3px;">
+        📄 Générer un Certificat Administratif
+    </strong> ; ces options sont disponibles en bas de page.
+</span>
 </div>
 <div class="search-container">
     <form id="searchForm" onsubmit="return false;">
@@ -470,12 +509,11 @@
                 
                 <!-- Section des Boutons réorganisée -->
                 <div class="card-actions">
-    <button type="button" class="btn-edit btn-edit-card" data-id="@p.Num">✏️Modifier</button>
+    <button type="button" class="btn-edit btn-edit-card" data-id="@p.Num">✏️ Modifier</button>
     
     <button type="button" class="btn-print btn-print-card" onclick="imprimerFiche('card-@p.Num')">🖨️ Imprimer la fiche</button>
     
     <button type="button" class="btn-certif" 
-            style="background-color: #6c757d; color: white; border: none; padding: 10px 15px; cursor: pointer; border-radius: 8px; margin: 0 5px;"
             onclick="openCertModal(this)"
             data-id="@p.Num"
             data-nom="@p.NomEtPrenoms" 
@@ -487,25 +525,25 @@
             data-datedentre="@p.Datedentre"
             data-dateprise="@p.Datedeprise"
             data-cin="@p.Cin">
-        📄 Générer Certificat Administratif
+        📄 Générer un Certificat Administratif
     </button>
     
-     @if (isAdmin)
-     {
-         <button type="button" class="btn-delete btn-delete-card" data-id="@p.Num">🗑 Archiver</button>
-     }
-     else
-     {
-          <button type="button" class="btn-delete" disabled style="background-color: #e9ecef; color: #777; border: none; padding: 10px 15px; cursor: not-allowed; opacity: 0.6; border-radius: 8px;">🗑 Archiver</button>
-      }
-      </div>
-            </div>
-        }
+    @if (isAdmin)
+    {
+        <button type="button" class="btn-delete btn-delete-card" data-id="@p.Num">🗑 Archiver</button>
     }
     else
     {
-        <p style="text-align:center; font-size: 1.1rem; color: #6c757d; margin-top: 40px;">Aucun résultat trouvé pour la recherche.</p>
+        <button type="button" class="btn-delete" disabled style="background-color: #e9ecef; color: #777; cursor: not-allowed; opacity: 0.6;">🗑 Archiver</button>
     }
+</div>
+                </div>
+            }
+        }
+        else
+        {
+            <p style="text-align:center; color:#6c757d; font-size:1.1rem; margin-top: 40px;">Aucun résultat trouvé pour la recherche.</p>
+        }
 <div id="modalOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; padding: 20px;">
     <div style="background: white; max-width: 500px; margin: 40px auto; padding: 20px; border-radius: 8px;">
         <h4 style="margin-top:0;">Configuration du Certificat</h4>
