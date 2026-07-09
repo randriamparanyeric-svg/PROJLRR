@@ -1,0 +1,42 @@
+# --- Visual Studio ---
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.dbmdl
+*.jfm
+*.csproj.user
+
+# --- Dossiers de compilation et de build ---
+bin/
+obj/
+# Dossiers spécifiques de déploiement
+deploy/
+publish/
+deployment/
+
+# --- Dépendances externes ---
+# Si vous utilisez LibMan ou NPM, ne pas commiter les librairies téléchargées
+wwwroot/lib/
+node_modules/
+
+# --- Fichiers temporaires ---
+*.tmp
+*.log
+*.bak
+*.swp
+*~
+*.orig
+
+# --- Fichiers OS ---
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# --- Fichiers de secrets (TRÈS IMPORTANT) ---
+# Ne jamais commiter vos fichiers de configuration contenant des mots de passe
+appsettings.Development.json
+*.pfx
+*.pubxml
