@@ -512,21 +512,31 @@
         
         <input type="hidden" id="hiddenPersonId" />
 
-        <label>Lieu de délivrance CIN :</label> 
-        <input type="text" id="inputLieu" class="form-control" style="width: 100%; margin-bottom: 10px;" />
-        
-        <label>Date de délivrance CIN :</label> 
-        <input type="date" id="inputdatecin" class="form-control" style="width: 100%; margin-bottom: 10px;" />
-        
-        <label>CHAPITRE :</label> 
-        <select id="inputchapitre" class="form-control" style="width: 100%; margin-bottom: 20px;">
-            <option value="00 810 110">00 810 110</option>
-            <option value="00 811 130">00 811 130</option>
-        </select>
+       <label>Lieu de délivrance CIN :</label> 
+<input type="text" id="inputLieu" class="form-control" style="width: 100%; margin-bottom: 10px;" />
 
-        <button onclick="genererCertificat()" style="background: #007bff; color: white; border: none; padding: 10px 20px; cursor: pointer; width: 100%;">
-            Télécharger le PDF
-        </button>
+<label>Date de délivrance CIN :</label> 
+<input type="date" id="inputdatecin" class="form-control" style="width: 100%; margin-bottom: 10px;" />
+
+<label>CHAPITRE :</label> 
+<select id="inputchapitre" class="form-control" style="width: 100%; margin-bottom: 20px;">
+    <option value="00 810 110">00 810 110</option>
+    <option value="00 811 130">00 811 130</option>
+</select>
+
+<button id="btnTelecharger" onclick="genererCertificat()" style="background: #007bff; color: white; border: none; padding: 10px 20px; cursor: pointer; width: 100%;">
+    Télécharger le PDF
+</button>
+
+<div id="popupLoader" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 9999; justify-content: center; align-items: center; color: white;">
+    <div style="background: white; padding: 20px; border-radius: 8px; color: #333; text-align: center; box-shadow: 0px 0px 10px rgba(0,0,0,0.3);">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+        <p style="margin-top: 15px; font-weight: bold;">Génération du PDF en cours...</p>
+    </div>
+</div>
+<div id="messageErreur" style="color: red; margin-top: 10px; display: none; text-align: center; font-weight: bold;">
+    Veuillez remplir tous les champs.
+</div>
         <form id="hiddenDownloadForm" action="/Search/TelechargerCertificat" method="POST" style="display:none;">
     <input type="hidden" name="id" id="formId">
     <input type="hidden" name="lieuCIN" id="formLieuCIN">
@@ -1265,22 +1275,41 @@ function closeModal() {
 }
 
 function genererCertificat() {
-    // 1. Récupération des valeurs depuis les inputs du modal
+    // 1. Récupération des éléments
     const id = document.getElementById("hiddenPersonId").value;
-    const lieu = document.getElementById("inputLieu").value;
+    const lieu = document.getElementById("inputLieu").value.trim();
     const date = document.getElementById("inputdatecin").value;
     const chapitre = document.getElementById("inputchapitre").value;
+    
+    const btn = document.getElementById("btnTelecharger");
+    const popup = document.getElementById("popupLoader"); // On cible le popup
+    const msgErreur = document.getElementById("messageErreur");
 
-    // 2. Transfert dans les champs du formulaire caché
+    // 2. Validation
+    if (lieu === "" || date === "") {
+        msgErreur.style.display = "block";
+        return;
+    }
+
+    // 3. Affichage du popup
+    msgErreur.style.display = "none";
+    popup.style.display = "flex"; // On utilise 'flex' pour centrer le contenu
+    btn.disabled = true;
+
+    // 4. Transfert des données
     document.getElementById("formId").value = id;
     document.getElementById("formLieuCIN").value = lieu;
     document.getElementById("formDateCIN").value = date;
     document.getElementById("formChapitre").value = chapitre;
 
-    // 3. Soumission
+    // 5. Soumission
     document.getElementById("hiddenDownloadForm").submit();
     
-    // 4. Fermeture
-    closeModal();
+    // 6. Fermeture après délai
+    setTimeout(() => {
+        closeModal();          // Ferme votre fenêtre de saisie
+        popup.style.display = "none"; // Cache le popup
+        btn.disabled = false;
+    }, 5000);
 }
 </script>
