@@ -47,8 +47,14 @@ public IActionResult TelechargerCertificat(int id, string lieuCIN, string dateCI
         container.Page(page =>
         {
             page.Size(PageSizes.A4);
-            page.Margin(1.5f, Unit.Centimetre);
-            page.DefaultTextStyle(x => x.FontSize(12).FontFamily(Fonts.TimesNewRoman));
+
+// Définition individuelle des marges
+page.MarginTop(0.5f, Unit.Centimetre);    // Marge très fine en haut
+page.MarginBottom(1.5f, Unit.Centimetre); // Garde 1.5cm en bas
+page.MarginLeft(1.5f, Unit.Centimetre);   // Garde 1.5cm à gauche
+page.MarginRight(1.5f, Unit.Centimetre);  // Garde 1.5cm à droite
+
+page.DefaultTextStyle(x => x.FontSize(12).FontFamily(Fonts.TimesNewRoman));
 
            // --- HEADER : STRUCTURE VERTICALE CORRIGÉE ---
 page.Header().Column(col => 
@@ -61,13 +67,13 @@ page.Header().Column(col =>
         col.Item()
            .AlignCenter()
            .PaddingRight(9.5f, Unit.Centimetre) // C'est ici que vous décalez le logo
-           .PaddingTop(5)
+           .PaddingTop(0)
            .Width(30)
            .Image(menPath);
 
     // 3. Bloc de texte : Le style est appliqué ici, sur le conteneur parent
     col.Item()
-   .PaddingTop(10)
+   .PaddingTop(0)
    .PaddingLeft(20)
    .DefaultTextStyle(x => x.FontSize(10).FontFamily(Fonts.TimesNewRoman)) 
    .Column(textCol => 
@@ -89,48 +95,98 @@ page.Header().Column(col =>
        textCol.Item().PaddingLeft(50).AlignLeft().Text("DE FIANARANTSOA").SemiBold();
        
        textCol.Item().PaddingLeft(65).AlignLeft().Text("*************").SemiBold();
-       textCol.Item().PaddingTop(5).PaddingLeft(25).AlignLeft().Text("N°.....................-CISCO/F/Div.GRH/P").SemiBold().Underline();
+       textCol.Item().PaddingTop(0).PaddingLeft(25).AlignLeft().Text("N°.....................-CISCO/F/Div.GRH/P").SemiBold().Underline();
    });
 });
-            // --- CONTENT : Corps du certificat ---
-            page.Content().PaddingTop(20).Column(c =>
-            {
-                c.Item().AlignCenter().Text("CERTIFICAT ADMINISTRATIF").FontSize(14).SemiBold();
-                c.Item().AlignCenter().Text("************************");
-                
-                c.Item().PaddingTop(20).PaddingLeft(20).Column(c2 =>
-                {
-                   c2.Spacing(8);
-                    c2.Item().PaddingLeft(2, Unit.Centimetre).Text("Je soussigné, CHEF DE LA CIRCONSCRIPTION SCOLAIRE DE FIANARANTSOA, ");
-                    c2.Item().Text("certifie que le nommé : " + p.NomEtPrenoms);
-                    c2.Item().Text($"MATRICULE : {p.Matricule}");
-                    c2.Item().Text($"Corps et Grade : {p.Corps} {p.Grade}");
-                    c2.Item().Text($"BUDGET : GENERAL    CHAPITRE: {chapitre}");
-                    c2.Item().Text($"Date et lieu de naissance: {p.Datenaiss} à {p.Lieudenaiss}");
-                    if (DateTime.TryParse(dateCIN, out DateTime dateValue))
+           // --- CONTENT : Corps du certificat (sans PaddingTop) ---
+page.Content().PaddingTop(20).Column(c =>
 {
-    c2.Item().Text($"CIN : {p.Cin} du {dateValue:dd/MM/yyyy} à {lieuCIN}");
-}
-else
-{
-    // Au cas où la date est invalide, on affiche le texte brut ou un message d'erreur
-    c2.Item().Text($"CIN : {p.Cin} du {dateCIN} à {lieuCIN}"); 
-}
-                    c2.Item().Text("Continue à servir le Ministère de L’Education Nationale, depuis le " + p.Datedentre + " date d’entrée");
-                    c2.Item().Text("dans l’administration, et actuellement en service au Lycée RAHERIVELO RAMAMONJY CISCO"); 
-                    c2.Item().Text("FIANARANTSOA depuis le " + p.Datedeprise + ", date de prise de service jusqu’à ce jour.");
-                    c2.Item().PaddingLeft(2, Unit.Centimetre).Text("En foi de quoi, la présente Certificat lui est délivré pour servir et valoir ce que de droit.");
-                    // 2. La date placée juste en dessous, alignée à droite
-c2.Item()
-  .PaddingTop(20) // Ajoute un espace entre la phrase et la date
-  .AlignRight()   // Pousse le texte vers la droite
-  .PaddingRight(20) // Optionnel : donne une petite marge par rapport au bord droit
-  .Text($"Fianarantsoa, le {DateTime.Now.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("fr-FR"))}")
-  .Italic();
-                });
-            });
+    c.Item().AlignCenter().Text("CERTIFICAT ADMINISTRATIF").FontSize(14).SemiBold();
+    c.Item().AlignCenter().Text("************************");
+    
+    c.Item().PaddingTop(20).PaddingLeft(20).Column(c2 =>
+    {
+        c2.Spacing(8);
+        
+        // Exemple avec Span pour le gras
+        c2.Item().PaddingLeft(2, Unit.Centimetre).Text(t => {
+            t.Span("Je soussigné, CHEF DE LA CIRCONSCRIPTION SCOLAIRE DE FIANARANTSOA,"); });
+       c2.Item().Text(t => {
+            t.Span(" certifie que le nommé :");
+            t.Span(p.NomEtPrenoms).SemiBold();
+        });
 
-          
+        c2.Item().Text(t => {
+            t.Span("MATRICULE : ");
+            t.Span(p.Matricule).SemiBold();
+        });
+
+        c2.Item().Text(t => {
+            t.Span("Corps et Grade : ");
+            t.Span($"{p.Corps} {p.Grade}").SemiBold();
+        });
+
+        c2.Item().Text(t => {
+            t.Span("BUDGET : GENERAL    CHAPITRE: ");
+            t.Span(chapitre).SemiBold();
+        });
+
+        c2.Item().Text(t => {
+            t.Span("Date et lieu de naissance: ");
+            t.Span(p.Datenaiss).SemiBold();
+            t.Span(" à ");
+            t.Span(p.Lieudenaiss).SemiBold();
+        });
+
+        // Gestion du CIN
+        c2.Item().Text(t => {
+            t.Span("CIN : ");
+            t.Span(p.Cin).SemiBold();
+            t.Span(" du ");
+            if (DateTime.TryParse(dateCIN, out DateTime dateValue))
+            {
+                t.Span(dateValue.ToString("dd/MM/yyyy")).SemiBold();
+            }
+            else
+            {
+                t.Span(dateCIN).SemiBold();
+            }
+            t.Span(" à ");
+            t.Span(lieuCIN).SemiBold();
+        });
+
+        c2.Item().Text(t => {
+            t.Span("Continue à servir le Ministère de L’Education Nationale, depuis le ");
+            t.Span(p.Datedentre).SemiBold();
+            t.Span(" date d’entrée");
+        });
+        c2.Item().Text(t => {
+            t.Span("dans l’administration, et actuellement en service au Lycée RAHERIVELO RAMAMONJY CISCO");
+        });
+        
+        c2.Item().Text(t => {
+            t.Span("FIANARANTSOA depuis le ");
+            t.Span(p.Datedeprise).SemiBold();
+            t.Span(", date de prise de service jusqu’à ce jour.");
+        });
+
+        c2.Item().PaddingLeft(2, Unit.Centimetre).Text("En foi de quoi, la présente Certificat lui est délivré pour servir et valoir ce que de droit.");
+
+        // Date en bas à droite
+        c2.Item()
+  .PaddingTop(20)
+  .AlignRight()
+  .PaddingRight(20)
+  .Text(t => 
+  {
+      // Option : appliquer le style Italic à tout le bloc
+      t.DefaultTextStyle(x => x.Italic()); 
+      
+      t.Span("Fianarantsoa, le ");
+      t.Span(DateTime.Now.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("fr-FR"))).SemiBold();
+    });
+    });
+});          
         });
     });
 
