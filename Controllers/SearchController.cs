@@ -34,10 +34,35 @@ namespace PROJLRR.Controllers
         // 0. GÉNÉRATION CERTIFICAT (NOUVEAU)
         // =================================================================
      [Authorize]
-public IActionResult TelechargerCertificat(int id, string lieuCIN, string dateCIN, string chapitre)
+public async Task<IActionResult> TelechargerCertificat(int id, string lieuCIN, string dateCIN, string chapitre)
 {
-    var p = _context.Personnels.Find(id);
+    // 1. Récupération du personnel
+    var p = await _context.Personnels.FindAsync(id);
     if (p == null) return NotFound("Personnel non trouvé.");
+
+    // --- 2. ENREGISTREMENT DE LA NOTIFICATION ---
+    bool isAdmin = User.IsInRole("Admin");
+    string nomUtilisateur = User.Identity?.Name ?? (isAdmin ? "Un administrateur" : "Un enseignant");
+    string titreUser = isAdmin ? "L'administrateur" : "L'enseignant";
+
+    // Vérification : est-ce que l'utilisateur génère pour lui-même ?
+    bool estPourSoiMeme = string.Equals(nomUtilisateur?.Trim(), p.NomEtPrenoms?.Trim(), StringComparison.OrdinalIgnoreCase);
+    string texteCible = estPourSoiMeme 
+        ? "son propre Certificat Administratif" 
+        : $"un Certificat Administratif pour **{p.NomEtPrenoms ?? p.Matricule}**";
+
+    var notification = new Notification
+    {
+        Message = $"{titreUser} **{nomUtilisateur}** a généré {texteCible}.",
+        DateCreation = DateTime.Now,
+        IsRead = false,
+        ModifiePar = nomUtilisateur
+    };
+
+    _context.Notifications.Add(notification);
+    await _context.SaveChangesAsync(); // Sauvegarde en base avant de générer le PDF
+
+    // --- 3. GÉNÉRATION DU PDF (QuestPDF) ---
 
     string repPath = Path.Combine(_env.WebRootPath, "uploads", "REP.jpg"); // Drapeau central
     string menPath = Path.Combine(_env.WebRootPath, "uploads", "MEN.png"); // Logo MEN

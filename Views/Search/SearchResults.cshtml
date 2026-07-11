@@ -438,29 +438,28 @@
 </div>
 </div>
 <div class="search-container">
-    <form id="searchForm" onsubmit="return false;">
-        <div style="text-align: left; margin-bottom: 8px;">
-            <label for="PersonnelNom" style="font-weight: 600;">Rechercher par Matricule ou Nom :</label>
-        </div>
-        <div class="search-group">
-            @if (isAdmin)
-            {
+    @if (isAdmin)
+    {
+        <form id="searchForm" onsubmit="return false;">
+            <div style="text-align: left; margin-bottom: 8px;">
+                <label for="PersonnelNom" style="font-weight: 600;">Rechercher par Matricule ou Nom :</label>
+            </div>
+            <div class="search-group">
                 <input type="text" id="PersonnelNom" class="search-input" name="searchTerm" required autocomplete="off" value="@ViewBag.SearchTerm" />
                 <button type="button" id="btnSubmitSearch" class="btn-search">
                     🔍 Rechercher
                 </button>
-            }
-            else
-            {
-                <input type="text" id="PersonnelNom" class="search-input" name="searchTerm" required autocomplete="off" value="@userNom" readonly 
-                       style="background-color: #e9ecef; color: #6c757d; cursor: not-allowed; border: 1px solid #ced4da;" />
-                <button type="button" id="btnSubmitSearch" disabled class="btn-search" style="background-color: #d3d3d3 !important; color: #777 !important; cursor: not-allowed; opacity: 0.6;">
-                    🔍 Rechercher
-                </button>
-            }
-            <div id="suggestions" class="list-group"></div>
-        </div>
-    </form>
+                <div id="suggestions" class="list-group"></div>
+            </div>
+        </form>
+    }
+    else
+    {
+  <div style="background: #ffffff; border-left: 6px solid #3182ce; padding: 20px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); color: #2d3748; margin-bottom: 20px; display: flex; align-items: center;">
+    <span style="font-size: 1.8rem; margin-right: 15px;">👋</span>
+    <span style="font-size: 1.2rem; font-weight: 500;">Bienvenue, <strong>@userNom</strong></span>
+</div>
+    }
 </div>
 
 <div id="resultsContainer">
