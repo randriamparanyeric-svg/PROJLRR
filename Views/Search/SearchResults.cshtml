@@ -419,37 +419,43 @@
                 <div style="font-size: 0.95rem; color: #718096; margin-top: 3px;">Heureux de vous revoir dans votre espace personnel.</div>
             </div>
         </div>
+<div class="instruction-card animated-banner-modern" style="padding: 10px; margin: 0 auto; max-width: 500px;">
+    @* Titre aligné au centre *@
+    <h3 style="margin: 0 0 8px 0; font-size: 15px; color: #78350f; display: flex; align-items: center; justify-content: center; gap: 6px;">
+    <svg style="width: 16px; height: 16px; color: #ca8a04; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 111.063.852l-.708 2.836a.75.75 0 001.063.852l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+    </svg>
+    Guide rapide
+</h3>
+    
+    @* Conteneur pour aligner les étapes à gauche *@
+    <div style="display: flex; flex-direction: column; align-items: flex-start;">
 
-        @* 2. Carte d'instruction (Guide rapide) *@
-        <div class="instruction-card animated-banner-modern">
-            <h3 style="margin: 0 0 16px 0; font-size: 18px; color: #78350f; display: flex; align-items: center; gap: 8px;">
-                <svg style="width: 22px; height: 22px; color: #ca8a04; flex-shrink: 0;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 111.063.852l-.708 2.836a.75.75 0 001.063.852l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-                </svg>
-                Guide rapide
-            </h3>
-            
-            <div style="margin-bottom: 20px; display: flex; align-items: flex-start;">
-                <span style="font-weight: bold; margin-right: 10px; color: #d97706;">01.</span>
-                <div>
-                    Pour mettre à jour vos renseignements, utilisez le bouton :<br>
-                    <span class="btn btn-yellow" style="margin-top: 8px;">✏️ Modifier</span>
-                </div>
-            </div>
-
-            <div style="margin-bottom: 20px; display: flex; align-items: flex-start;">
-                <span style="font-weight: bold; margin-right: 10px; color: #d97706;">02.</span>
-                <div>
-                    Pour télécharger votre certificat administratif, utilisez le bouton :<br>
-                    <span class="btn btn-gray" style="margin-top: 8px;">📄 Générer le Certificat</span>
-                </div>
-            </div>
-
-            <div style="border-top: 1px solid #fef3c7; padding-top: 15px; margin-top: 10px; text-align: center; color: #92400e; font-size: 14px;">
-                Ces options sont disponibles en bas de page.
-                <div class="bounce" style="font-size: 20px; margin-top: 8px;">⬇</div>
+        @* Étape 01 *@
+        <div style="margin-bottom: 8px; display: flex; align-items: flex-start; font-size: 12px;">
+            <span style="font-weight: bold; margin-right: 6px; color: #d97706; min-width: 25px; display: inline-block;">01.</span>
+            <div style="line-height: 1.2; text-align: left;">
+                Pour mettre à jour vos renseignements, utilisez le bouton :<br>
+                <span class="btn btn-yellow" style="margin-top: 3px; padding: 2px 8px; font-size: 11px;">✏️ Modifier</span>
             </div>
         </div>
+
+        @* Étape 02 *@
+        <div style="margin-bottom: 8px; display: flex; align-items: flex-start; font-size: 12px;">
+            <span style="font-weight: bold; margin-right: 6px; color: #d97706; min-width: 25px; display: inline-block;">02.</span>
+            <div style="line-height: 1.2; text-align: left;">
+                Pour générer votre certificat administratif, utilisez le bouton :<br>
+                <span class="btn btn-gray" style="margin-top: 3px; padding: 2px 8px; font-size: 11px;">📄 Générer un Certificat Administratif</span>
+            </div>
+        </div>
+
+    </div>
+
+    @* Footer aligné à gauche *@
+    <div style="border-top: 1px solid #fef3c7; padding-top: 5px; margin-top: 2px; text-align: center; color: #92400e; font-size: 11px;">
+        Options en bas de page <div class="bounce" style="display: inline-block; font-size: 14px; margin-left: 4px;">⬇</div>
+    </div>
+</div>
     }
 </div>
 <div id="resultsContainer">
