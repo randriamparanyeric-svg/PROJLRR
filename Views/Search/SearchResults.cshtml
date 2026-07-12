@@ -357,27 +357,7 @@
         /* ⏱️ Vitesse augmentée au maximum (0.6 seconde) */
         animation: modernPulse 0.4s infinite ease-in-out; 
     }
-</style>
-
-<div class="info-banner-modern animated-banner-modern" style="
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 14px;
-    background-color: #fffbeb;
-    border: 1px solid #fef08a;
-    border-left: 4px solid #eab308;
-    padding: 14px 18px;
-    border-radius: 8px;
-    margin: 20px auto;
-    max-width: 750px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-">
-    <svg style="width: 22px; height: 22px; color: #ca8a04; flex-shrink: 0;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 111.063.852l-.708 2.836a.75.75 0 001.063.852l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-    </svg>
-    
+</style>    
    <style>
     .instruction-card {
         background: #ffffff;
@@ -411,32 +391,6 @@
         60% { transform: translateY(-5px); }
     }
 </style>
-
-<div class="instruction-card">
-    <h3 style="margin: 0 0 16px 0; font-size: 18px; color: #78350f;">Guide rapide</h3>
-    
-    <div style="margin-bottom: 20px; display: flex; align-items: flex-start;">
-        <span style="font-weight: bold; margin-right: 10px; color: #d97706;">01.</span>
-        <div>
-            Pour mettre à jour vos renseignements, utilisez le bouton :<br>
-            <span class="btn btn-yellow" style="margin-top: 8px;">✏️ Modifier</span>
-        </div>
-    </div>
-
-    <div style="margin-bottom: 20px; display: flex; align-items: flex-start;">
-        <span style="font-weight: bold; margin-right: 10px; color: #d97706;">02.</span>
-        <div>
-            Pour télécharger votre certificat administratif, utilisez le bouton :<br>
-            <span class="btn btn-gray" style="margin-top: 8px;">📄 Générer le Certificat</span>
-        </div>
-    </div>
-
-    <div style="border-top: 1px solid #fef3c7; padding-top: 15px; margin-top: 10px; text-align: center; color: #92400e; font-size: 14px;">
-        Ces options sont disponibles en bas de page.
-        <div class="bounce" style="font-size: 20px; margin-top: 8px;">⬇</div>
-    </div>
-</div>
-</div>
 <div class="search-container">
     @if (isAdmin)
     {
@@ -455,20 +409,49 @@
     }
     else
     {
-  <div style="background: #ffffff; border-left: 6px solid #2b6cb0; padding: 20px 25px; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.08); color: #2d3748; margin-bottom: 25px; display: flex; align-items: center; border: 1px solid #e2e8f0; border-left-width: 6px;">
-    
-    <div style="background: #ebf8ff; width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 20px; font-size: 1.6rem; border: 2px solid #bee3f8;">
-        👋
-    </div>
+        @* --- BLOC UTILISATEUR (Fusionné) --- *@
+        
+        @* 1. Message de bienvenue *@
+        <div style="background: #ffffff; border-left: 6px solid #2b6cb0; padding: 20px 25px; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.08); color: #2d3748; margin-bottom: 25px; display: flex; align-items: center; border: 1px solid #e2e8f0; border-left-width: 6px;">
+            <div style="background: #ebf8ff; width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 20px; font-size: 1.6rem; border: 2px solid #bee3f8;">👋</div>
+            <div>
+                <div style="font-size: 1.3rem; font-weight: 700; color: #1a365d;">Bonjour, @userNom</div>
+                <div style="font-size: 0.95rem; color: #718096; margin-top: 3px;">Heureux de vous revoir dans votre espace personnel.</div>
+            </div>
+        </div>
 
-    <div>
-        <div style="font-size: 1.3rem; font-weight: 700; color: #1a365d;">Bonjour, @userNom</div>
-        <div style="font-size: 0.95rem; color: #718096; margin-top: 3px;">Heureux de vous revoir dans votre espace personnel.</div>
-    </div>
-</div>
+        @* 2. Carte d'instruction (Guide rapide) *@
+        <div class="instruction-card animated-banner-modern">
+            <h3 style="margin: 0 0 16px 0; font-size: 18px; color: #78350f; display: flex; align-items: center; gap: 8px;">
+                <svg style="width: 22px; height: 22px; color: #ca8a04; flex-shrink: 0;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 111.063.852l-.708 2.836a.75.75 0 001.063.852l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                </svg>
+                Guide rapide
+            </h3>
+            
+            <div style="margin-bottom: 20px; display: flex; align-items: flex-start;">
+                <span style="font-weight: bold; margin-right: 10px; color: #d97706;">01.</span>
+                <div>
+                    Pour mettre à jour vos renseignements, utilisez le bouton :<br>
+                    <span class="btn btn-yellow" style="margin-top: 8px;">✏️ Modifier</span>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px; display: flex; align-items: flex-start;">
+                <span style="font-weight: bold; margin-right: 10px; color: #d97706;">02.</span>
+                <div>
+                    Pour télécharger votre certificat administratif, utilisez le bouton :<br>
+                    <span class="btn btn-gray" style="margin-top: 8px;">📄 Générer le Certificat</span>
+                </div>
+            </div>
+
+            <div style="border-top: 1px solid #fef3c7; padding-top: 15px; margin-top: 10px; text-align: center; color: #92400e; font-size: 14px;">
+                Ces options sont disponibles en bas de page.
+                <div class="bounce" style="font-size: 20px; margin-top: 8px;">⬇</div>
+            </div>
+        </div>
     }
 </div>
-
 <div id="resultsContainer">
 
     @if (Model != null && Model.Any())
