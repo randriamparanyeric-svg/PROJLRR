@@ -33,7 +33,16 @@
 </style>
 
 <div class="container mt-4">
-    <h2 class="mb-4">@ViewData["Title"]</h2>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">@ViewData["Title"]</h2>
+
+    <button type="button"
+            id="btn-paste-decharge"
+            class="btn btn-warning shadow-sm">
+        <i class="fas fa-paste"></i>
+        Coller une décharge
+    </button>
+</div>
     <div asp-validation-summary="All" class="text-danger fw-bold mb-3"></div>
 
     <form method="post" asp-action="Add" id="dechargeForm">
@@ -73,24 +82,44 @@
             <div class="card-body">
                 <h4 class="card-title mb-3">Articles à décharger</h4>
                 <div id="articles-container">
-                    <div class="article-row row g-2 align-items-center mb-2">
-                        <div class="col-12 col-sm-6">
-                            <select class="form-control article-select" name="Articles[0].ArticleNom" required>
-                                <option value="">Chargement de la liste d'inventaire...</option>
-                            </select>
-                        </div>
-                        <div class="col-4 col-sm-2">
-                            <input type="number" class="form-control" name="Articles[0].Quantite"
-                                   value="1" min="1" required placeholder="Qté" />
-                        </div>
-                        <div class="col-4 col-sm-2">
-                            <input type="text" class="form-control bg-light" name="Articles[0].Unite" readonly placeholder="Unité" />
-                        </div>
-                        <div class="col-4 col-sm-2 text-center">
-                            <button type="button" class="btn btn-danger remove-article w-100">Suppr.</button>
-                        </div>
-                    </div>
-                </div>
+                   <div class="article-row row g-2 align-items-center mb-2">
+    <input type="hidden"
+           name="Articles.Index"
+           value="0" />
+
+    <div class="col-12 col-sm-6">
+        <select class="form-control article-select"
+                name="Articles[0].ArticleNom"
+                required>
+            <option value="">Chargement de la liste d'inventaire...</option>
+        </select>
+    </div>
+
+    <div class="col-4 col-sm-2">
+        <input type="number"
+               class="form-control qty-input"
+               name="Articles[0].Quantite"
+               value="1"
+               min="1"
+               required
+               placeholder="Qté" />
+    </div>
+
+    <div class="col-4 col-sm-2">
+        <input type="text"
+               class="form-control bg-light"
+               name="Articles[0].Unite"
+               readonly
+               placeholder="Unité" />
+    </div>
+
+    <div class="col-4 col-sm-2 text-center">
+        <button type="button"
+                class="btn btn-danger remove-article w-100">
+            Suppr.
+        </button>
+    </div>
+</div>                </div>
                 <button type="button" id="add-article" class="btn btn-outline-secondary btn-sm mt-2" disabled>Initialisation...</button>
             </div>
         </div>
@@ -241,28 +270,193 @@ $(document).ready(function () {
     });
 
     let indexCompteur = 1;
-    $("#add-article").click(function () {
-        let structureLigne = `
+   function ajouterLigneArticle(nomArticle, quantite, unite) {
+    const index = indexCompteur;
+
+    const structureLigne = `
         <div class="article-row row g-2 align-items-center mb-2">
+            <input type="hidden"
+                   name="Articles.Index"
+                   value="${index}" />
+
             <div class="col-12 col-sm-6">
-                <select class="form-control article-select" name="Articles[${indexCompteur}].ArticleNom" required></select>
+                <select class="form-control article-select"
+                        name="Articles[${index}].ArticleNom"
+                        required>
+                </select>
             </div>
+
             <div class="col-4 col-sm-2">
-                <input type="number" class="form-control" name="Articles[${indexCompteur}].Quantite" value="1" min="1" required />
+                <input type="number"
+                       class="form-control qty-input"
+                       name="Articles[${index}].Quantite"
+                       value="${quantite || 1}"
+                       min="1"
+                       required />
             </div>
+
             <div class="col-4 col-sm-2">
-                <input type="text" class="form-control bg-light" name="Articles[${indexCompteur}].Unite" readonly />
+                <input type="text"
+                       class="form-control bg-light"
+                       name="Articles[${index}].Unite"
+                       value="${unite || ""}"
+                       readonly />
             </div>
+
             <div class="col-4 col-sm-2 text-center">
-                <button type="button" class="btn btn-danger remove-article w-100">Suppr.</button>
+                <button type="button"
+                        class="btn btn-danger remove-article w-100">
+                    Suppr.
+                </button>
             </div>
         </div>`;
-        
-        let $nouvelleLigne = $(structureLigne);
-        $("#articles-container").append($nouvelleLigne);
-        hydraterSelectDArticle($nouvelleLigne.find(".article-select"));
-        indexCompteur++;
+
+    const $nouvelleLigne = $(structureLigne);
+
+    $("#articles-container").append($nouvelleLigne);
+
+    const $select = $nouvelleLigne.find(".article-select");
+
+    hydraterSelectDArticle($select);
+
+    // Sélectionner l'article après le chargement du catalogue.
+    if (nomArticle) {
+        $select.val(nomArticle).trigger("change");
+    }
+
+    if (unite) {
+        $nouvelleLigne
+            .find("input[name$='.Unite']")
+            .val(unite);
+    }
+
+    indexCompteur++;
+}
+
+$("#add-article").click(function () {
+    ajouterLigneArticle("", 1, "");
+});
+
+// ======================================================
+// COLLER UNE DÉCHARGE
+// ======================================================
+$("#btn-paste-decharge").on("click", function () {
+    const donneesCopiees = sessionStorage.getItem("dechargeACopier");
+
+    if (!donneesCopiees) {
+        Swal.fire({
+            icon: "info",
+            title: "Aucune décharge copiée",
+            text: "Veuillez d'abord copier une décharge depuis la page Modifier."
+        });
+
+        return;
+    }
+
+    let decharge;
+
+    try {
+        decharge = JSON.parse(donneesCopiees);
+    }
+    catch (erreur) {
+        sessionStorage.removeItem("dechargeACopier");
+
+        Swal.fire({
+            icon: "error",
+            title: "Erreur",
+            text: "Les données copiées sont invalides."
+        });
+
+        return;
+    }
+
+    if (!decharge.success || !Array.isArray(decharge.articles)) {
+        Swal.fire({
+            icon: "error",
+            title: "Erreur",
+            text: "La décharge copiée ne contient aucun article."
+        });
+
+        return;
+    }
+
+    if (decharge.articles.length === 0) {
+        Swal.fire({
+            icon: "warning",
+            title: "Aucun article",
+            text: "La décharge copiée ne contient aucun article."
+        });
+
+        return;
+    }
+
+    Swal.fire({
+        icon: "question",
+        title: "Coller la décharge ?",
+        html:
+            "Les articles de la décharge de <b>" +
+            (decharge.personnelSource || "l'agent source") +
+            "</b> seront ajoutés au formulaire.<br><br>" +
+            "Vous devrez ensuite sélectionner le nouveau personnel.",
+        showCancelButton: true,
+        confirmButtonText: "Oui, coller",
+        cancelButtonText: "Annuler",
+        confirmButtonColor: "#f0ad4e"
+    }).then(function (confirmation) {
+        if (!confirmation.isConfirmed) {
+            return;
+        }
+
+        // On ne copie pas l'ancien nom.
+        // L'utilisateur peut sélectionner ou saisir le nouveau personnel.
+        $("#PersonnelNom").val("");
+
+        // On supprime les lignes présentes dans le formulaire.
+        $("#articles-container").empty();
+
+        // On recommence les index à zéro.
+        indexCompteur = 0;
+
+        // Ajout des articles copiés.
+        decharge.articles.forEach(function (article) {
+            ajouterLigneArticle(
+                article.articleNom,
+                article.quantite,
+                article.unite
+            );
+        });
+
+        // Une nouvelle décharge doit avoir une nouvelle date.
+        const maintenant = new Date();
+        const annee = maintenant.getFullYear();
+        const mois = String(maintenant.getMonth() + 1).padStart(2, "0");
+        const jour = String(maintenant.getDate()).padStart(2, "0");
+        const heures = String(maintenant.getHours()).padStart(2, "0");
+        const minutes = String(maintenant.getMinutes()).padStart(2, "0");
+
+        $("#DateDecharge").val(
+            `${annee}-${mois}-${jour}T${heures}:${minutes}`
+        );
+
+        // On ne réutilise pas automatiquement la signature de l'autre personne.
+        $("#Matricule").val("");
+        $("#signature-preview").hide().attr("src", "");
+
+        if (typeof signaturePadEngine !== "undefined") {
+            signaturePadEngine.clear();
+        }
+
+        // Suppression après utilisation pour éviter une nouvelle copie involontaire.
+        sessionStorage.removeItem("dechargeACopier");
+
+        Swal.fire({
+            icon: "success",
+            title: "Décharge collée",
+            text: "Vérifiez le personnel, puis ajoutez la signature du nouveau bénéficiaire.",
+            confirmButtonColor: "#198754"
+        });
     });
+});
 
     $(document).on("click", ".remove-article", function () {
         $(this).closest(".article-row").remove();
@@ -314,7 +508,7 @@ $(document).ready(function () {
 
     // --- 4. ENGINE DE SIGNATURES ET APERÇU ---
     var canvasElement = document.getElementById("signature-pad");
-    var signaturePadEngine = new SignaturePad(canvasElement);
+    window.signaturePadEngine = new SignaturePad(canvasElement);
 
     // Événement d'interrogation AJAX de la signature précédente
     $("#Matricule").on("blur", function () {
@@ -342,7 +536,7 @@ $(document).ready(function () {
             success: function (resultatJson) {
                 if (resultatJson.success) {
                     $("#signature-preview").attr("src", resultatJson.path).fadeIn();
-                    signaturePadEngine.clear(); 
+                   window.signaturePadEngine.clear();
                 } else {
                     $("#signature-preview").hide().attr("src", "");
                     Swal.fire({
@@ -369,7 +563,7 @@ $(document).ready(function () {
     $("#dechargeForm").submit(function(e){
         let estCalqueApercuVisible = $("#signature-preview").is(":visible");
 
-        if (signaturePadEngine.isEmpty() && !estCalqueApercuVisible) {
+        if (window.signaturePadEngine.isEmpty() && !estCalqueApercuVisible) {
             Swal.fire({
                 icon: 'warning',
                 title: 'Validation bloquée',
@@ -378,7 +572,7 @@ $(document).ready(function () {
             });
             e.preventDefault();
         } 
-        else if (!signaturePadEngine.isEmpty()) {
+        else if (!window.signaturePadEngine.isEmpty()) {
             $("#SignatureData").val(signaturePadEngine.toDataURL());
         }
     });

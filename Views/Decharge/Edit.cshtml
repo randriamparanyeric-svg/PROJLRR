@@ -31,7 +31,12 @@
 </style>
 
 <div class="container mt-4">
-    <h2 class="mb-4">@ViewData["Title"]</h2>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">@ViewData["Title"]</h2>
+        <button type="button" id="btn-copy-decharge" class="btn btn-success shadow-sm">
+            <i class="fas fa-copy"></i> Copier cette décharge
+        </button>
+    </div>
     <div asp-validation-summary="All" class="text-danger fw-bold mb-3"></div>
 
     <form method="post" asp-controller="Decharge" asp-action="Edit" id="dechargeForm">
@@ -359,6 +364,66 @@ $(document).ready(function () {
         signaturePadEngine.clear();
         $("#signature-preview").fadeOut().attr("src", ""); 
         verifierModificationsFormulaire();
+    });
+
+    // 🟢 BOUTON COPIER
+    $("#btn-copy-decharge").on("click", function (e) {
+        e.preventDefault();
+
+        const dechargeId = $("input[name='Id']").val();
+        console.log("ID récupéré :", dechargeId);
+
+        if (!dechargeId) {
+            Swal.fire({
+                icon: "error",
+                title: "Erreur",
+                text: "L'identifiant de la décharge est introuvable."
+            });
+            return;
+        }
+
+        $.ajax({
+            url: "/Decharge/GetDechargeToCopy?id=" + dechargeId,
+            type: "GET",
+            dataType: "json",
+            success: function (response) {
+                console.log("Réponse serveur :", response);
+
+                if (!response.success) {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Copie impossible",
+                        text: response.message || "Impossible de récupérer cette décharge."
+                    });
+                    return;
+                }
+
+                sessionStorage.setItem("dechargeACopier", JSON.stringify(response));
+                console.log("✅ Données copiées dans sessionStorage");
+
+                Swal.fire({
+                    icon: "success",
+                    title: "Décharge copiée",
+                    html: "La décharge de <b>" + response.personnelSource + "</b> a été copiée.<br><br>Ouvrez maintenant la page <b>Ajouter</b> et cliquez sur <b>Coller</b>.",
+                    confirmButtonText: "Ouvrir Ajouter",
+                    showCancelButton: true,
+                    cancelButtonText: "Rester ici",
+                    confirmButtonColor: "#198754"
+                }).then(function (confirmation) {
+                    if (confirmation.isConfirmed) {
+                        window.location.href = "/Decharge/Add";
+                    }
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Erreur AJAX :", error, xhr);
+                Swal.fire({
+                    icon: "error",
+                    title: "Erreur",
+                    text: "Une erreur est survenue pendant la copie."
+                });
+            }
+        });
     });
 
     $("#dechargeForm").submit(function(e){

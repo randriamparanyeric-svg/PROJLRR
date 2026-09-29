@@ -370,6 +370,108 @@ public IActionResult IndexBis()
             }
         }
 
+        // GET: Decharge/GetDechargeToCopy
+// Récupère les articles d'une décharge afin de les copier dans Add.cshtml.
+[HttpGet]
+public JsonResult GetDechargeToCopy(int id)
+{
+    try
+    {
+        var dechargeSource = _dbContext.Decharges
+            .FirstOrDefault(d => d.Id == id);
+
+        if (dechargeSource == null)
+        {
+            return Json(new
+            {
+                success = false,
+                message = "La décharge source est introuvable."
+            });
+        }
+
+        if (!dechargeSource.DateDecharge.HasValue)
+        {
+            return Json(new
+            {
+                success = false,
+                message = "La date de la décharge source est invalide."
+            });
+        }
+
+        DateTime dateSource;
+
+        try
+        {
+            dateSource = new DateTime(dechargeSource.DateDecharge.Value);
+        }
+        catch
+        {
+            return Json(new
+            {
+                success = false,
+                message = "Impossible de convertir la date de la décharge."
+            });
+        }
+
+        // Le groupe est identifié par le personnel et l'année/mois/jour/heure/minute.
+        // Cela permet de récupérer tous les articles enregistrés ensemble.
+        string dateGroupe = dateSource.ToString("yyyyMMddHHmm");
+
+        var articles = _dbContext.Decharges
+            .AsEnumerable()
+            .Where(d =>
+                string.Equals(
+                    d.PersonnelNom?.Trim(),
+                    dechargeSource.PersonnelNom?.Trim(),
+                    StringComparison.OrdinalIgnoreCase
+                )
+                &&
+                d.DateDecharge.HasValue
+                &&
+                new DateTime(d.DateDecharge.Value)
+                    .ToString("yyyyMMddHHmm") == dateGroupe
+            )
+            .OrderBy(d => d.Id)
+            .Select(d => new
+            {
+                articleNom = d.ArticleNom,
+                quantite = d.Quantite ?? 0,
+                unite = d.Unite
+            })
+            .ToList();
+
+        if (!articles.Any())
+        {
+            return Json(new
+            {
+                success = false,
+                message = "Aucun article trouvé dans cette décharge."
+            });
+        }
+
+        return Json(new
+        {
+            success = true,
+
+            // Le nom source est renvoyé uniquement à titre informatif.
+            // Il ne sera pas automatiquement copié vers le nouveau personnel.
+            personnelSource = dechargeSource.PersonnelNom,
+
+            dateSource = dateSource.ToString("yyyy-MM-ddTHH:mm"),
+
+            articles
+        });
+    }
+    catch (Exception ex)
+    {
+        return Json(new
+        {
+            success = false,
+            message = "Erreur pendant la copie : " + ex.Message
+        });
+    }
+}
+
         // GET: Decharge/GetSignaturePrecedente (Interrogé par AJAX au floutage du Matricule)
         [HttpGet]
         public JsonResult GetSignaturePrecedente(string nom, string matricule)
