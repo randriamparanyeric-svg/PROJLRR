@@ -30,19 +30,48 @@
     .select2-container--default .select2-selection--single .select2-selection__arrow {
         height: 36px;
     }
+
+    /* Styles pour les suggestions de personnel */
+    .suggestions-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        border: 1px solid #ddd;
+        border-top: none;
+        max-height: 200px;
+        overflow-y: auto;
+        background: white;
+    }
+
+    .suggestion-item {
+        padding: 10px;
+        cursor: pointer;
+        border-bottom: 1px solid #eee;
+        font-size: 0.95em;
+    }
+
+    .suggestion-item:hover {
+        background-color: #f5f5f5;
+    }
+
+    .suggestion-source {
+        color: #6c757d;
+        font-size: 0.85em;
+        font-weight: 500;
+    }
 </style>
 
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="mb-0">@ViewData["Title"]</h2>
+        <h2 class="mb-0">@ViewData["Title"]</h2>
 
-    <button type="button"
-            id="btn-paste-decharge"
-            class="btn btn-warning shadow-sm">
-        <i class="fas fa-paste"></i>
-        Coller une décharge
-    </button>
-</div>
+        <button type="button"
+                id="btn-paste-decharge"
+                class="btn btn-warning shadow-sm">
+            <i class="fas fa-paste"></i>
+            Coller une décharge
+        </button>
+    </div>
     <div asp-validation-summary="All" class="text-danger fw-bold mb-3"></div>
 
     <form method="post" asp-action="Add" id="dechargeForm">
@@ -52,7 +81,7 @@
                 <div class="form-group position-relative">
                     <label for="PersonnelNom" class="form-label fw-bold">Nom du Personnel</label>
                     <input type="text" class="form-control form-control-lg" id="PersonnelNom" name="PersonnelNom"
-                           required autocomplete="off" value="@Model?.PersonnelNom" placeholder="Saisissez un nom ou un matricule..." />
+                           required autocomplete="off" value="@Model?.PersonnelNom" placeholder="Tapez le nom ou un matricule pour trouver l'agent..." />
                     <div id="suggestions" class="list-group shadow" style="position: absolute; z-index: 1000; width: 100%;"></div>
                 </div>
 
@@ -82,44 +111,45 @@
             <div class="card-body">
                 <h4 class="card-title mb-3">Articles à décharger</h4>
                 <div id="articles-container">
-                   <div class="article-row row g-2 align-items-center mb-2">
-    <input type="hidden"
-           name="Articles.Index"
-           value="0" />
+                    <div class="article-row row g-2 align-items-center mb-2">
+                        <input type="hidden"
+                               name="Articles.Index"
+                               value="0" />
 
-    <div class="col-12 col-sm-6">
-        <select class="form-control article-select"
-                name="Articles[0].ArticleNom"
-                required>
-            <option value="">Chargement de la liste d'inventaire...</option>
-        </select>
-    </div>
+                        <div class="col-12 col-sm-6">
+                            <select class="form-control article-select"
+                                    name="Articles[0].ArticleNom"
+                                    required>
+                                <option value="">Chargement de la liste d'inventaire...</option>
+                            </select>
+                        </div>
 
-    <div class="col-4 col-sm-2">
-        <input type="number"
-               class="form-control qty-input"
-               name="Articles[0].Quantite"
-               value="1"
-               min="1"
-               required
-               placeholder="Qté" />
-    </div>
+                        <div class="col-4 col-sm-2">
+                            <input type="number"
+                                   class="form-control qty-input"
+                                   name="Articles[0].Quantite"
+                                   value="1"
+                                   min="1"
+                                   required
+                                   placeholder="Qté" />
+                        </div>
 
-    <div class="col-4 col-sm-2">
-        <input type="text"
-               class="form-control bg-light"
-               name="Articles[0].Unite"
-               readonly
-               placeholder="Unité" />
-    </div>
+                        <div class="col-4 col-sm-2">
+                            <input type="text"
+                                   class="form-control bg-light"
+                                   name="Articles[0].Unite"
+                                   readonly
+                                   placeholder="Unité" />
+                        </div>
 
-    <div class="col-4 col-sm-2 text-center">
-        <button type="button"
-                class="btn btn-danger remove-article w-100">
-            Suppr.
-        </button>
-    </div>
-</div>                </div>
+                        <div class="col-4 col-sm-2 text-center">
+                            <button type="button"
+                                    class="btn btn-danger remove-article w-100">
+                                Suppr.
+                            </button>
+                        </div>
+                    </div>
+                </div>
                 <button type="button" id="add-article" class="btn btn-outline-secondary btn-sm mt-2" disabled>Initialisation...</button>
             </div>
         </div>
@@ -134,30 +164,37 @@
 
         <div class="card mb-4 shadow-sm">
             <div class="card-body d-flex flex-column align-items-center text-center">
-                
+
                 <label class="form-label fw-bold mb-3">Validation & Signature</label>
-                
+
                 <div class="form-group mb-3" style="max-width: 400px; width: 100%;">
-                    <label for="Matricule" class="text-muted d-block mb-1" style="font-size: 0.85em; font-weight: 500;">
-                        Optionnel : Entrez votre matricule pour charger votre signature existante
+                    <label for="Matricule" class="text-muted d-block mb-2" style="font-size: 0.9em; font-weight: 500;">
+                        <i class="fas fa-lightbulb text-warning"></i> Astuce : Entrez votre matricule pour charger votre dernière signature
                     </label>
-                    <input type="text" class="form-control text-center" id="Matricule" name="Matricule" value="@Model?.Matricule" placeholder="Ex: 321456" autocomplete="off" />
+                    <input type="text" class="form-control text-center" id="Matricule" name="Matricule" 
+                           value="@Model?.Matricule" placeholder="Ex: 321456" autocomplete="off" />
+                    <small class="text-muted d-block mt-2">
+                        ℹ️ Si aucune signature n'est trouvée, vous pouvez la dessiner ci-dessous
+                    </small>
                 </div>
 
                 <div class="signature-wrapper" style="max-width: 400px; width: 100%;">
                     <div class="border rounded bg-white position-relative mx-auto" style="width: 400px; height: 200px; overflow: hidden;">
-                        
-                        <canvas id="signature-pad" width="400" height="200" style="position: absolute; top:0; left:0; z-index: 1;"></canvas>
-                        
-                        <img id="signature-preview" src="" alt="Aperçu signature bdd" 
+
+                        <canvas id="signature-pad" width="400" height="200" style="position: absolute; top:0; left:0; z-index: 1; cursor: crosshair;"></canvas>
+
+                        <img id="signature-preview" src="" alt="Aperçu signature bdd"
                              style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; background: rgba(240, 253, 244, 0.96); z-index: 5; border: 2px solid #22c55e;" />
                     </div>
+
+                    <div class="mt-2 d-flex gap-2 justify-content-center flex-wrap">
+                        <button type="button" id="clear-signature" class="btn btn-sm btn-outline-success">
+                            <i class="fas fa-eraser"></i> Effacer / Dessiner manuellement
+                        </button>
                     
-                    <div class="mt-2">
-                        <button type="button" id="clear-signature" class="btn btn-sm btn-outline-success">Effacer / Dessiner manuellement</button>
                     </div>
                 </div>
-                
+
             </div>
         </div>
         <input type="hidden" id="SignatureData" name="SignatureData" />
@@ -172,6 +209,31 @@
     </form>
 </div>
 
+<!-- Modal de recherche de signature -->
+<div class="modal fade" id="signatureSearchModal" tabindex="-1" aria-labelledby="signatureSearchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="signatureSearchModalLabel">
+                    <i class="fas fa-search"></i> Rechercher une signature
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="searchSignatureInput" class="form-label">Nom du personnel</label>
+                    <input type="text" class="form-control" id="searchSignatureInput" 
+                           placeholder="Tapez le nom pour trouver une signature...">
+                    <div id="signatureSuggestions" class="mt-3"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="~/js/jquery.min.js"></script>
 <script src="~/js/select2.min.js"></script>
 <script src="~/js/sweetalert2.all.min.js"></script>
@@ -179,7 +241,7 @@
 
 <script>
 $(document).ready(function () {
-    
+
     // --- 1. BOÎTES MODALES SWEETALERT2 ---
     @if (TempData["SuccessMessage"] != null)
     {
@@ -187,8 +249,8 @@ $(document).ready(function () {
         Swal.fire({
             icon: 'success',
             title: '<span style="color: #166534;">Réussi</span>',
-            html: '<b style="color: #14532d; font-size: 1.1rem;">@Html.Raw(TempData["SuccessMessage"])</b>', 
-            background: '#f0fdf4', 
+            html: '<b style="color: #14532d; font-size: 1.1rem;">@Html.Raw(TempData["SuccessMessage"])</b>',
+            background: '#f0fdf4',
             iconColor: '#22c55e',
             timer: 2300,
             timerProgressBar: true,
@@ -199,12 +261,12 @@ $(document).ready(function () {
     }
 
     // --- 2. LOGIQUE DYNAMIQUE DES ARTICLES ---
-    let ensembleArticles = []; 
+    let ensembleArticles = [];
 
     function chargerHistoriqueRecents(nomPersonnel) {
-        if (!nomPersonnel || nomPersonnel.length < 2) { 
-            $("#historique-personnel").hide(); 
-            return; 
+        if (!nomPersonnel || nomPersonnel.length < 2) {
+            $("#historique-personnel").hide();
+            return;
         }
         $.ajax({
             url: "/Decharge/GetDerniereDechargePersonnel",
@@ -217,43 +279,43 @@ $(document).ready(function () {
                         tableauBody.append(`<tr><td>${x.article}</td><td>${x.quantite} ${x.unite}</td><td>${x.date}</td></tr>`);
                     });
                     $("#historique-personnel").fadeIn();
-                } else { 
-                    $("#historique-personnel").hide(); 
+                } else {
+                    $("#historique-personnel").hide();
                 }
             }
         });
     }
 
     // 🔥 FONCTION CORRIGÉE ET SÉCURISÉE POUR PC & FOCUS
-   function hydraterSelectDArticle(selectCible) {
-    if (selectCible.hasClass("select2-hidden-accessible")) {
-        selectCible.select2("destroy");
-    }
-    
-    selectCible.next('.select2-container').remove();
-    selectCible.empty().append('<option value="">Rechercher un article...</option>');
-    
-    ensembleArticles.forEach(function (art) {
-        let texteLabel = art.nom + ' (' + art.quantite + ' ' + art.unite + ')';
-        selectCible.append(`<option value="${art.nom}" data-unite="${art.unite}">${texteLabel}</option>`);
-    });
-    
-    selectCible.select2({
-        width: '100%',
-        placeholder: "Rechercher un article..."
-    });
+    function hydraterSelectDArticle(selectCible) {
+        if (selectCible.hasClass("select2-hidden-accessible")) {
+            selectCible.select2("destroy");
+        }
 
-    // 🔥 LE CORRECTIF ANTI-ALÉATOIRE POUR PC
-    selectCible.on('select2:open', function () {
-        setTimeout(function () {
-            // On cherche l'input de recherche dans le container qui vient de s'ouvrir
-            const searchField = document.querySelector('.select2-container--open .select2-search__field');
-            if (searchField) {
-                searchField.focus(); // Focus JavaScript natif (plus robuste que jQuery sur PC)
-            }
-        }, 150); // 150ms laisse le temps à l'animation PC de se terminer proprement
-    });
-}
+        selectCible.next('.select2-container').remove();
+        selectCible.empty().append('<option value="">Rechercher un article...</option>');
+
+        ensembleArticles.forEach(function (art) {
+            let texteLabel = art.nom + ' (' + art.quantite + ' ' + art.unite + ')';
+            selectCible.append(`<option value="${art.nom}" data-unite="${art.unite}">${texteLabel}</option>`);
+        });
+
+        selectCible.select2({
+            width: '100%',
+            placeholder: "Rechercher un article..."
+        });
+
+        // 🔥 LE CORRECTIF ANTI-ALÉATOIRE POUR PC
+        selectCible.on('select2:open', function () {
+            setTimeout(function () {
+                // On cherche l'input de recherche dans le container qui vient de s'ouvrir
+                const searchField = document.querySelector('.select2-container--open .select2-search__field');
+                if (searchField) {
+                    searchField.focus(); // Focus JavaScript natif (plus robuste que jQuery sur PC)
+                }
+            }, 150); // 150ms laisse le temps à l'animation PC de se terminer proprement
+        });
+    }
 
     // Chargement initial du catalogue
     $.ajax({
@@ -264,16 +326,16 @@ $(document).ready(function () {
             hydraterSelectDArticle($(".article-select").first());
             $("#add-article").prop('disabled', false).text("+ Ajouter un article");
         },
-        error: function() {
+        error: function () {
             $("#add-article").text("Erreur réseau");
         }
     });
 
     let indexCompteur = 1;
-   function ajouterLigneArticle(nomArticle, quantite, unite) {
-    const index = indexCompteur;
+    function ajouterLigneArticle(nomArticle, quantite, unite) {
+        const index = indexCompteur;
 
-    const structureLigne = `
+        const structureLigne = `
         <div class="article-row row g-2 align-items-center mb-2">
             <input type="hidden"
                    name="Articles.Index"
@@ -311,152 +373,152 @@ $(document).ready(function () {
             </div>
         </div>`;
 
-    const $nouvelleLigne = $(structureLigne);
+        const $nouvelleLigne = $(structureLigne);
 
-    $("#articles-container").append($nouvelleLigne);
+        $("#articles-container").append($nouvelleLigne);
 
-    const $select = $nouvelleLigne.find(".article-select");
+        const $select = $nouvelleLigne.find(".article-select");
 
-    hydraterSelectDArticle($select);
+        hydraterSelectDArticle($select);
 
-    // Sélectionner l'article après le chargement du catalogue.
-    if (nomArticle) {
-        $select.val(nomArticle).trigger("change");
+        // Sélectionner l'article après le chargement du catalogue.
+        if (nomArticle) {
+            $select.val(nomArticle).trigger("change");
+        }
+
+        if (unite) {
+            $nouvelleLigne
+                .find("input[name$='.Unite']")
+                .val(unite);
+        }
+
+        indexCompteur++;
     }
 
-    if (unite) {
-        $nouvelleLigne
-            .find("input[name$='.Unite']")
-            .val(unite);
-    }
+    $("#add-article").click(function () {
+        ajouterLigneArticle("", 1, "");
+    });
 
-    indexCompteur++;
-}
+    // ======================================================
+    // COLLER UNE DÉCHARGE
+    // ======================================================
+    $("#btn-paste-decharge").on("click", function () {
+        const donneesCopiees = sessionStorage.getItem("dechargeACopier");
 
-$("#add-article").click(function () {
-    ajouterLigneArticle("", 1, "");
-});
+        if (!donneesCopiees) {
+            Swal.fire({
+                icon: "info",
+                title: "Aucune décharge copiée",
+                text: "Veuillez d'abord copier une décharge depuis la page Modifier."
+            });
 
-// ======================================================
-// COLLER UNE DÉCHARGE
-// ======================================================
-$("#btn-paste-decharge").on("click", function () {
-    const donneesCopiees = sessionStorage.getItem("dechargeACopier");
-
-    if (!donneesCopiees) {
-        Swal.fire({
-            icon: "info",
-            title: "Aucune décharge copiée",
-            text: "Veuillez d'abord copier une décharge depuis la page Modifier."
-        });
-
-        return;
-    }
-
-    let decharge;
-
-    try {
-        decharge = JSON.parse(donneesCopiees);
-    }
-    catch (erreur) {
-        sessionStorage.removeItem("dechargeACopier");
-
-        Swal.fire({
-            icon: "error",
-            title: "Erreur",
-            text: "Les données copiées sont invalides."
-        });
-
-        return;
-    }
-
-    if (!decharge.success || !Array.isArray(decharge.articles)) {
-        Swal.fire({
-            icon: "error",
-            title: "Erreur",
-            text: "La décharge copiée ne contient aucun article."
-        });
-
-        return;
-    }
-
-    if (decharge.articles.length === 0) {
-        Swal.fire({
-            icon: "warning",
-            title: "Aucun article",
-            text: "La décharge copiée ne contient aucun article."
-        });
-
-        return;
-    }
-
-    Swal.fire({
-        icon: "question",
-        title: "Coller la décharge ?",
-        html:
-            "Les articles de la décharge de <b>" +
-            (decharge.personnelSource || "l'agent source") +
-            "</b> seront ajoutés au formulaire.<br><br>" +
-            "Vous devrez ensuite sélectionner le nouveau personnel.",
-        showCancelButton: true,
-        confirmButtonText: "Oui, coller",
-        cancelButtonText: "Annuler",
-        confirmButtonColor: "#f0ad4e"
-    }).then(function (confirmation) {
-        if (!confirmation.isConfirmed) {
             return;
         }
 
-        // On ne copie pas l'ancien nom.
-        // L'utilisateur peut sélectionner ou saisir le nouveau personnel.
-        $("#PersonnelNom").val("");
+        let decharge;
 
-        // On supprime les lignes présentes dans le formulaire.
-        $("#articles-container").empty();
+        try {
+            decharge = JSON.parse(donneesCopiees);
+        }
+        catch (erreur) {
+            sessionStorage.removeItem("dechargeACopier");
 
-        // On recommence les index à zéro.
-        indexCompteur = 0;
+            Swal.fire({
+                icon: "error",
+                title: "Erreur",
+                text: "Les données copiées sont invalides."
+            });
 
-        // Ajout des articles copiés.
-        decharge.articles.forEach(function (article) {
-            ajouterLigneArticle(
-                article.articleNom,
-                article.quantite,
-                article.unite
-            );
-        });
-
-        // Une nouvelle décharge doit avoir une nouvelle date.
-        const maintenant = new Date();
-        const annee = maintenant.getFullYear();
-        const mois = String(maintenant.getMonth() + 1).padStart(2, "0");
-        const jour = String(maintenant.getDate()).padStart(2, "0");
-        const heures = String(maintenant.getHours()).padStart(2, "0");
-        const minutes = String(maintenant.getMinutes()).padStart(2, "0");
-
-        $("#DateDecharge").val(
-            `${annee}-${mois}-${jour}T${heures}:${minutes}`
-        );
-
-        // On ne réutilise pas automatiquement la signature de l'autre personne.
-        $("#Matricule").val("");
-        $("#signature-preview").hide().attr("src", "");
-
-        if (typeof signaturePadEngine !== "undefined") {
-            signaturePadEngine.clear();
+            return;
         }
 
-        // Suppression après utilisation pour éviter une nouvelle copie involontaire.
-        sessionStorage.removeItem("dechargeACopier");
+        if (!decharge.success || !Array.isArray(decharge.articles)) {
+            Swal.fire({
+                icon: "error",
+                title: "Erreur",
+                text: "La décharge copiée ne contient aucun article."
+            });
+
+            return;
+        }
+
+        if (decharge.articles.length === 0) {
+            Swal.fire({
+                icon: "warning",
+                title: "Aucun article",
+                text: "La décharge copiée ne contient aucun article."
+            });
+
+            return;
+        }
 
         Swal.fire({
-            icon: "success",
-            title: "Décharge collée",
-            text: "Vérifiez le personnel, puis ajoutez la signature du nouveau bénéficiaire.",
-            confirmButtonColor: "#198754"
+            icon: "question",
+            title: "Coller la décharge ?",
+            html:
+                "Les articles de la décharge de <b>" +
+                (decharge.personnelSource || "l'agent source") +
+                "</b> seront ajoutés au formulaire.<br><br>" +
+                "Vous devrez ensuite sélectionner le nouveau personnel.",
+            showCancelButton: true,
+            confirmButtonText: "Oui, coller",
+            cancelButtonText: "Annuler",
+            confirmButtonColor: "#f0ad4e"
+        }).then(function (confirmation) {
+            if (!confirmation.isConfirmed) {
+                return;
+            }
+
+            // On ne copie pas l'ancien nom.
+            // L'utilisateur peut sélectionner ou saisir le nouveau personnel.
+            $("#PersonnelNom").val("");
+
+            // On supprime les lignes présentes dans le formulaire.
+            $("#articles-container").empty();
+
+            // On recommence les index à zéro.
+            indexCompteur = 0;
+
+            // Ajout des articles copiés.
+            decharge.articles.forEach(function (article) {
+                ajouterLigneArticle(
+                    article.articleNom,
+                    article.quantite,
+                    article.unite
+                );
+            });
+
+            // Une nouvelle décharge doit avoir une nouvelle date.
+            const maintenant = new Date();
+            const annee = maintenant.getFullYear();
+            const mois = String(maintenant.getMonth() + 1).padStart(2, "0");
+            const jour = String(maintenant.getDate()).padStart(2, "0");
+            const heures = String(maintenant.getHours()).padStart(2, "0");
+            const minutes = String(maintenant.getMinutes()).padStart(2, "0");
+
+            $("#DateDecharge").val(
+                `${annee}-${mois}-${jour}T${heures}:${minutes}`
+            );
+
+            // On ne réutilise pas automatiquement la signature de l'autre personne.
+            $("#Matricule").val("");
+            $("#signature-preview").hide().attr("src", "");
+
+            if (typeof signaturePadEngine !== "undefined") {
+                signaturePadEngine.clear();
+            }
+
+            // Suppression après utilisation pour éviter une nouvelle copie involontaire.
+            sessionStorage.removeItem("dechargeACopier");
+
+            Swal.fire({
+                icon: "success",
+                title: "Décharge collée",
+                text: "Vérifiez le personnel, puis ajoutez la signature du nouveau bénéficiaire.",
+                confirmButtonColor: "#198754"
+            });
         });
     });
-});
 
     $(document).on("click", ".remove-article", function () {
         $(this).closest(".article-row").remove();
@@ -470,39 +532,52 @@ $("#btn-paste-decharge").on("click", function () {
     // --- 3. AUTOCOMPLÉTION DU PERSONNEL ---
     $("#PersonnelNom").keyup(function () {
         let saisie = $(this).val().trim();
-        if (saisie.length >= 2) {  
+        if (saisie.length >= 2) {
             $.ajax({
                 url: "/Decharge/SearchPersonnel",
                 type: "GET",
                 data: { search: saisie },
                 success: function (reponse) {
                     let conteneurSuggestions = $("#suggestions").empty();
-                    reponse.forEach(p => {
-                        let texteAAfficher = $.isNumeric(saisie) ? p.matricule : p.nom;
-                        conteneurSuggestions.append(`<a href="#" class="list-group-item list-group-item-action item-de-suggestion" data-name="${p.nom}">${texteAAfficher}</a>`);
-                    });
+                    if (reponse.length > 0) {
+                        reponse.forEach(p => {
+                            let texteAAfficher = $.isNumeric(saisie) ? p.matricule : p.nom;
+                            conteneurSuggestions.append(`
+                                <a href="#" class="list-group-item list-group-item-action item-de-suggestion" data-name="${p.nom}" data-matricule="${p.matricule || ''}">
+                                    <strong>${texteAAfficher}</strong>
+                                    ${p.matricule && p.matricule !== 'N/A' ? `<br><small class="suggestion-source">Matricule: ${p.matricule}</small>` : ''}
+                                </a>
+                            `);
+                        });
+                    }
                 }
             });
-        } else { 
-            $("#suggestions").empty(); 
-            $("#historique-personnel").hide(); 
+        } else {
+            $("#suggestions").empty();
+            $("#historique-personnel").hide();
         }
     });
 
     $(document).on("click", ".item-de-suggestion", function (e) {
         e.preventDefault();
         let nomRetenu = $(this).data("name");
-        $("#PersonnelNom").val(nomRetenu);  
+        let matriculeRetenu = $(this).data("matricule") || "";
+        
+        $("#PersonnelNom").val(nomRetenu);
+        if (matriculeRetenu && matriculeRetenu !== 'N/A') {
+            $("#Matricule").val(matriculeRetenu);
+        }
         $("#suggestions").empty();
         chargerHistoriqueRecents(nomRetenu);
         
-        if ($("#Matricule").val().trim() !== "") {
-            $("#Matricule").trigger("blur");
+        // Charger la signature si matricule disponible
+        if (matriculeRetenu && matriculeRetenu !== 'N/A') {
+            chargerSignaturePrecedente(nomRetenu, matriculeRetenu);
         }
     });
 
     let verifNomInitial = $("#PersonnelNom").val().trim();
-    if(verifNomInitial.length >= 2) {
+    if (verifNomInitial.length >= 2) {
         chargerHistoriqueRecents(verifNomInitial);
     }
 
@@ -510,7 +585,49 @@ $("#btn-paste-decharge").on("click", function () {
     var canvasElement = document.getElementById("signature-pad");
     window.signaturePadEngine = new SignaturePad(canvasElement);
 
-    // Événement d'interrogation AJAX de la signature précédente
+    // Fonction centrale pour charger une signature
+    function chargerSignaturePrecedente(nom, matricule, mode = 'exact') {
+        if (!nom || !matricule) return;
+
+        $.ajax({
+            url: "/Decharge/GetSignaturePrecedente",
+            type: "GET",
+            data: { 
+                nom: nom, 
+                matricule: matricule,
+                searchMode: mode
+            },
+            success: function (resultatJson) {
+                if (resultatJson.success) {
+                    $("#signature-preview").attr("src", resultatJson.path).fadeIn();
+                    window.signaturePadEngine.clear();
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Signature trouvée',
+                        text: 'La signature précédente a été chargée.',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                } else {
+                    $("#signature-preview").hide().attr("src", "");
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Signature introuvable',
+                        text: resultatJson.message || 'Aucune signature précédente trouvée.'
+                    });
+                }
+            },
+            error: function () {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erreur',
+                    text: 'Impossible de joindre le service.'
+                });
+            }
+        });
+    }
+
+    // Événement d'interrogation AJAX de la signature précédente (au flou du matricule)
     $("#Matricule").on("blur", function () {
         let mtr = $(this).val().trim();
         let nom = $("#PersonnelNom").val().trim();
@@ -529,25 +646,77 @@ $("#btn-paste-decharge").on("click", function () {
             return;
         }
 
+        chargerSignaturePrecedente(nom, mtr, 'exact');
+    });
+
+    // --- 5. MODAL DE RECHERCHE DE SIGNATURE ---
+    $("#search-signature-btn").click(function () {
+        // Réinitialiser le champ de recherche
+        $("#searchSignatureInput").val("").focus();
+        $("#signatureSuggestions").empty();
+        
+        // Afficher le modal
+        new bootstrap.Modal(document.getElementById('signatureSearchModal')).show();
+    });
+
+    // Recherche dynamique dans le modal
+    $("#searchSignatureInput").on("keyup", function () {
+        let searchTerm = $(this).val().trim();
+        
+        if (searchTerm.length < 2) {
+            $("#signatureSuggestions").empty();
+            return;
+        }
+
         $.ajax({
             url: "/Decharge/GetSignaturePrecedente",
             type: "GET",
-            data: { nom: nom, matricule: mtr },
-            success: function (resultatJson) {
-                if (resultatJson.success) {
-                    $("#signature-preview").attr("src", resultatJson.path).fadeIn();
-                   window.signaturePadEngine.clear();
-                } else {
-                    $("#signature-preview").hide().attr("src", "");
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Signature introuvable',
-                        text: resultatJson.message
-                    });
-                }
+            data: { 
+                nom: searchTerm,
+                searchMode: 'suggest'
             },
-            error: function () {
-                console.error("Impossible de joindre le service de synchronisation des images.");
+            success: function (data) {
+                let container = $("#signatureSuggestions").empty();
+                
+                if (data.success && data.suggestions && data.suggestions.length > 0) {
+                    let html = '<div class="list-group">';
+                    
+                    data.suggestions.forEach(function (item) {
+                        html += `
+                            <button type="button" class="list-group-item list-group-item-action signature-suggestion-item" 
+                                    data-nom="${item.nom}" 
+                                    data-matricule="${item.matricule}">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <strong>${item.nom}</strong>
+                                    <span class="suggestion-source">${item.source}</span>
+                                </div>
+                                ${item.matricule !== 'N/A' ? `<small class="d-block">Matricule: ${item.matricule}</small>` : ''}
+                            </button>
+                        `;
+                    });
+                    
+                    html += '</div>';
+                    container.html(html);
+
+                    // Événement au clic sur une suggestion
+                    $(".signature-suggestion-item").on("click", function () {
+                        let nom = $(this).data("nom");
+                        let matricule = $(this).data("matricule");
+                        
+                        chargerSignaturePrecedente(nom, matricule, 'fetch');
+                        
+                        // Remplir les champs
+                        $("#PersonnelNom").val(nom);
+                        if (matricule !== 'N/A') {
+                            $("#Matricule").val(matricule);
+                        }
+                        
+                        // Fermer le modal
+                        bootstrap.Modal.getInstance(document.getElementById('signatureSearchModal')).hide();
+                    });
+                } else {
+                    container.html('<div class="alert alert-info">Aucune signature trouvée.</div>');
+                }
             }
         });
     });
@@ -555,12 +724,12 @@ $("#btn-paste-decharge").on("click", function () {
     // Reset complet de la zone
     $("#clear-signature").click(function () {
         signaturePadEngine.clear();
-        $("#Matricule").val(""); 
-        $("#signature-preview").fadeOut().attr("src", ""); 
+        $("#Matricule").val("");
+        $("#signature-preview").fadeOut().attr("src", "");
     });
 
-    // --- 5. INTERCEPTION SÉCURISÉE AVANT ENVOI FORMULAIRE ---
-    $("#dechargeForm").submit(function(e){
+    // --- 6. INTERCEPTION SÉCURISÉE AVANT ENVOI FORMULAIRE ---
+    $("#dechargeForm").submit(function (e) {
         let estCalqueApercuVisible = $("#signature-preview").is(":visible");
 
         if (window.signaturePadEngine.isEmpty() && !estCalqueApercuVisible) {
@@ -571,7 +740,7 @@ $("#btn-paste-decharge").on("click", function () {
                 confirmButtonColor: '#0284c7'
             });
             e.preventDefault();
-        } 
+        }
         else if (!window.signaturePadEngine.isEmpty()) {
             $("#SignatureData").val(signaturePadEngine.toDataURL());
         }

@@ -472,33 +472,102 @@ public JsonResult GetDechargeToCopy(int id)
     }
 }
 
-        // GET: Decharge/GetSignaturePrecedente (Interrogé par AJAX au floutage du Matricule)
+       
+        // GET: Decharge/GetSignaturePrecedente (Recherche par nom OR matricule avec suggestions)
         [HttpGet]
-        public JsonResult GetSignaturePrecedente(string nom, string matricule)
+        public JsonResult GetSignaturePrecedente(string nom, string matricule, string searchMode = "exact")
         {
-            if (string.IsNullOrEmpty(nom) || string.IsNullOrEmpty(matricule))
-                return Json(new { success = false, message = "Données d'identité incomplètes." });
-
-            var personnelValide = _dbContext.Personnels
-                .Any(p => p.NomEtPrenoms == nom.Trim() && p.Matricule == matricule.Trim());
-
-            if (!personnelValide)
-                return Json(new { success = false, message = "Le matricule ne correspond pas au personnel sélectionné." });
-
-            var derniereDecharge = _dbContext.Decharges
-                .Where(d => d.PersonnelNom == nom.Trim() && !string.IsNullOrEmpty(d.SignaturePath))
-                .OrderByDescending(d => d.DateDecharge)
-                .ThenByDescending(d => d.Id)
-                .FirstOrDefault();
-
-            if (derniereDecharge != null)
+            // Mode 1 : Recherche exacte (avec matricule) - Validation stricte
+            if (searchMode == "exact" && !string.IsNullOrEmpty(matricule))
             {
-                return Json(new { success = true, path = derniereDecharge.SignaturePath });
+                if (string.IsNullOrEmpty(nom))
+                    return Json(new { success = false, message = "Veuillez spécifier le nom du personnel." });
+
+                var personnelValide = _dbContext.Personnels
+                    .Any(p => p.NomEtPrenoms.ToLower().Trim() == nom.ToLower().Trim() && 
+                              p.Matricule.ToLower().Trim() == matricule.ToLower().Trim());
+
+                if (!personnelValide)
+                    return Json(new { success = false, message = "Le matricule ne correspond pas au personnel sélectionné." });
+
+                var derniereDecharge = _dbContext.Decharges
+                    .Where(d => d.PersonnelNom.ToLower().Trim() == nom.ToLower().Trim() && 
+                                !string.IsNullOrEmpty(d.SignaturePath))
+                    .OrderByDescending(d => d.DateDecharge)
+                    .ThenByDescending(d => d.Id)
+                    .FirstOrDefault();
+
+                if (derniereDecharge != null)
+                {
+                    return Json(new { success = true, path = derniereDecharge.SignaturePath });
+                }
+
+                return Json(new { success = false, message = "Aucun historique de signature trouvé pour cet agent." });
             }
 
-            return Json(new { success = false, message = "Aucun historique de signature trouvé pour cet agent." });
-        }
+            // Mode 2 : Recherche par suggestion (autocomplétion)
+            if (searchMode == "suggest" && !string.IsNullOrEmpty(nom))
+            {
+                string searchLower = nom.Trim().ToLower();
 
+                // Recherche dans Personnels
+                var suggestionsPersonnels = _dbContext.Personnels
+                    .Where(p => (p.NomEtPrenoms ?? "").ToLower().Contains(searchLower) && 
+                                !string.IsNullOrEmpty(p.Matricule))
+                    .Select(p => new 
+                    { 
+                        nom = p.NomEtPrenoms, 
+                        matricule = p.Matricule,
+                        source = "Personnel"
+                    })
+                    .ToList();
+
+                // Recherche dans Decharges (signatures existantes)
+                var suggestionsDecharges = _dbContext.Decharges
+                    .Where(d => (d.PersonnelNom ?? "").ToLower().Contains(searchLower) &&
+                                !string.IsNullOrEmpty(d.SignaturePath))
+                    .Select(d => new 
+                    { 
+                        nom = d.PersonnelNom, 
+                        matricule = "N/A",
+                        source = "Decharge"
+                    })
+                    .ToList();
+
+                var suggestions = suggestionsPersonnels
+                    .Union(suggestionsDecharges)
+                    .GroupBy(x => x.nom.ToLower().Trim())
+                    .Select(g => g.FirstOrDefault())
+                    .OrderBy(x => x.nom)
+                    .Take(10)
+                    .ToList();
+
+                if (suggestions.Count == 0)
+                    return Json(new { success = false, message = "Aucun personnel trouvé." });
+
+                return Json(new { success = true, suggestions = suggestions });
+            }
+
+            // Mode 3 : Récupération directe après sélection (fetch)
+            if (searchMode == "fetch" && !string.IsNullOrEmpty(nom))
+            {
+                var derniereDecharge = _dbContext.Decharges
+                    .Where(d => d.PersonnelNom.ToLower().Trim() == nom.ToLower().Trim() && 
+                                !string.IsNullOrEmpty(d.SignaturePath))
+                    .OrderByDescending(d => d.DateDecharge)
+                    .ThenByDescending(d => d.Id)
+                    .FirstOrDefault();
+
+                if (derniereDecharge != null)
+                {
+                    return Json(new { success = true, path = derniereDecharge.SignaturePath });
+                }
+
+                return Json(new { success = false, message = "Aucune signature trouvée pour cet agent." });
+            }
+
+            return Json(new { success = false, message = "Paramètres invalides." });
+        }
         [HttpGet]
         public JsonResult GetDerniereDechargePersonnel(string nom)
         {
