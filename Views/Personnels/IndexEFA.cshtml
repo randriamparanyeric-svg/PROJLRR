@@ -14,11 +14,28 @@
         </div>
         <div class="action-group">
             <button class="btn-print" onclick="imprimerTableau()">
-                🖨️ Imprimer la liste
+                🖨️ Imprimer la sélection
+            </button>
+            <button class="btn-print btn-presence" onclick="demanderTitreEtImprimer()">
+                📋 Imprimer Fiche de Présence
             </button>
             <a href="@Url.Action("Create", "Personnels")" class="btn-primary">
                 ➕ Ajouter un personnel
             </a>
+        </div>
+    </div>
+
+    <!-- 🎛️ PANNEAU DE FILTRE DES COLONNES -->
+    <div class="column-filter-panel">
+        <span class="filter-label">📋 Colonnes à afficher / imprimer :</span>
+        <div class="filter-options">
+            <label><input type="checkbox" checked onchange="toggleColumn(0, this)"> Num</label>
+            <label><input type="checkbox" checked onchange="toggleColumn(1, this)"> Matricule</label>
+            <label><input type="checkbox" checked onchange="toggleColumn(2, this)"> Nom et Prénoms</label>
+            <label><input type="checkbox" checked onchange="toggleColumn(3, this)"> CIN</label>
+            <label><input type="checkbox" checked onchange="toggleColumn(4, this)"> Contact</label>
+            <label><input type="checkbox" checked onchange="toggleColumn(5, this)"> Fonction</label>
+            <label><input type="checkbox" checked onchange="toggleColumn(6, this)"> Bureau</label>
         </div>
     </div>
 
@@ -37,7 +54,7 @@
             </thead>
             <tbody>
                 @{
-                    // Filtrage et tri d'origine conservés strictement
+                    // Filtrage (uniquement les PA) et tri par Matière (Bureau)
                     var personnelsFiltres = Model
                         .Where(p => p.Fonction != null && p.Fonction.ToUpper() == "PA")
                         .OrderBy(p => p.Matiere)
@@ -54,7 +71,6 @@
                         <td class="text-left text-dark">@personnel.NomEtPrenoms</td>
                         <td class="text-mono">@personnel.Cin</td>
                         <td class="col-contact text-mono">@personnel.Contact</td>
-                        
                         <td>@personnel.Fonction</td>
                         <td>@personnel.Matiere</td>
                     </tr>
@@ -65,8 +81,23 @@
     </div>
 </div>
 
+<script src="~/js/sweetalert2.all.min.js"></script>
+
 <script>
-// FONCTION D'IMPRESSION OPTIMISÉE (Rendu premium sur papier)
+// 1. MASQUER OU AFFICHER LES COLONNES EN TEMPS RÉEL
+function toggleColumn(colIndex, checkbox) {
+    var table = document.querySelector("#tableau table");
+    var rows = table.rows;
+    
+    for (var i = 0; i < rows.length; i++) {
+        var cell = rows[i].cells[colIndex];
+        if (cell) {
+            cell.style.display = checkbox.checked ? "" : "none";
+        }
+    }
+}
+
+// 2. FONCTION D'IMPRESSION OPTIMISÉE (N'imprime que ce qui est coché)
 function imprimerTableau() {
     var contenu = document.getElementById('tableau').innerHTML;
     var pageImpression = window.open('', '_blank', 'width=900,height=700');
@@ -82,17 +113,19 @@ function imprimerTableau() {
             <title>Impression - Personnels Administratifs</title>
             <style>
                 body { font-family: 'Segoe UI', Arial, sans-serif; color: #333; padding: 20px; }
-                h2 { color: #1e3a8a; margin-bottom: 20px; font-size: 22px; border-bottom: 2px solid #1e3a8a; padding-bottom: 8px; text-transform: uppercase; }
+                h2 { color: #1e3a8a; margin-bottom: 20px; font-size: 22px; border-bottom: 2px solid #1e3a8a; padding-bottom: 8px; text-transform: uppercase; text-align: center; }
                 table { width: 100%; border-collapse: collapse; margin-top: 10px; }
                 th, td { border: 1px solid #cbd5e1; padding: 10px 12px; font-size: 13px; text-align: center; } 
                 th { background-color: #f8fafc; color: #1e3a8a; font-weight: bold; text-transform: uppercase; font-size: 11px; }
+                /* Cache automatiquement les cellules masquées */
+                td[style*="display: none"], th[style*="display: none"] { display: none !important; }
                 td:nth-child(3) { text-align: left; font-weight: 500; } 
                 td:nth-child(5), td:nth-child(4) { width: 1px; white-space: nowrap; font-family: monospace; } 
                 tr:nth-child(even) { background-color: #f8fafc; }
             </style>
         </head>
         <body>
-            <h2 align="center">LISTE DES PERSONNELS ADMINISTRATIFS</h2>
+            <h2>LISTE DES PERSONNELS ADMINISTRATIFS</h2>
             ${contenu}
         </body>
         </html>
@@ -106,4 +139,169 @@ function imprimerTableau() {
         pageImpression.close(); 
     }, 400);
 }
+
+// 3. BOÎTE DE DIALOGUE POUR LE TITRE DE LA FICHE DE PRÉSENCE
+function demanderTitreEtImprimer() {
+    Swal.fire({
+        title: 'Titre de la fiche de présence',
+        input: 'text',
+        inputPlaceholder: 'Ex: Personnel Administratif / Réunion...',
+        showCancelButton: true,
+        confirmButtonText: 'Valider et Imprimer',
+        cancelButtonText: 'Annuler',
+        confirmButtonColor: '#0d9488'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            var titrePersonnalise = result.value ? result.value.trim() : "";
+            imprimerFichePresence(titrePersonnalise);
+        }
+    });
+}
+
+// 4. FONCTION D'IMPRESSION DE LA FICHE DE PRÉSENCE PERSONNALISÉE
+function imprimerFichePresence(titrePersonnalise) {
+    var dateDuJour = new Date().toLocaleDateString('fr-FR');
+    var rows = document.querySelectorAll("#tableau tbody tr");
+    
+    var lignesTableau = "";
+    var idx = 1;
+
+    rows.forEach(row => {
+        var cells = row.cells;
+        var matricule = cells[1].innerText;
+        var nomPrenoms = cells[2].innerText;
+        var bureau = cells[6].innerText; // Correspond au bureau
+
+        lignesTableau += `
+            <tr>
+                <td>${idx}</td>
+                <td style="text-align: left; font-weight: 500;">${nomPrenoms}</td>
+                <td>${matricule}</td>
+                <td>${bureau}</td>
+                <td></td>
+            </tr>
+        `;
+        idx++;
+    });
+
+    var pageImpression = window.open('', '_blank', 'width=1000,height=700');
+    
+    if (!pageImpression) {
+        alert("Veuillez autoriser les pop-ups pour pouvoir imprimer.");
+        return;
+    }
+
+    pageImpression.document.write(`
+        <html>
+        <head>
+            <title>Fiche de présence - ${dateDuJour}</title>
+            <style>
+                body { font-family: 'Segoe UI', Arial, sans-serif; color: #333; padding: 25px; }
+                .header-top { display: flex; justify-content: space-between; align-items: flex-start; font-weight: bold; font-size: 13px; margin-bottom: 20px; }
+                .school-name { text-transform: uppercase; text-align: left; color: #1e3a8a; }
+                .date-print { text-align: right; color: #334155; }
+                .title-container { text-align: center; margin-bottom: 25px; }
+                h2 { color: #1e3a8a; margin: 0 0 6px 0; font-size: 22px; text-transform: uppercase; }
+                .custom-title { font-size: 15px; font-weight: bold; color: #334155; text-transform: uppercase; }
+                table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+                th, td { border: 1px solid #334155; padding: 10px 12px; font-size: 13px; text-align: center; } 
+                th { background-color: #f1f5f9; color: #1e3a8a; font-weight: bold; text-transform: uppercase; font-size: 11px; }
+                tr:nth-child(even) { background-color: #f8fafc; }
+            </style>
+        </head>
+        <body>
+            <div class="header-top">
+                <div class="school-name">LYCEE RAHERIVELO RAMAMONJY</div>
+                <div class="date-print">Date : ${dateDuJour}</div>
+            </div>
+            <div class="title-container">
+                <h2>FICHE DE PRESENCE DES PERSONNELS ADMINISTRATIFS</h2>
+                ${titrePersonnalise ? `<div class="custom-title">${titrePersonnalise}</div>` : ''}
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">Num</th>
+                        <th style="text-align: left;">Nom et Prénoms</th>
+                        <th style="width: 120px;">Matricule</th>
+                        <th style="width: 130px;">Bureau</th>
+                        <th style="width: 160px;">Émargement</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${lignesTableau}
+                </tbody>
+            </table>
+        </body>
+        </html>
+    `);
+
+    pageImpression.document.close();
+    pageImpression.focus();
+    
+    setTimeout(() => { 
+        pageImpression.print(); 
+        pageImpression.close(); 
+    }, 400);
+}
 </script>
+
+<style>
+    .column-filter-panel {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        padding: 12px 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .filter-label {
+        font-weight: 600;
+        font-size: 13.5px;
+        color: #334155;
+    }
+    .filter-options {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+    .filter-options label {
+        font-size: 13px;
+        color: #475569;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        user-select: none;
+    }
+    .filter-options input[type="checkbox"] {
+        accent-color: #1e3a8a;
+        width: 15px;
+        height: 15px;
+        cursor: pointer;
+    }
+    .btn-presence {
+        background-color: #0d9488 !important;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: background-color 0.2s;
+    }
+    .btn-presence:hover {
+        background-color: #0f766e !important;
+    }
+    .text-bold { font-weight: 600; color: #64748b; }
+    .text-dark { color: #0f172a !important; }
+    .text-left { text-align: left !important; }
+    .text-mono { font-family: monospace; font-size: 13.5px; }
+</style>
