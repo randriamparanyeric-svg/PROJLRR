@@ -159,7 +159,14 @@ function demanderTitreEtImprimer() {
 
 // 4. FONCTION D'IMPRESSION DE LA FICHE DE PRÉSENCE PERSONNALISÉE
 function imprimerFichePresence(titrePersonnalise) {
-    var dateDuJour = new Date().toLocaleDateString('fr-FR');
+    // Formatage de la date du jour au format : "Fianarantsoa, le 21 octobre 2026"
+    var dateFormatted = new Date().toLocaleDateString('fr-FR', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+    });
+    var dateDuJour = `Fianarantsoa, le ${dateFormatted}`;
+
     var rows = document.querySelectorAll("#tableau tbody tr");
     
     var lignesTableau = "";
@@ -198,10 +205,10 @@ function imprimerFichePresence(titrePersonnalise) {
                 body { font-family: 'Segoe UI', Arial, sans-serif; color: #333; padding: 25px; }
                 .header-top { display: flex; justify-content: space-between; align-items: flex-start; font-weight: bold; font-size: 13px; margin-bottom: 20px; }
                 .school-name { text-transform: uppercase; text-align: left; color: #1e3a8a; }
-                .date-print { text-align: right; color: #334155; }
+                .date-print { text-align: right; color: #334155; font-style: italic; }
                 .title-container { text-align: center; margin-bottom: 25px; }
-                h2 { color: #1e3a8a; margin: 0 0 6px 0; font-size: 22px; text-transform: uppercase; }
-                .custom-title { font-size: 15px; font-weight: bold; color: #334155; text-transform: uppercase; }
+                h2 { color: #1e3a8a; margin: 0 0 6px 0; font-size: 20px; text-transform: uppercase; }
+                .custom-title { font-size: 15px; font-weight: bold; color: #334155; text-transform: uppercase; margin-top: 4px; }
                 table { width: 100%; border-collapse: collapse; margin-top: 10px; }
                 th, td { border: 1px solid #334155; padding: 10px 12px; font-size: 13px; text-align: center; } 
                 th { background-color: #f1f5f9; color: #1e3a8a; font-weight: bold; text-transform: uppercase; font-size: 11px; }
@@ -211,7 +218,7 @@ function imprimerFichePresence(titrePersonnalise) {
         <body>
             <div class="header-top">
                 <div class="school-name">LYCEE RAHERIVELO RAMAMONJY</div>
-                <div class="date-print">Date : ${dateDuJour}</div>
+                <div class="date-print">${dateDuJour}</div>
             </div>
             <div class="title-container">
                 <h2>FICHE DE PRESENCE DES PERSONNELS ENSEIGNANTS</h2>
