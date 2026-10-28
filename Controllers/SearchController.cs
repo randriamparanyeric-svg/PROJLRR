@@ -33,8 +33,11 @@ namespace PROJLRR.Controllers
         // =================================================================
         // 0. GÉNÉRATION CERTIFICAT (NOUVEAU)
         // =================================================================
-     [Authorize]
-public async Task<IActionResult> TelechargerCertificat(int id, string lieuCIN, string dateCIN, string chapitre)
+    // =================================================================
+// 0. GÉNÉRATION CERTIFICAT (AVEC CHOIX DU SIGNATAIRE ET CONDITION DE L'EN-TÊTE)
+// =================================================================
+[Authorize]
+public async Task<IActionResult> TelechargerCertificat(int id, string lieuCIN, string dateCIN, string chapitre, string signataire)
 {
     // 1. Récupération du personnel
     var p = await _context.Personnels.FindAsync(id);
@@ -62,7 +65,31 @@ public async Task<IActionResult> TelechargerCertificat(int id, string lieuCIN, s
     _context.Notifications.Add(notification);
     await _context.SaveChangesAsync(); // Sauvegarde en base avant de générer le PDF
 
-    // --- 3. GÉNÉRATION DU PDF (QuestPDF) ---
+    // --- 3. DÉTERMINATION DU SIGNATAIRE ET DE L'EN-TÊTE ---
+    string texteSignataire = "CHEF DE LA CIRCONSCRIPTION SCOLAIRE DE FIANARANTSOA";
+    bool estCisco = true;
+
+    if (!string.IsNullOrEmpty(signataire))
+    {
+        string sigTrimmed = signataire.Trim().ToLower();
+        if (sigTrimmed.Contains("proviseur_adjoint") || sigTrimmed.Contains("adjoint"))
+        {
+            texteSignataire = "PROVISEUR ADJOINT DU LYCEE RAHERIVELO RAMAMONJY";
+            estCisco = false; // Masque la ligne CISCO
+        }
+        else if (sigTrimmed.Contains("proviseur"))
+        {
+            texteSignataire = "PROVISEUR DU LYCEE RAHERIVELO RAMAMONJY";
+            estCisco = false; // Masque la ligne CISCO
+        }
+        else
+        {
+            texteSignataire = "CHEF DE LA CIRCONSCRIPTION SCOLAIRE DE FIANARANTSOA";
+            estCisco = true;  // Affiche la ligne CISCO
+        }
+    }
+
+    // --- 4. GÉNÉRATION DU PDF (QuestPDF) ---
 
     string repPath = Path.Combine(_env.WebRootPath, "uploads", "REP.jpg"); // Drapeau central
     string menPath = Path.Combine(_env.WebRootPath, "uploads", "MEN.png"); // Logo MEN
@@ -73,145 +100,145 @@ public async Task<IActionResult> TelechargerCertificat(int id, string lieuCIN, s
         {
             page.Size(PageSizes.A4);
 
-// Définition individuelle des marges
-page.MarginTop(0.5f, Unit.Centimetre);    // Marge très fine en haut
-page.MarginBottom(1.5f, Unit.Centimetre); // Garde 1.5cm en bas
-page.MarginLeft(1.5f, Unit.Centimetre);   // Garde 1.5cm à gauche
-page.MarginRight(1.5f, Unit.Centimetre);  // Garde 1.5cm à droite
+            // Définition individuelle des marges
+            page.MarginTop(0.5f, Unit.Centimetre);    
+            page.MarginBottom(1.5f, Unit.Centimetre); 
+            page.MarginLeft(1.5f, Unit.Centimetre);    
+            page.MarginRight(1.5f, Unit.Centimetre);   
 
-page.DefaultTextStyle(x => x.FontSize(12).FontFamily(Fonts.TimesNewRoman));
+            page.DefaultTextStyle(x => x.FontSize(12).FontFamily(Fonts.TimesNewRoman));
 
-           // --- HEADER : STRUCTURE VERTICALE CORRIGÉE ---
-page.Header().Column(col => 
-{
-    // 1. Logo REP centré en haut
-    if (System.IO.File.Exists(repPath))
-        col.Item().AlignCenter().Width(100).Image(repPath);
-
-    if (System.IO.File.Exists(menPath))
-        col.Item()
-           .AlignCenter()
-           .PaddingRight(9.5f, Unit.Centimetre) // C'est ici que vous décalez le logo
-           .PaddingTop(0)
-           .Width(30)
-           .Image(menPath);
-
-    // 3. Bloc de texte : Le style est appliqué ici, sur le conteneur parent
-    col.Item()
-   .PaddingTop(0)
-   .PaddingLeft(20)
-   .DefaultTextStyle(x => x.FontSize(10).FontFamily(Fonts.TimesNewRoman)) 
-   .Column(textCol => 
-   {
-       textCol.Spacing(2); 
-       textCol.Item().AlignLeft().Text("MINISTERE DE L’EDUCATION NATIONALE").SemiBold();
-       textCol.Item().PaddingLeft(65).AlignLeft().Text("*************").SemiBold();
-       textCol.Item().PaddingLeft(45).AlignLeft().Text("SECRETARIAT GENERAL").SemiBold();
-       textCol.Item().PaddingLeft(65).AlignLeft().Text("*************").SemiBold();
-       
-       // SÉPARATION ICI :
-       textCol.Item().AlignLeft().Text("DIRECTION REGIONALE DE L’EDUCATION").SemiBold();
-       textCol.Item().PaddingLeft(30).AlignLeft().Text("NATIONALE HAUTE MATSIATRA").SemiBold();
-       
-       textCol.Item().PaddingLeft(65).AlignLeft().Text("*************").SemiBold();
-       
-       // Même chose ici si vous voulez aligner avec la partie précédente
-       textCol.Item().PaddingLeft(30).AlignLeft().Text("CIRCONSCRIPTION SCOLAIRE").SemiBold();
-       textCol.Item().PaddingLeft(50).AlignLeft().Text("DE FIANARANTSOA").SemiBold();
-       
-       textCol.Item().PaddingLeft(65).AlignLeft().Text("*************").SemiBold();
-       textCol.Item().PaddingTop(0).PaddingLeft(25).AlignLeft().Text("N°.....................-CISCO/F/Div.GRH/P").SemiBold().Underline();
-   });
-});
-           // --- CONTENT : Corps du certificat (sans PaddingTop) ---
-page.Content().PaddingTop(20).Column(c =>
-{
-    c.Item().AlignCenter().Text("CERTIFICAT ADMINISTRATIF").FontSize(14).SemiBold();
-    c.Item().AlignCenter().Text("************************");
-    
-    c.Item().PaddingTop(20).PaddingLeft(20).Column(c2 =>
-    {
-        c2.Spacing(8);
-        
-        // Exemple avec Span pour le gras
-        c2.Item().PaddingLeft(2, Unit.Centimetre).Text(t => {
-            t.Span("Je soussigné, CHEF DE LA CIRCONSCRIPTION SCOLAIRE DE FIANARANTSOA,"); });
-       c2.Item().Text(t => {
-            t.Span(" certifie que le nommé :");
-            t.Span(p.NomEtPrenoms).SemiBold();
-        });
-
-        c2.Item().Text(t => {
-            t.Span("MATRICULE : ");
-            t.Span(p.Matricule).SemiBold();
-        });
-
-        c2.Item().Text(t => {
-            t.Span("Corps et Grade : ");
-            t.Span($"{p.Corps} {p.Grade}").SemiBold();
-        });
-
-        c2.Item().Text(t => {
-            t.Span("BUDGET : GENERAL    CHAPITRE: ");
-            t.Span(chapitre).SemiBold();
-        });
-
-        c2.Item().Text(t => {
-            t.Span("Date et lieu de naissance: ");
-            t.Span(p.Datenaiss).SemiBold();
-            t.Span(" à ");
-            t.Span(p.Lieudenaiss).SemiBold();
-        });
-
-        // Gestion du CIN
-        c2.Item().Text(t => {
-            t.Span("CIN : ");
-            t.Span(p.Cin).SemiBold();
-            t.Span(" du ");
-            if (DateTime.TryParse(dateCIN, out DateTime dateValue))
+            // --- HEADER : STRUCTURE VERTICALE ---
+            page.Header().Column(col => 
             {
-                t.Span(dateValue.ToString("dd/MM/yyyy")).SemiBold();
-            }
-            else
+                if (System.IO.File.Exists(repPath))
+                    col.Item().AlignCenter().Width(100).Image(repPath);
+
+                if (System.IO.File.Exists(menPath))
+                    col.Item()
+                       .AlignCenter()
+                       .PaddingRight(9.5f, Unit.Centimetre)
+                       .PaddingTop(0)
+                       .Width(30)
+                       .Image(menPath);
+
+                col.Item()
+               .PaddingTop(0)
+               .PaddingLeft(20)
+               .DefaultTextStyle(x => x.FontSize(10).FontFamily(Fonts.TimesNewRoman)) 
+               .Column(textCol => 
+               {
+                    textCol.Spacing(2); 
+                    textCol.Item().AlignLeft().Text("MINISTERE DE L’EDUCATION NATIONALE").SemiBold();
+                    textCol.Item().PaddingLeft(65).AlignLeft().Text("*************").SemiBold();
+                    textCol.Item().PaddingLeft(45).AlignLeft().Text("SECRETARIAT GENERAL").SemiBold();
+                    textCol.Item().PaddingLeft(65).AlignLeft().Text("*************").SemiBold();
+
+                    textCol.Item().AlignLeft().Text("DIRECTION REGIONALE DE L’EDUCATION").SemiBold();
+                    textCol.Item().PaddingLeft(30).AlignLeft().Text("NATIONALE HAUTE MATSIATRA").SemiBold();
+                    textCol.Item().PaddingLeft(65).AlignLeft().Text("*************").SemiBold();
+
+                    textCol.Item().PaddingLeft(30).AlignLeft().Text("CIRCONSCRIPTION SCOLAIRE").SemiBold();
+                    textCol.Item().PaddingLeft(50).AlignLeft().Text("DE FIANARANTSOA").SemiBold();
+                    textCol.Item().PaddingLeft(65).AlignLeft().Text("*************").SemiBold();
+                    
+                    // Ligne du numéro CISCO affichée UNIQUEMENT si c'est la CISCO
+                    if (estCisco)
+                    {
+                        textCol.Item().PaddingTop(0).PaddingLeft(25).AlignLeft().Text("N°.....................-CISCO/F/Div.GRH/P").SemiBold().Underline();
+                    }
+               });
+            });
+
+            // --- CONTENT : Corps du certificat ---
+            page.Content().PaddingTop(20).Column(c =>
             {
-                t.Span(dateCIN).SemiBold();
-            }
-            t.Span(" à ");
-            t.Span(lieuCIN).SemiBold();
-        });
+                c.Item().AlignCenter().Text("CERTIFICAT ADMINISTRATIF").FontSize(14).SemiBold();
+                c.Item().AlignCenter().Text("************************");
 
-        c2.Item().Text(t => {
-            t.Span("Continue à servir le Ministère de L’Education Nationale, depuis le ");
-            t.Span(p.Datedentre).SemiBold();
-            t.Span(" date d’entrée");
-        });
-        c2.Item().Text(t => {
-            t.Span("dans l’administration, et actuellement en service au Lycée RAHERIVELO RAMAMONJY CISCO");
-        });
-        
-        c2.Item().Text(t => {
-            t.Span("FIANARANTSOA depuis le ");
-            t.Span(p.Datedeprise).SemiBold();
-            t.Span(", date de prise de service jusqu’à ce jour.");
-        });
+                c.Item().PaddingTop(20).PaddingLeft(20).Column(c2 =>
+                {
+                    c2.Spacing(8);
 
-        c2.Item().PaddingLeft(2, Unit.Centimetre).Text("En foi de quoi, la présente Certificat lui est délivré pour servir et valoir ce que de droit.");
+                    // Utilisation dynamique du signataire
+                    c2.Item().PaddingLeft(2, Unit.Centimetre).Text(t => {
+                        t.Span($"Je soussigné, {texteSignataire},"); 
+                    });
 
-        // Date en bas à droite
-        c2.Item()
-  .PaddingTop(20)
-  .AlignRight()
-  .PaddingRight(20)
-  .Text(t => 
-  {
-      // Option : appliquer le style Italic à tout le bloc
-      t.DefaultTextStyle(x => x.Italic()); 
-      
-      t.Span("Fianarantsoa, le ");
-      t.Span(DateTime.Now.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("fr-FR"))).SemiBold();
-    });
-    });
-});          
+                    c2.Item().Text(t => {
+                        t.Span(" certifie que le nommé :");
+                        t.Span(p.NomEtPrenoms).SemiBold();
+                    });
+
+                    c2.Item().Text(t => {
+                        t.Span("MATRICULE : ");
+                        t.Span(p.Matricule).SemiBold();
+                    });
+
+                    c2.Item().Text(t => {
+                        t.Span("Corps et Grade : ");
+                        t.Span($"{p.Corps} {p.Grade}").SemiBold();
+                    });
+
+                    c2.Item().Text(t => {
+                        t.Span("BUDGET : GENERAL    CHAPITRE: ");
+                        t.Span(chapitre).SemiBold();
+                    });
+
+                    c2.Item().Text(t => {
+                        t.Span("Date et lieu de naissance: ");
+                        t.Span(p.Datenaiss).SemiBold();
+                        t.Span(" à ");
+                        t.Span(p.Lieudenaiss).SemiBold();
+                    });
+
+                    // Gestion du CIN
+                    c2.Item().Text(t => {
+                        t.Span("CIN : ");
+                        t.Span(p.Cin).SemiBold();
+                        t.Span(" du ");
+                        if (DateTime.TryParse(dateCIN, out DateTime dateValue))
+                        {
+                            t.Span(dateValue.ToString("dd/MM/yyyy")).SemiBold();
+                        }
+                        else
+                        {
+                            t.Span(dateCIN).SemiBold();
+                        }
+                        t.Span(" à ");
+                        t.Span(lieuCIN).SemiBold();
+                    });
+
+                    c2.Item().Text(t => {
+                        t.Span("Continue à servir le Ministère de L’Education Nationale, depuis le ");
+                        t.Span(p.Datedentre).SemiBold();
+                        t.Span(" date d’entrée");
+                    });
+                    c2.Item().Text(t => {
+                        t.Span("dans l’administration, et actuellement en service au Lycée RAHERIVELO RAMAMONJY CISCO");
+                    });
+
+                    c2.Item().Text(t => {
+                        t.Span("FIANARANTSOA depuis le ");
+                        t.Span(p.Datedeprise).SemiBold();
+                        t.Span(", date de prise de service jusqu’à ce jour.");
+                    });
+
+                    c2.Item().PaddingLeft(2, Unit.Centimetre).Text("En foi de quoi, la présente Certificat lui est délivré pour servir et valoir ce que de droit.");
+
+                    // Date en bas à droite
+                    c2.Item()
+                      .PaddingTop(20)
+                      .AlignRight()
+                      .PaddingRight(20)
+                      .Text(t => 
+                      {
+                          t.DefaultTextStyle(x => x.Italic()); 
+                          t.Span("Fianarantsoa, le ");
+                          t.Span(DateTime.Now.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("fr-FR"))).SemiBold();
+                      });
+                });
+            });          
         });
     });
 
