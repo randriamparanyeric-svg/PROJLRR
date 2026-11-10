@@ -208,95 +208,191 @@ public async Task<IActionResult> ExporterExcel()
 
     return File(memoryStream, contentType, nomFichier);
 }
-[HttpGet]
-public IActionResult ExporterContactsAndroid()
-{
-    // 1. On récupère les agents avec Nom et Contact valides
-    var listePersonnel = _context.Personnels
-        .Where(p => !string.IsNullOrEmpty(p.NomEtPrenoms) && !string.IsNullOrEmpty(p.Contact))
-        .ToList();
+        [HttpGet]
+        public IActionResult ExporterContactsAndroid()
+        {
+            // 1. On récupère les agents avec Nom et Contact valides
+            var listePersonnel = _context.Personnels
+                .Where(p => !string.IsNullOrEmpty(p.NomEtPrenoms) && !string.IsNullOrEmpty(p.Contact))
+                .ToList();
 
-    if (!listePersonnel.Any())
+            if (!listePersonnel.Any())
+            {
+                return Content("Aucun contact avec un numéro valide n'a été trouvé.");
+            }
+
+            var sb = new StringBuilder();
+
+            foreach (var p in listePersonnel)
+            {
+                // Extraction propre de la fonction (PA ou PE)
+                string fonctionPart = "";
+                if (!string.IsNullOrWhiteSpace(p.Fonction))
+                {
+                    string fUpper = p.Fonction.Trim().ToUpper();
+                    if (fUpper.Contains("PA")) fonctionPart = "PA";
+                    else if (fUpper.Contains("PE")) fonctionPart = "PE";
+                    else fonctionPart = p.Fonction.Trim(); // Sécurité au cas où une autre fonction existe
+                }
+
+                // ─── CONSTRUCTION DU NOM STYLE : Fonction - Matiere - NomEtPrenoms ───
+                string nomAffichage = "";
+                string nomNettoye = p.NomEtPrenoms.Trim();
+                string matiereNettoye = !string.IsNullOrWhiteSpace(p.Matiere) ? p.Matiere.Trim() : "";
+
+                if (!string.IsNullOrEmpty(fonctionPart) && !string.IsNullOrEmpty(matiereNettoye))
+                {
+                    // Cas idéal : PA - Histoire - Dupont Jean
+                    nomAffichage = $"{fonctionPart} - {matiereNettoye} - {nomNettoye}";
+                }
+                else if (!string.IsNullOrEmpty(fonctionPart))
+                {
+                    // Si pas de matière renseignée : PA - Dupont Jean
+                    nomAffichage = $"{fonctionPart} - {nomNettoye}";
+                }
+                else if (!string.IsNullOrEmpty(matiereNettoye))
+                {
+                    // Si pas de fonction renseignée : Histoire - Dupont Jean
+                    nomAffichage = $"{matiereNettoye} - {nomNettoye}";
+                }
+                else
+                {
+                    // Si uniquement le nom : Dupont Jean
+                    nomAffichage = nomNettoye;
+                }
+
+                // ─── NETTOYAGE STRICT DU NUMÉRO DE TÉLÉPHONE ───
+                string contactNettoye = p.Contact.Replace(" ", "").Trim();
+
+                // Sécurité supplémentaire : si après nettoyage le numéro est vide, on passe à l'agent suivant
+                if (string.IsNullOrEmpty(contactNettoye)) continue;
+
+                // Écriture du bloc vCard
+                sb.AppendLine("BEGIN:VCARD");
+                sb.AppendLine("VERSION:3.0");
+                sb.AppendLine($"FN:{nomAffichage}");
+                sb.AppendLine($"N:;{nomAffichage};;;");
+
+                // Injection du numéro propre sans aucun espace
+                sb.AppendLine($"TEL;TYPE=CELL:{contactNettoye}");
+
+                if (!string.IsNullOrWhiteSpace(p.Fonction))
+                {
+                    sb.AppendLine($"TITLE:{p.Fonction.Trim()}");
+                }
+
+                // Optionnel : On peut aussi stocker la matière dans le champ département/organisme de la vCard
+                if (!string.IsNullOrEmpty(matiereNettoye))
+                {
+                    sb.AppendLine($"ORG:{matiereNettoye}");
+                }
+
+                if (!string.IsNullOrWhiteSpace(p.Matricule))
+                {
+                    sb.AppendLine($"NOTE:Matricule: {p.Matricule.Trim()}");
+                }
+
+                sb.AppendLine("END:VCARD");
+            }
+
+            byte[] fileBytes = Encoding.UTF8.GetBytes(sb.ToString());
+            string nomFichier = $"Contacts_Tri_Complet_{DateTime.Now:yyyyMMdd}.vcf";
+
+            return File(fileBytes, "text/vcard", nomFichier);
+        }
+[HttpGet]
+public IActionResult ExporterContact(string matricule)
+{
+    // 1. Récupération du personnel par son Matricule
+    var personnel = _context.Personnels.FirstOrDefault(p => p.Matricule == matricule);
+
+    if (personnel == null || string.IsNullOrEmpty(personnel.Contact))
     {
-        return Content("Aucun contact avec un numéro valide n'a été trouvé.");
+        TempData["Error"] = "Personnel introuvable ou contact invalide.";
+        return RedirectToAction(nameof(Index));
     }
 
     var sb = new StringBuilder();
 
-    foreach (var p in listePersonnel)
+    // 2. Extraction propre de la fonction (PA ou PE)
+    string fonctionPart = "";
+    if (!string.IsNullOrWhiteSpace(personnel.Fonction))
     {
-        // Extraction propre de la fonction (PA ou PE)
-        string fonctionPart = "";
-        if (!string.IsNullOrWhiteSpace(p.Fonction))
-        {
-            string fUpper = p.Fonction.Trim().ToUpper();
-            if (fUpper.Contains("PA")) fonctionPart = "PA";
-            else if (fUpper.Contains("PE")) fonctionPart = "PE";
-            else fonctionPart = p.Fonction.Trim(); // Sécurité au cas où une autre fonction existe
-        }
-
-        // ─── CONSTRUCTION DU NOM STYLE : Fonction - Matiere - NomEtPrenoms ───
-        string nomAffichage = "";
-        string nomNettoye = p.NomEtPrenoms.Trim();
-        string matiereNettoye = !string.IsNullOrWhiteSpace(p.Matiere) ? p.Matiere.Trim() : "";
-
-        if (!string.IsNullOrEmpty(fonctionPart) && !string.IsNullOrEmpty(matiereNettoye))
-        {
-            // Cas idéal : PA - Histoire - Dupont Jean
-            nomAffichage = $"{fonctionPart} - {matiereNettoye} - {nomNettoye}";
-        }
-        else if (!string.IsNullOrEmpty(fonctionPart))
-        {
-            // Si pas de matière renseignée : PA - Dupont Jean
-            nomAffichage = $"{fonctionPart} - {nomNettoye}";
-        }
-        else if (!string.IsNullOrEmpty(matiereNettoye))
-        {
-            // Si pas de fonction renseignée : Histoire - Dupont Jean
-            nomAffichage = $"{matiereNettoye} - {nomNettoye}";
-        }
-        else
-        {
-            // Si uniquement le nom : Dupont Jean
-            nomAffichage = nomNettoye;
-        }
-
-        // ─── NETTOYAGE STRICT DU NUMÉRO DE TÉLÉPHONE ───
-        string contactNettoye = p.Contact.Replace(" ", "").Trim();
-
-        // Sécurité supplémentaire : si après nettoyage le numéro est vide, on passe à l'agent suivant
-        if (string.IsNullOrEmpty(contactNettoye)) continue;
-
-        // Écriture du bloc vCard
-        sb.AppendLine("BEGIN:VCARD");
-        sb.AppendLine("VERSION:3.0"); 
-        sb.AppendLine($"FN:{nomAffichage}");
-        sb.AppendLine($"N:;{nomAffichage};;;");
-        
-        // Injection du numéro propre sans aucun espace
-        sb.AppendLine($"TEL;TYPE=CELL:{contactNettoye}");
-
-        if (!string.IsNullOrWhiteSpace(p.Fonction))
-        {
-            sb.AppendLine($"TITLE:{p.Fonction.Trim()}");
-        }
-
-        // Optionnel : On peut aussi stocker la matière dans le champ département/organisme de la vCard
-        if (!string.IsNullOrEmpty(matiereNettoye))
-        {
-            sb.AppendLine($"ORG:{matiereNettoye}");
-        }
-
-        if (!string.IsNullOrWhiteSpace(p.Matricule))
-        {
-            sb.AppendLine($"NOTE:Matricule: {p.Matricule.Trim()}");
-        }
-
-        sb.AppendLine("END:VCARD");
+        string fUpper = personnel.Fonction.Trim().ToUpper();
+        if (fUpper.Contains("PA")) fonctionPart = "PA";
+        else if (fUpper.Contains("PE")) fonctionPart = "PE";
+        else fonctionPart = personnel.Fonction.Trim();
     }
 
+    // 3. Construction du nom d'affichage : Fonction - Matière - Nom et Prénoms
+    string nomAffichage = "";
+    string nomNettoye = personnel.NomEtPrenoms.Trim();
+    string matiereNettoye = !string.IsNullOrWhiteSpace(personnel.Matiere) ? personnel.Matiere.Trim() : "";
+
+    if (!string.IsNullOrEmpty(fonctionPart) && !string.IsNullOrEmpty(matiereNettoye))
+    {
+        nomAffichage = $"{fonctionPart} - {matiereNettoye} - {nomNettoye}";
+    }
+    else if (!string.IsNullOrEmpty(fonctionPart))
+    {
+        nomAffichage = $"{fonctionPart} - {nomNettoye}";
+    }
+    else if (!string.IsNullOrEmpty(matiereNettoye))
+    {
+        nomAffichage = $"{matiereNettoye} - {nomNettoye}";
+    }
+    else
+    {
+        nomAffichage = nomNettoye;
+    }
+
+    // 4. Nettoyage strict du numéro de téléphone (suppression des espaces)
+    string contactNettoye = personnel.Contact.Replace(" ", "").Trim();
+
+    if (string.IsNullOrEmpty(contactNettoye))
+    {
+        TempData["Error"] = "Le numéro de contact de ce personnel est invalide.";
+        return RedirectToAction(nameof(Index));
+    }
+
+    // 5. Génération du fichier vCard (.vcf) individuel
+    sb.AppendLine("BEGIN:VCARD");
+    sb.AppendLine("VERSION:3.0");
+    sb.AppendLine($"FN:{nomAffichage}");
+    sb.AppendLine($"N:;{nomAffichage};;;");
+    sb.AppendLine($"TEL;TYPE=CELL:{contactNettoye}");
+
+    if (!string.IsNullOrWhiteSpace(personnel.Fonction))
+    {
+        sb.AppendLine($"TITLE:{personnel.Fonction.Trim()}");
+    }
+
+    if (!string.IsNullOrEmpty(matiereNettoye))
+    {
+        sb.AppendLine($"ORG:{matiereNettoye}");
+    }
+
+    if (!string.IsNullOrWhiteSpace(personnel.Matricule))
+    {
+        sb.AppendLine($"NOTE:Matricule: {personnel.Matricule.Trim()}");
+    }
+
+    sb.AppendLine("END:VCARD");
+
     byte[] fileBytes = Encoding.UTF8.GetBytes(sb.ToString());
-    string nomFichier = $"Contacts_Tri_Complet_{DateTime.Now:yyyyMMdd}.vcf";
+    
+    // Nettoyage sécurisé du nom de fichier sans erreur LINQ
+    string nomFichierSanitized = "";
+    foreach (char c in nomNettoye)
+    {
+        if (char.IsLetterOrDigit(c) || c == '_')
+        {
+            nomFichierSanitized += c;
+        }
+    }
+    if (string.IsNullOrEmpty(nomFichierSanitized)) nomFichierSanitized = "Personnel";
+
+    string nomFichier = $"Contact_{nomFichierSanitized}.vcf";
 
     return File(fileBytes, "text/vcard", nomFichier);
 }
