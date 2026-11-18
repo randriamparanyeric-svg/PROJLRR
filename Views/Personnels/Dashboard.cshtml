@@ -1,0 +1,351 @@
+@model List<PROJLRR.Models.Personnel>
+
+@{
+    ViewData["Title"] = "Tableau de Bord Global";
+    Layout = "/Views/Shared/Layout.cshtml";
+}
+
+<link rel="stylesheet" href="~/css/stat.css" />
+
+<div class="container-fluid py-4">
+    <!-- EN-TÊTE DE LA PAGE -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>📊 Tableau de Bord Global - Lycée Raherivelo Ramamonjy</h2>
+            <p class="text-muted">Vue d'ensemble et indicateurs clés au <span id="cert_date" class="fw-bold text-dark"></span></p>
+        </div>
+        <div class="action-group">
+            <a href="@Url.Action("SearchResults", "Search")" class="btn btn-outline-primary">🔍 Recherche</a>
+            <button class="btn btn-primary" onclick="imprimerTableau()">🖨️ Imprimer </button>
+        </div>
+    </div>
+
+    @{
+        // --- CALCULS ET VENTILATIONS DÉTAILLÉES ---
+        var matieresEnseignantes = new List<string> { "MLG", "FRA", "ANG", "ALL", "ESP", "RUS", "PHI", "HG", "MAT", "PC", "SVT", "EPS", "SES", "EAC" };
+        int tH_Fonct = 0, tF_Fonct = 0, tH_Cont = 0, tF_Cont = 0, tH_Fram = 0, tF_Fram = 0, tGenEns = 0;
+
+        foreach (var mat in matieresEnseignantes)
+        {
+            tH_Fonct += Model.Count(p => p.Matiere?.Trim().ToUpper() == mat.ToUpper() && (p.Sexe == "H" || p.Sexe?.ToUpper() == "HOMME") && p.Statut?.ToUpper() == "FONCTIONNAIRE");
+            tF_Fonct += Model.Count(p => p.Matiere?.Trim().ToUpper() == mat.ToUpper() && (p.Sexe == "F" || p.Sexe?.ToUpper() == "FEMME") && p.Statut?.ToUpper() == "FONCTIONNAIRE");
+            tH_Cont += Model.Count(p => p.Matiere?.Trim().ToUpper() == mat.ToUpper() && (p.Sexe == "H" || p.Sexe?.ToUpper() == "HOMME") && p.Statut?.ToUpper() == "EFA");
+            tF_Cont += Model.Count(p => p.Matiere?.Trim().ToUpper() == mat.ToUpper() && (p.Sexe == "F" || p.Sexe?.ToUpper() == "FEMME") && p.Statut?.ToUpper() == "EFA");
+            tH_Fram += Model.Count(p => p.Matiere?.Trim().ToUpper() == mat.ToUpper() && (p.Sexe == "H" || p.Sexe?.ToUpper() == "HOMME") && p.Statut?.ToUpper() == "VACATAIRE");
+            tF_Fram += Model.Count(p => p.Matiere?.Trim().ToUpper() == mat.ToUpper() && (p.Sexe == "F" || p.Sexe?.ToUpper() == "FEMME") && p.Statut?.ToUpper() == "VACATAIRE");
+        }
+        tGenEns = tH_Fonct + tF_Fonct + tH_Cont + tF_Cont + tH_Fram + tF_Fram;
+
+        var postesAdmin = new List<string> { "PROVISEUR", "PROVISEUR ADJOINT", "ECONOME", "SG", "PROVISORAT", "SCOLARITE", "INFO", "SURVEILLANT", "COMPTABLE", "CDI", "LV II", "CAELF", "ILO", "EXAMEN", "LABO PC", "LABO SVT", "EMPL DE SERV", "INFIRMERIE", "GARDIEN" };
+        int aH_Fonct = 0, aF_Fonct = 0, aH_Cont = 0, aF_Cont = 0, aH_Fram = 0, aF_Fram = 0, aGenAdmin = 0;
+
+        foreach (var poste in postesAdmin)
+        {
+            aH_Fonct += Model.Count(p => p.Matiere?.Trim().ToUpper() == poste.ToUpper() && (p.Sexe == "H" || p.Sexe?.ToUpper() == "HOMME") && p.Statut?.ToUpper() == "FONCTIONNAIRE");
+            aF_Fonct += Model.Count(p => p.Matiere?.Trim().ToUpper() == poste.ToUpper() && (p.Sexe == "F" || p.Sexe?.ToUpper() == "FEMME") && p.Statut?.ToUpper() == "FONCTIONNAIRE");
+            aH_Cont += Model.Count(p => p.Matiere?.Trim().ToUpper() == poste.ToUpper() && (p.Sexe == "H" || p.Sexe?.ToUpper() == "HOMME") && p.Statut?.ToUpper() == "EFA");
+            aF_Cont += Model.Count(p => p.Matiere?.Trim().ToUpper() == poste.ToUpper() && (p.Sexe == "F" || p.Sexe?.ToUpper() == "FEMME") && p.Statut?.ToUpper() == "EFA");
+            aH_Fram += Model.Count(p => p.Matiere?.Trim().ToUpper() == poste.ToUpper() && (p.Sexe == "H" || p.Sexe?.ToUpper() == "HOMME") && p.Statut?.ToUpper() == "VACATAIRE");
+            aF_Fram += Model.Count(p => p.Matiere?.Trim().ToUpper() == poste.ToUpper() && (p.Sexe == "F" || p.Sexe?.ToUpper() == "FEMME") && p.Statut?.ToUpper() == "VACATAIRE");
+        }
+        aGenAdmin = aH_Fonct + aF_Fonct + aH_Cont + aF_Cont + aH_Fram + aF_Fram;
+    }
+
+    <!-- ================================================================= -->
+    <!-- 1. BLOCS DE CHIFFRES CLÉS (KPIs) GLOBAUX & DÉTAILLÉS              -->
+    <!-- ================================================================= -->
+    <div class="row g-3 mb-4">
+        <!-- Carte 1 : Effectif Global -->
+        <div class="col-md-3">
+            <div class="card text-white bg-primary shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Total Personnel</h5>
+                    <h3 class="display-6 fw-bold">@Model.Count</h3>
+                    <p class="mb-0">Agents enregistrés dans la base</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Carte 2 : Total Sexe Global -->
+        <div class="col-md-3">
+            <div class="card text-white bg-success shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Par Sexe</h5>
+                    <p class="mb-1">Hommes : <b class="fs-5">@Model.Count(p => p.Sexe != null && (p.Sexe.ToUpper() == "H" || p.Sexe.ToUpper().StartsWith("M")))</b></p>
+                    <p class="mb-0">Femmes : <b class="fs-5">@Model.Count(p => p.Sexe != null && (p.Sexe.ToUpper() == "F" || p.Sexe.ToUpper().StartsWith("F")))</b></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Carte 3 : Résumé Détaillé Total Enseignants -->
+        <div class="col-md-3">
+            <div class="card text-dark bg-warning shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold mb-2">📚 Total Enseignants : <span class="fs-4">@tGenEns</span></h5>
+                    <hr class="my-1 border-dark">
+                    <table class="w-100 small" style="line-height: 1.5;">
+                        <tr>
+                            <td class="fw-semibold">Fonctionnaires</td>
+                            <td class="text-end">H : <b>@tH_Fonct</b></td>
+                            <td class="text-end">F : <b>@tF_Fonct</b></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-semibold">EFA (Cont.)</td>
+                            <td class="text-end">H : <b>@tH_Cont</b></td>
+                            <td class="text-end">F : <b>@tF_Cont</b></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-semibold">Fram (Vac.)</td>
+                            <td class="text-end">H : <b>@tH_Fram</b></td>
+                            <td class="text-end">F : <b>@tF_Fram</b></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Carte 4 : Résumé Détaillé Total Administratif -->
+        <div class="col-md-3">
+            <div class="card text-white bg-secondary shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold mb-2">🏢 Total Admin : <span class="fs-4">@aGenAdmin</span></h5>
+                    <hr class="my-1 border-light">
+                    <table class="w-100 small text-white" style="line-height: 1.5;">
+                        <tr>
+                            <td class="fw-semibold">Fonctionnaires</td>
+                            <td class="text-end">H : <b>@aH_Fonct</b></td>
+                            <td class="text-end">F : <b>@aF_Fonct</b></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-semibold">EFA (Cont.)</td>
+                            <td class="text-end">H : <b>@aH_Cont</b></td>
+                            <td class="text-end">F : <b>@aF_Cont</b></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-semibold">Fram (Vac.)</td>
+                            <td class="text-end">H : <b>@aH_Fram</b></td>
+                            <td class="text-end">F : <b>@aF_Fram</b></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- 2. GRAPHIQUES ANALYTIQUES (Chart.js)                              -->
+    <!-- ================================================================= -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-5">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white fw-bold py-3">Répartition par Statut Global</div>
+                <div class="card-body d-flex justify-content-center align-items-center" style="height: 280px;">
+                    <canvas id="statutChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-7">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white fw-bold py-3">Top 6 des Matières / Postes</div>
+                <div class="card-body d-flex justify-content-center align-items-center" style="height: 280px;">
+                    <canvas id="matiereChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SIGNATURE ADMINISTRATIVE -->
+    <div style="text-align: right; margin-top: 35px; margin-bottom: 20px; font-style: italic; font-size: 14px; color: #334155;">
+        Fait à Fianarantsoa, le <span id="cert_date1"></span>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Génération et affichage dynamique des dates du jour en français
+        let date = new Date();
+        let options = { day: "numeric", month: "long", year: "numeric" };
+        let today = date.toLocaleDateString("fr-FR", options);
+        document.getElementById("cert_date").innerText = today;
+        document.getElementById("cert_date1").innerText = today;
+
+        // Récupération sécurisée des données de la liste transmise par le modèle C#
+        const personnels = @Json.Serialize(Model);
+
+        // Variables globales pour stocker les instances Chart.js (utiles pour l'impression)
+        let statutChartInstance = null;
+        let matiereChartInstance = null;
+
+        // 1. Calcul dynamique pour le graphique Camembert (Statut)
+        const statutsCount = {};
+        personnels.forEach(p => {
+            let s = p.statut ? p.statut.toUpperCase() : "NON DÉFINI";
+            statutsCount[s] = (statutsCount[s] || 0) + 1;
+        });
+
+        if (Object.keys(statutsCount).length > 0) {
+            const ctxStatut = document.getElementById('statutChart').getContext('2d');
+            statutChartInstance = new Chart(ctxStatut, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(statutsCount),
+                    datasets: [{
+                        data: Object.values(statutsCount),
+                        backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b']
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        // 2. Calcul dynamique pour le graphique en Barres (Top Matières / Postes)
+        const matieresCount = {};
+        personnels.forEach(p => {
+            if (p.matiere) {
+                let m = p.matiere.trim().toUpperCase();
+                matieresCount[m] = (matieresCount[m] || 0) + 1;
+            }
+        });
+        
+        // Tri décroissant et sélection des 6 principales valeurs
+        const sortedMatieres = Object.entries(matieresCount).sort((a, b) => b[1] - a[1]).slice(0, 6);
+
+        if (sortedMatieres.length > 0) {
+            const ctxMatiere = document.getElementById('matiereChart').getContext('2d');
+            matiereChartInstance = new Chart(ctxMatiere, {
+                type: 'bar',
+                data: {
+                    labels: sortedMatieres.map(item => item[0]),
+                    datasets: [{
+                        label: 'Effectif',
+                        data: sortedMatieres.map(item => item[1]),
+                        backgroundColor: '#4e73df'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+                }
+            });
+        }
+
+        // FONCTION D'IMPRESSION SUR MESURE POUR LE TABLEAU DE BORD
+        function imprimerTableau() {
+            // Conversion des graphiques Chart.js en images base64 pour impression pop-up
+            let statutImg = statutChartInstance ? statutChartInstance.toBase64Image() : '';
+            let matiereImg = matiereChartInstance ? matiereChartInstance.toBase64Image() : '';
+
+            var pageImpression = window.open('', '_blank', 'width=950,height=750');
+            
+            if (!pageImpression) {
+                alert("Veuillez autoriser les pop-ups pour pouvoir imprimer.");
+                return;
+            }
+
+            pageImpression.document.write(`
+                <html>
+                <head>
+                    <title>Impression - Tableau de Bord Global</title>
+                    <style>
+                        @@page {
+                            margin-top: 15px;
+                            margin-bottom: 15px;
+                        }
+
+                        body { 
+                            font-family: 'Segoe UI', Arial, sans-serif; 
+                            color: #333; 
+                            padding: 20px 30px; 
+                        }
+                        
+                        h2 { color: #1e3a8a; margin-top: 0; margin-bottom: 5px; font-size: 20px; text-transform: uppercase; text-align: center; }
+                        .subtitle { text-align: center; color: #475569; font-size: 14px; margin-bottom: 25px; }
+                        
+                        .row { display: flex; flex-wrap: wrap; margin-bottom: 15px; gap: 15px; justify-content: center; }
+                        .col-md-3 { width: 22%; min-width: 200px; box-sizing: border-box; }
+                        .col-lg-5, .col-lg-7 { width: 48%; min-width: 300px; box-sizing: border-box; text-align: center; }
+                        
+                        .card { border: 1px solid #94a3b8; border-radius: 8px; padding: 15px; margin-bottom: 15px; background: #fff; }
+                        .card-title { font-size: 15px; font-weight: bold; margin-bottom: 8px; color: #1e293b; }
+                        .display-6 { font-size: 24px; font-weight: bold; margin: 5px 0; }
+                        .small { font-size: 12px; line-height: 1.4; color: #334155; }
+                        hr { border: 0; border-top: 1px solid #94a3b8; margin: 8px 0; }
+                        
+                        img.chart-print { max-width: 100%; height: 200px; object-fit: contain; margin-top: 10px; }
+                        .signature { text-align: right; margin-top: 35px; font-style: italic; font-size: 14px; color: #334155; }
+                        
+                        table.print-table { width: 100%; font-size: 12px; border-collapse: collapse; }
+                        table.print-table td { padding: 2px 0; }
+                    </style>
+                </head>
+                <body>
+                    <h2>Tableau de Bord Global - Lycée Raherivelo Ramamonjy</h2>
+                    <div class="subtitle">Situation en date du ${today}</div>
+                    
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="card" style="border-left: 4px solid #4f46e5;">
+                                <div class="card-title">Total Personnel</div>
+                                <div class="display-6">@Model.Count</div>
+                                <div class="small">Agents enregistrés</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card" style="border-left: 4px solid #10b981;">
+                                <div class="card-title">Par Sexe</div>
+                                <div class="small">Hommes : <b>@Model.Count(p => p.Sexe != null && (p.Sexe.ToUpper() == "H" || p.Sexe.ToUpper().StartsWith("M")))</b></div>
+                                <div class="small">Femmes : <b>@Model.Count(p => p.Sexe != null && (p.Sexe.ToUpper() == "F" || p.Sexe.ToUpper().StartsWith("F")))</b></div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card" style="border-left: 4px solid #f59e0b;">
+                                <div class="card-title">📚 Total Enseignants : @tGenEns</div>
+                                <hr>
+                                <table class="print-table">
+                                    <tr><td>Fonct</td><td style="text-align:right;">H : <b>@tH_Fonct</b></td><td style="text-align:right;">F : <b>@tF_Fonct</b></td></tr>
+                                    <tr><td>EFA</td><td style="text-align:right;">H : <b>@tH_Cont</b></td><td style="text-align:right;">F : <b>@tF_Cont</b></td></tr>
+                                    <tr><td>Fram</td><td style="text-align:right;">H : <b>@tH_Fram</b></td><td style="text-align:right;">F : <b>@tF_Fram</b></td></tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card" style="border-left: 4px solid #64748b;">
+                                <div class="card-title">🏢 Total Admin : @aGenAdmin</div>
+                                <hr>
+                                <table class="print-table">
+                                    <tr><td>Fonct</td><td style="text-align:right;">H : <b>@aH_Fonct</b></td><td style="text-align:right;">F : <b>@aF_Fonct</b></td></tr>
+                                    <tr><td>EFA</td><td style="text-align:right;">H : <b>@aH_Cont</b></td><td style="text-align:right;">F : <b>@aF_Cont</b></td></tr>
+                                    <tr><td>Fram</td><td style="text-align:right;">H : <b>@aH_Fram</b></td><td style="text-align:right;">F : <b>@aF_Fram</b></td></tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row" style="margin-top: 20px;">
+                        <div class="col-lg-5 card">
+                            <div class="card-title">Répartition par Statut Global</div>
+                            ${statutImg ? `<img src="${statutImg}" class="chart-print" />` : ''}
+                        </div>
+                        <div class="col-lg-7 card">
+                            <div class="card-title">Top 6 des Matières / Postes</div>
+                            ${matiereImg ? `<img src="${matiereImg}" class="chart-print" />` : ''}
+                        </div>
+                    </div>
+                    
+                    <div class="signature">Fait à Fianarantsoa, le ${today}</div>
+                </body>
+                </html>
+            `);
+
+            pageImpression.document.close();
+            pageImpression.focus();
+            
+            setTimeout(() => { 
+                pageImpression.print(); 
+                pageImpression.close(); 
+            }, 500);
+        }
+    </script>
+}

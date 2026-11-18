@@ -174,8 +174,8 @@
                 { bg: '#064e3b', text: '#f0fdf4' }, // Vert Forêt / Vert Très Clair
                 { bg: '#581c87', text: '#fdf4ff' }, // Byzantium / Violet Très Clair
                 { bg: '#451a03', text: '#fff7ed' }, // Brun Chaud Riche / Ambre Clair
-               { bg: '#1e272e', text: '#f1f5f9' }, // REMPLACÉ : Noir Charbon / Gris Très Clair
-               { bg: '#0f3443', text: '#e6f4f8' }, // REMPLACÉ : Bleu Canard Profond / Cyan Givré
+                { bg: '#1e272e', text: '#f1f5f9' }, // Noir Charbon / Gris Très Clair
+                { bg: '#0f3443', text: '#e6f4f8' }, // Bleu Canard Profond / Cyan Givré
                 { bg: '#2e1065', text: '#f5f3ff' }  // Violet Nuit Obscur / Blanc
             ];
 
@@ -230,7 +230,7 @@
                                 <li><a class="dropdown-item" href="@Url.Action("STAT", "Personnels")">📊 Statistique PE</a></li>
                                 <li><a class="dropdown-item" href="@Url.Action("STAT2", "Personnels")">📈 Statistique PA</a></li>
                                 <li><a class="dropdown-item" href="@Url.Action("RETRAITE", "Personnels")">🧓 Retraités cette année</a></li>
-                                <li><a class="dropdown-item" href="@Url.Action("Archive", "Search")">📁 Liste des personnels archivés</a></li>
+                                <li><a class="dropdown-item" href="@Url.Action("Dashboard", "Personnels")">📊 Tableau de bord global</a></li>
                                 <li><a class="dropdown-item" href="@Url.Action("ExporterExcel", "Personnels")">🟢 Exporter vers Excel</a></li>
                                 <li><a class="dropdown-item" href="@Url.Action("ExporterContactsAndroid", "Personnels")">📱 Exporter Contact vers Android (.VCF)</a></li>
                                 <div class="dropdown-divider"></div>
@@ -444,20 +444,21 @@
         }
     </script>
     @if (TempData["SuccessMessage"] != null)
-{
-    <script>
-        // On attend que la page soit prête
-        document.addEventListener('DOMContentLoaded', function() {
-            Swal.fire({
-                icon: 'success',
-                title: 'Opération réussie',
-                text: '@Html.Raw(TempData["SuccessMessage"])',
-                confirmButtonColor: '#4f46e5', // Correspond à votre --primary-color
-                background: '#ffffff',
-                confirmButtonText: 'OK'
+    {
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Opération réussie',
+                    text: '@Html.Raw(TempData["SuccessMessage"])',
+                    confirmButtonColor: '#4f46e5',
+                    background: '#ffffff',
+                    confirmButtonText: 'OK'
+                });
             });
-        });
-    </script>
-}
+        </script>
+    }
+
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

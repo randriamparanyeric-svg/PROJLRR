@@ -119,6 +119,6 @@ public class AccountController : Controller
         {
             return Redirect(returnUrl);
         }
-        return RedirectToAction("SearchResults", "Search", new { searchTerm = "" });
+        return RedirectToAction("Dashboard", "Personnels");
     }
 }

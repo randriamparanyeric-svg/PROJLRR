@@ -300,101 +300,112 @@ public async Task<IActionResult> ExporterExcel()
 
             return File(fileBytes, "text/vcard", nomFichier);
         }
-[HttpGet]
-public IActionResult ExporterContact(string matricule)
-{
-    // 1. Récupération du personnel par son Matricule
-    var personnel = _context.Personnels.FirstOrDefault(p => p.Matricule == matricule);
-
-    if (personnel == null || string.IsNullOrEmpty(personnel.Contact))
-    {
-        TempData["Error"] = "Personnel introuvable ou contact invalide.";
-        return RedirectToAction(nameof(Index));
-    }
-
-    var sb = new StringBuilder();
-
-    // 2. Extraction propre de la fonction (PA ou PE)
-    string fonctionPart = "";
-    if (!string.IsNullOrWhiteSpace(personnel.Fonction))
-    {
-        string fUpper = personnel.Fonction.Trim().ToUpper();
-        if (fUpper.Contains("PA")) fonctionPart = "PA";
-        else if (fUpper.Contains("PE")) fonctionPart = "PE";
-        else fonctionPart = personnel.Fonction.Trim();
-    }
-
-    // 3. Construction du nom d'affichage : Fonction - Matière - Nom et Prénoms
-    string nomAffichage = "";
-    string nomNettoye = personnel.NomEtPrenoms.Trim();
-    string matiereNettoye = !string.IsNullOrWhiteSpace(personnel.Matiere) ? personnel.Matiere.Trim() : "";
-
-    if (!string.IsNullOrEmpty(fonctionPart) && !string.IsNullOrEmpty(matiereNettoye))
-    {
-        nomAffichage = $"{fonctionPart} - {matiereNettoye} - {nomNettoye}";
-    }
-    else if (!string.IsNullOrEmpty(fonctionPart))
-    {
-        nomAffichage = $"{fonctionPart} - {nomNettoye}";
-    }
-    else if (!string.IsNullOrEmpty(matiereNettoye))
-    {
-        nomAffichage = $"{matiereNettoye} - {nomNettoye}";
-    }
-    else
-    {
-        nomAffichage = nomNettoye;
-    }
-
-    // 4. Nettoyage strict du numéro de téléphone (suppression des espaces)
-    string contactNettoye = personnel.Contact.Replace(" ", "").Trim();
-
-    if (string.IsNullOrEmpty(contactNettoye))
-    {
-        TempData["Error"] = "Le numéro de contact de ce personnel est invalide.";
-        return RedirectToAction(nameof(Index));
-    }
-
-    // 5. Génération du fichier vCard (.vcf) individuel
-    sb.AppendLine("BEGIN:VCARD");
-    sb.AppendLine("VERSION:3.0");
-    sb.AppendLine($"FN:{nomAffichage}");
-    sb.AppendLine($"N:;{nomAffichage};;;");
-    sb.AppendLine($"TEL;TYPE=CELL:{contactNettoye}");
-
-    if (!string.IsNullOrWhiteSpace(personnel.Fonction))
-    {
-        sb.AppendLine($"TITLE:{personnel.Fonction.Trim()}");
-    }
-
-    if (!string.IsNullOrEmpty(matiereNettoye))
-    {
-        sb.AppendLine($"ORG:{matiereNettoye}");
-    }
-
-    if (!string.IsNullOrWhiteSpace(personnel.Matricule))
-    {
-        sb.AppendLine($"NOTE:Matricule: {personnel.Matricule.Trim()}");
-    }
-
-    sb.AppendLine("END:VCARD");
-
-    byte[] fileBytes = Encoding.UTF8.GetBytes(sb.ToString());
-    
-    // Nettoyage sécurisé du nom de fichier sans erreur LINQ
-    string nomFichierSanitized = "";
-    foreach (char c in nomNettoye)
-    {
-        if (char.IsLetterOrDigit(c) || c == '_')
+        [HttpGet]
+        public IActionResult ExporterContact(string matricule)
         {
-            nomFichierSanitized += c;
+            // 1. Récupération du personnel par son Matricule
+            var personnel = _context.Personnels.FirstOrDefault(p => p.Matricule == matricule);
+
+            if (personnel == null || string.IsNullOrEmpty(personnel.Contact))
+            {
+                TempData["Error"] = "Personnel introuvable ou contact invalide.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var sb = new StringBuilder();
+
+            // 2. Extraction propre de la fonction (PA ou PE)
+            string fonctionPart = "";
+            if (!string.IsNullOrWhiteSpace(personnel.Fonction))
+            {
+                string fUpper = personnel.Fonction.Trim().ToUpper();
+                if (fUpper.Contains("PA")) fonctionPart = "PA";
+                else if (fUpper.Contains("PE")) fonctionPart = "PE";
+                else fonctionPart = personnel.Fonction.Trim();
+            }
+
+            // 3. Construction du nom d'affichage : Fonction - Matière - Nom et Prénoms
+            string nomAffichage = "";
+            string nomNettoye = personnel.NomEtPrenoms.Trim();
+            string matiereNettoye = !string.IsNullOrWhiteSpace(personnel.Matiere) ? personnel.Matiere.Trim() : "";
+
+            if (!string.IsNullOrEmpty(fonctionPart) && !string.IsNullOrEmpty(matiereNettoye))
+            {
+                nomAffichage = $"{fonctionPart} - {matiereNettoye} - {nomNettoye}";
+            }
+            else if (!string.IsNullOrEmpty(fonctionPart))
+            {
+                nomAffichage = $"{fonctionPart} - {nomNettoye}";
+            }
+            else if (!string.IsNullOrEmpty(matiereNettoye))
+            {
+                nomAffichage = $"{matiereNettoye} - {nomNettoye}";
+            }
+            else
+            {
+                nomAffichage = nomNettoye;
+            }
+
+            // 4. Nettoyage strict du numéro de téléphone (suppression des espaces)
+            string contactNettoye = personnel.Contact.Replace(" ", "").Trim();
+
+            if (string.IsNullOrEmpty(contactNettoye))
+            {
+                TempData["Error"] = "Le numéro de contact de ce personnel est invalide.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            // 5. Génération du fichier vCard (.vcf) individuel
+            sb.AppendLine("BEGIN:VCARD");
+            sb.AppendLine("VERSION:3.0");
+            sb.AppendLine($"FN:{nomAffichage}");
+            sb.AppendLine($"N:;{nomAffichage};;;");
+            sb.AppendLine($"TEL;TYPE=CELL:{contactNettoye}");
+
+            if (!string.IsNullOrWhiteSpace(personnel.Fonction))
+            {
+                sb.AppendLine($"TITLE:{personnel.Fonction.Trim()}");
+            }
+
+            if (!string.IsNullOrEmpty(matiereNettoye))
+            {
+                sb.AppendLine($"ORG:{matiereNettoye}");
+            }
+
+            if (!string.IsNullOrWhiteSpace(personnel.Matricule))
+            {
+                sb.AppendLine($"NOTE:Matricule: {personnel.Matricule.Trim()}");
+            }
+
+            sb.AppendLine("END:VCARD");
+
+            byte[] fileBytes = Encoding.UTF8.GetBytes(sb.ToString());
+
+            // Nettoyage sécurisé du nom de fichier sans erreur LINQ
+            string nomFichierSanitized = "";
+            foreach (char c in nomNettoye)
+            {
+                if (char.IsLetterOrDigit(c) || c == '_')
+                {
+                    nomFichierSanitized += c;
+                }
+            }
+            if (string.IsNullOrEmpty(nomFichierSanitized)) nomFichierSanitized = "Personnel";
+
+            string nomFichier = $"Contact_{nomFichierSanitized}.vcf";
+
+            return File(fileBytes, "text/vcard", nomFichier);
         }
-    }
-    if (string.IsNullOrEmpty(nomFichierSanitized)) nomFichierSanitized = "Personnel";
-
-    string nomFichier = $"Contact_{nomFichierSanitized}.vcf";
-
-    return File(fileBytes, "text/vcard", nomFichier);
-}
+// =====================================================================
+        // ACTION : TABLEAU DE BORD GLOBAL & SITUATIONS OFFICIELLES UNIFIÉES
+        // =====================================================================
+        public async Task<IActionResult> Dashboard()
+        {
+            // Récupère l'intégralité de la liste des personnels depuis la base SQLite
+            var personnels = await _context.Personnels.AsNoTracking().ToListAsync();
+            
+            // Transmet directement la liste brute à la vue
+            return View(personnels);
+        }
     }
 }
