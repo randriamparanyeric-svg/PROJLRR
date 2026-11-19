@@ -15,8 +15,8 @@
             <p class="text-muted">Vue d'ensemble et indicateurs clés au <span id="cert_date" class="fw-bold text-dark"></span></p>
         </div>
         <div class="action-group">
-            <a href="@Url.Action("SearchResults", "Search")" class="btn btn-outline-primary">🔍 Recherche</a>
-            <button class="btn btn-primary" onclick="imprimerTableau()">🖨️ Imprimer </button>
+            <a href="@Url.Action("SearchResults", "Search")" class="btn btn-outline-primary">🔍 Recherche avancée</a>
+            <button class="btn btn-primary" onclick="imprimerTableau()">🖨️ Imprimer le tableau de bord</button>
         </div>
     </div>
 
@@ -49,6 +49,39 @@
             aF_Fram += Model.Count(p => p.Matiere?.Trim().ToUpper() == poste.ToUpper() && (p.Sexe == "F" || p.Sexe?.ToUpper() == "FEMME") && p.Statut?.ToUpper() == "VACATAIRE");
         }
         aGenAdmin = aH_Fonct + aF_Fonct + aH_Cont + aF_Cont + aH_Fram + aF_Fram;
+
+        // --- FONCTIONS LOCALES DE COMPTAGE DES DIPLÔMES PÉDAGOGIQUES (CAPEN OU MAPEN) ---
+        Func<PROJLRR.Models.Personnel, bool> estQualifie = p =>
+        {
+            var diplome = (p.Diplomeped ?? "").ToUpper();
+            return diplome.Contains("CAPEN") || diplome.Contains("MAPEN");
+        };
+
+        Func<string, string, string> formaterRatioStatut = (matiere, statutCible) =>
+        {
+            var listeStatut = Model.Where(p =>
+                p.Matiere?.Trim().ToUpper() == matiere.ToUpper() &&
+                (p.Statut?.Trim().ToUpper() ?? "") == statutCible.ToUpper()
+            ).ToList();
+
+            int total = listeStatut.Count;
+            int qualifes = listeStatut.Count(estQualifie);
+            return $"{qualifes} / {total}";
+        };
+
+        Func<string, string> formaterRatioMatiere = (matiere) =>
+        {
+            var listeMatiere = Model.Where(p =>
+                p.Matiere?.Trim().ToUpper() == matiere.ToUpper()
+            ).ToList();
+
+            int total = listeMatiere.Count;
+            int qualifes = listeMatiere.Count(estQualifie);
+            return $"{qualifes} / {total}";
+        };
+
+        var matieresLitteraires = new List<string> { "MLG", "FRA", "ANG", "ALL", "ESP", "RUS" };
+        var matieresScientifiques = new List<string> { "SVT", "MAT", "PC" };
     }
 
     <!-- ================================================================= -->
@@ -127,6 +160,61 @@
                             <td class="text-end">F : <b>@aF_Fram</b></td>
                         </tr>
                     </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- 1B. BLOCS CHIFFRES QUALIFICATION PÉDAGOGIQUE (CAPEN / MAPEN)       -->
+    <!-- ================================================================= -->
+    <div class="row g-3 mb-4">
+        <!-- 1ER BLOC CHIFFRE : Enseignant qualifié littéraire -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100 border-start border-4 border-primary">
+                <div class="card-header bg-white fw-bold text-primary">
+                    📖 Enseignant qualifié littéraire (CAPEN / MAPEN)
+                </div>
+                <div class="card-body small">
+                    <div class="row g-2">
+                        @foreach (var mat in matieresLitteraires)
+                        {
+                            <div class="col-md-6">
+                                <div class="border rounded p-2 bg-light h-100">
+                                    <div class="fw-bold text-dark border-bottom pb-1 mb-1">@mat</div>
+                                    <div>EFA : <b>@formaterRatioStatut(mat, "EFA")</b></div>
+                                    <div>FONCT : <b>@formaterRatioStatut(mat, "FONCTIONNAIRE")</b></div>
+                                    <div>FRAM : <b>@formaterRatioStatut(mat, "VACATAIRE")</b></div>
+                                    <div class="text-primary mt-1">TOTAL : <b>@formaterRatioMatiere(mat)</b></div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2ÈME BLOC CHIFFRE : Enseignant qualifié scientifique -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100 border-start border-4 border-info">
+                <div class="card-header bg-white fw-bold text-info">
+                    🔬 Enseignant qualifié scientifique (CAPEN / MAPEN)
+                </div>
+                <div class="card-body small">
+                    <div class="row g-2">
+                        @foreach (var mat in matieresScientifiques)
+                        {
+                            <div class="col-md-6">
+                                <div class="border rounded p-2 bg-light h-100">
+                                    <div class="fw-bold text-dark border-bottom pb-1 mb-1">@mat</div>
+                                    <div>EFA : <b>@formaterRatioStatut(mat, "EFA")</b></div>
+                                    <div>FONCT : <b>@formaterRatioStatut(mat, "FONCTIONNAIRE")</b></div>
+                                    <div>FRAM : <b>@formaterRatioStatut(mat, "VACATAIRE")</b></div>
+                                    <div class="text-info mt-1">TOTAL : <b>@formaterRatioMatiere(mat)</b></div>
+                                </div>
+                            </div>
+                        }
+                    </div>
                 </div>
             </div>
         </div>
@@ -320,6 +408,39 @@
                                     <tr><td>Fram</td><td style="text-align:right;">H : <b>@aH_Fram</b></td><td style="text-align:right;">F : <b>@aF_Fram</b></td></tr>
                                 </table>
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-5 card">
+                            <div class="card-title">📖 Enseignants Qualifiés Littéraires (CAPEN / MAPEN)</div>
+                            <table class="print-table">
+                                @foreach (var mat in matieresLitteraires)
+                                {
+                                    <tr>
+                                        <td style="text-align:left; font-weight:bold;">@mat</td>
+                                        <td>EFA: @formaterRatioStatut(mat, "EFA")</td>
+                                        <td>FONCT: @formaterRatioStatut(mat, "FONCTIONNAIRE")</td>
+                                        <td>FRAM: @formaterRatioStatut(mat, "VACATAIRE")</td>
+                                        <td style="text-align:right; font-weight:bold;">TOTAL: @formaterRatioMatiere(mat)</td>
+                                    </tr>
+                                }
+                            </table>
+                        </div>
+                        <div class="col-lg-7 card">
+                            <div class="card-title">🔬 Enseignants Qualifiés Scientifiques (CAPEN / MAPEN)</div>
+                            <table class="print-table">
+                                @foreach (var mat in matieresScientifiques)
+                                {
+                                    <tr>
+                                        <td style="text-align:left; font-weight:bold;">@mat</td>
+                                        <td>EFA: @formaterRatioStatut(mat, "EFA")</td>
+                                        <td>FONCT: @formaterRatioStatut(mat, "FONCTIONNAIRE")</td>
+                                        <td>FRAM: @formaterRatioStatut(mat, "VACATAIRE")</td>
+                                        <td style="text-align:right; font-weight:bold;">TOTAL: @formaterRatioMatiere(mat)</td>
+                                    </tr>
+                                }
+                            </table>
                         </div>
                     </div>
 
