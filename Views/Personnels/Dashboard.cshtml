@@ -7,16 +7,165 @@
 
 <link rel="stylesheet" href="~/css/stat.css" />
 
-<div class="container-fluid py-4">
+<style>
+    .dashboard-wrapper {
+        background: linear-gradient(180deg, #f1f5f9 0%, #f8fafc 100%);
+        min-height: 100vh;
+    }
+
+    .dash-header {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 1.35rem 1.6rem;
+        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+    }
+
+    .dash-title {
+        font-weight: 800;
+        color: #0f172a;
+        letter-spacing: -0.02em;
+    }
+
+    .modern-card {
+        border-radius: 16px;
+        border: 1px solid rgba(15, 23, 42, 0.07);
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        overflow: hidden;
+    }
+
+    .modern-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 26px rgba(15, 23, 42, 0.09);
+    }
+
+    /* Blocs de chiffres colorés */
+    .bloc-personnel {
+        background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+        border-left: 6px solid #4338ca !important;
+    }
+
+    .bloc-sexe {
+        background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+        border-left: 6px solid #059669 !important;
+    }
+
+    .bloc-enseignants {
+        background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+        border-left: 6px solid #d97706 !important;
+    }
+
+    .bloc-admin {
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+        border-left: 6px solid #334155 !important;
+    }
+
+    .bloc-qualifie {
+        background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+        border-left: 6px solid #7c3aed !important;
+    }
+
+    .bloc-fonctionnaire {
+        background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
+        border-left: 6px solid #0d9488 !important;
+    }
+
+    .bloc-contractuel {
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        border-left: 6px solid #0284c7 !important;
+    }
+
+    .bloc-chart {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+    }
+
+    .kpi-label {
+        font-size: 0.78rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+
+    .kpi-number {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: #0f172a;
+        line-height: 1.15;
+    }
+
+    .stat-pill {
+        background-color: rgba(255, 255, 255, 0.85);
+        color: #0f172a;
+        border: 1px solid rgba(15, 23, 42, 0.06);
+        border-radius: 10px;
+        padding: 0.45rem 0.75rem;
+        font-size: 0.86rem;
+    }
+
+    .detail-mini-table {
+        background-color: rgba(255, 255, 255, 0.75);
+        border-radius: 10px;
+        padding: 0.45rem 0.65rem;
+    }
+
+    .synth-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.6rem 0.25rem;
+        border-bottom: 1px dashed rgba(15, 23, 42, 0.14);
+        font-size: 0.92rem;
+        font-weight: 500;
+        color: #1e293b;
+    }
+
+    .synth-item:last-of-type {
+        border-bottom: none;
+    }
+
+    .synth-badge {
+        font-weight: 800;
+        font-size: 0.95rem;
+        padding: 0.25rem 0.7rem;
+        border-radius: 999px;
+        background: #ffffff;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
+    }
+
+    .synth-total-box {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 0.7rem;
+        padding: 0.72rem 0.95rem;
+        border-radius: 12px;
+        font-weight: 800;
+        color: #ffffff;
+        box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
+    }
+
+    .section-divider-title {
+        font-size: 0.82rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #475569;
+        margin-bottom: 0.85rem;
+    }
+</style>
+
+<div class="dashboard-wrapper container-fluid py-4">
     <!-- EN-TÊTE DE LA PAGE -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="dash-header d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <div>
-            <h2>📊 Tableau de Bord Global - Lycée Raherivelo Ramamonjy</h2>
-            <p class="text-muted">Vue d'ensemble et indicateurs clés au <span id="cert_date" class="fw-bold text-dark"></span></p>
+            <h2 class="dash-title mb-1">📊 Tableau de Bord Global — Lycée Raherivelo Ramamonjy</h2>
+            <p class="text-muted mb-0 small">Vue d'ensemble et indicateurs clés au <span id="cert_date" class="fw-semibold text-dark"></span></p>
         </div>
-        <div class="action-group">
-            <a href="@Url.Action("SearchResults", "Search")" class="btn btn-outline-primary">🔍 Recherche avancée</a>
-            <button class="btn btn-primary" onclick="imprimerTableau()">🖨️ Imprimer le tableau de bord</button>
+        <div class="action-group d-flex flex-wrap gap-2">
+            <a href="@Url.Action("SearchResults", "Search")" class="btn btn-outline-primary rounded-3 px-3">🔍 Recherche</a>
+            <button class="btn btn-primary rounded-3 px-3 shadow-sm" onclick="imprimerTableau()">🖨️ Imprimer </button>
         </div>
     </div>
 
@@ -50,120 +199,90 @@
         }
         aGenAdmin = aH_Fonct + aF_Fonct + aH_Cont + aF_Cont + aH_Fram + aF_Fram;
 
-        // --- FONCTIONS LOCALES DE COMPTAGE DES DIPLÔMES PÉDAGOGIQUES (CAPEN OU MAPEN) ---
+        // --- GROUPES DE MATIÈRES ---
+        var matieresLitteraires = new List<string> { "MLG", "FRA", "ANG", "ALL", "ESP", "RUS", "PHI", "HG" };
+        var matieresScientifiques = new List<string> { "SVT", "MAT", "PC" };
+
+        // --- FONCTIONS LOCALES DE COMPTAGE ---
         Func<PROJLRR.Models.Personnel, bool> estQualifie = p =>
         {
             var diplome = (p.Diplomeped ?? "").ToUpper();
             return diplome.Contains("CAPEN") || diplome.Contains("MAPEN");
         };
 
-        Func<string, string, string> formaterRatioStatut = (matiere, statutCible) =>
-        {
-            var listeStatut = Model.Where(p =>
-                p.Matiere?.Trim().ToUpper() == matiere.ToUpper() &&
-                (p.Statut?.Trim().ToUpper() ?? "") == statutCible.ToUpper()
-            ).ToList();
+        // 1er Bloc : Enseignants qualifiés (CAPEN / MAPEN)
+        int qualifieLitt = Model.Count(p => p.Matiere != null && matieresLitteraires.Contains(p.Matiere.Trim().ToUpper()) && estQualifie(p));
+        int qualifieSci = Model.Count(p => p.Matiere != null && matieresScientifiques.Contains(p.Matiere.Trim().ToUpper()) && estQualifie(p));
+        int totalQualifie = qualifieLitt + qualifieSci;
 
-            int total = listeStatut.Count;
-            int qualifes = listeStatut.Count(estQualifie);
-            return $"{qualifes} / {total}";
-        };
+        // 2ème Bloc : Enseignants fonctionnaires (Tous diplômes)
+        int fonctLitt = Model.Count(p => p.Matiere != null && matieresLitteraires.Contains(p.Matiere.Trim().ToUpper()) && (p.Statut?.Trim().ToUpper() ?? "") == "FONCTIONNAIRE");
+        int fonctSci = Model.Count(p => p.Matiere != null && matieresScientifiques.Contains(p.Matiere.Trim().ToUpper()) && (p.Statut?.Trim().ToUpper() ?? "") == "FONCTIONNAIRE");
+        int totalFonct = fonctLitt + fonctSci;
 
-        Func<string, string> formaterRatioMatiere = (matiere) =>
-        {
-            var listeMatiere = Model.Where(p =>
-                p.Matiere?.Trim().ToUpper() == matiere.ToUpper()
-            ).ToList();
+        // 3ème Bloc : Enseignants contractuels / EFA (Tous diplômes)
+        int contLitt = Model.Count(p => p.Matiere != null && matieresLitteraires.Contains(p.Matiere.Trim().ToUpper()) && (p.Statut?.Trim().ToUpper() ?? "") == "EFA");
+        int contSci = Model.Count(p => p.Matiere != null && matieresScientifiques.Contains(p.Matiere.Trim().ToUpper()) && (p.Statut?.Trim().ToUpper() ?? "") == "EFA");
+        int totalCont = contLitt + contSci;
 
-            int total = listeMatiere.Count;
-            int qualifes = listeMatiere.Count(estQualifie);
-            return $"{qualifes} / {total}";
-        };
-
-        Func<List<string>, int> compterQualifiesGroupe = (listeMatieres) =>
-        {
-            return Model.Count(p =>
-                p.Matiere != null &&
-                listeMatieres.Contains(p.Matiere.Trim().ToUpper()) &&
-                estQualifie(p)
-            );
-        };
-
-        // --- FONCTIONS LOCALES DE COMPTAGE TOUS DIPLÔMES CONFONDUS PAR STATUT ---
-        Func<string, string, int> compterEffectifStatut = (matiere, statutCible) =>
-        {
-            return Model.Count(p =>
-                p.Matiere?.Trim().ToUpper() == matiere.ToUpper() &&
-                (p.Statut?.Trim().ToUpper() ?? "") == statutCible.ToUpper()
-            );
-        };
-
-        Func<string, int> compterEffectifMatiere = (matiere) =>
-        {
-            return Model.Count(p =>
-                p.Matiere?.Trim().ToUpper() == matiere.ToUpper()
-            );
-        };
-
-        Func<List<string>, int> compterGrandTotalGroupe = (listeMatieres) =>
-        {
-            return Model.Count(p =>
-                p.Matiere != null &&
-                listeMatieres.Contains(p.Matiere.Trim().ToUpper())
-            );
-        };
-
-        var matieresLitteraires = new List<string> { "MLG", "FRA", "ANG", "ALL", "ESP", "RUS", "PHI", "HG" };
-        var matieresScientifiques = new List<string> { "SVT", "MAT", "PC" };
+        int totalHommes = Model.Count(p => p.Sexe != null && (p.Sexe.ToUpper() == "H" || p.Sexe.ToUpper().StartsWith("M")));
+        int totalFemmes = Model.Count(p => p.Sexe != null && (p.Sexe.ToUpper() == "F" || p.Sexe.ToUpper().StartsWith("F")));
     }
 
     <!-- ================================================================= -->
     <!-- 1. BLOCS DE CHIFFRES CLÉS (KPIs) GLOBAUX & DÉTAILLÉS              -->
     <!-- ================================================================= -->
+    <div class="section-divider-title">Indicateurs Globaux & Répartition par Catégorie</div>
     <div class="row g-3 mb-4">
         <!-- Carte 1 : Effectif Global -->
         <div class="col-md-3">
-            <div class="card text-white bg-primary shadow-sm h-100">
-                <div class="card-body">
-                    <h5 class="card-title">Total Personnel</h5>
-                    <h3 class="display-6 fw-bold">@Model.Count</h3>
-                    <p class="mb-0">Agents enregistrés dans la base</p>
-                </div>
+            <div class="modern-card bloc-personnel h-100 p-3 d-flex flex-column justify-content-between">
+                <div class="kpi-label" style="color: #4338ca;">Nombre total des Personnels</div>
+                <div class="kpi-number my-2">@Model.Count</div>
+                <div class="small fw-medium" style="color: #3730a3;">Agents enregistrés dans la base</div>
             </div>
         </div>
 
         <!-- Carte 2 : Total Sexe Global -->
         <div class="col-md-3">
-            <div class="card text-white bg-success shadow-sm h-100">
-                <div class="card-body">
-                    <h5 class="card-title">Par Sexe</h5>
-                    <p class="mb-1">Hommes : <b class="fs-5">@Model.Count(p => p.Sexe != null && (p.Sexe.ToUpper() == "H" || p.Sexe.ToUpper().StartsWith("M")))</b></p>
-                    <p class="mb-0">Femmes : <b class="fs-5">@Model.Count(p => p.Sexe != null && (p.Sexe.ToUpper() == "F" || p.Sexe.ToUpper().StartsWith("F")))</b></p>
+            <div class="modern-card bloc-sexe h-100 p-3 d-flex flex-column justify-content-between">
+                <div class="kpi-label mb-2" style="color: #059669;">Nombre Par Sexe</div>
+                <div class="d-flex flex-column gap-2">
+                    <div class="stat-pill d-flex justify-content-between align-items-center">
+                        <span>Hommes</span>
+                        <span class="fw-bold fs-6" style="color: #047857;">@totalHommes</span>
+                    </div>
+                    <div class="stat-pill d-flex justify-content-between align-items-center">
+                        <span>Femmes</span>
+                        <span class="fw-bold fs-6" style="color: #047857;">@totalFemmes</span>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Carte 3 : Résumé Détaillé Total Enseignants -->
         <div class="col-md-3">
-            <div class="card text-dark bg-warning shadow-sm h-100">
-                <div class="card-body">
-                    <h5 class="card-title fw-bold mb-2">📚 Total Enseignants : <span class="fs-4">@tGenEns</span></h5>
-                    <hr class="my-1 border-dark">
-                    <table class="w-100 small" style="line-height: 1.5;">
+            <div class="modern-card bloc-enseignants h-100 p-3 d-flex flex-column justify-content-between">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="kpi-label" style="color: #b45309;">📚 Nombre total des Personnels Enseignants</span>
+                    <span class="badge rounded-pill text-bg-warning fs-6 px-3 shadow-xs">@tGenEns</span>
+                </div>
+                <div class="detail-mini-table">
+                    <table class="w-100 small text-secondary" style="line-height: 1.65;">
                         <tr>
-                            <td class="fw-semibold">Fonctionnaires</td>
-                            <td class="text-end">H : <b>@tH_Fonct</b></td>
-                            <td class="text-end">F : <b>@tF_Fonct</b></td>
+                            <td class="fw-semibold text-dark">Fonctionnaires</td>
+                            <td class="text-end">H : <b class="text-dark">@tH_Fonct</b></td>
+                            <td class="text-end">F : <b class="text-dark">@tF_Fonct</b></td>
                         </tr>
                         <tr>
-                            <td class="fw-semibold">EFA (Cont.)</td>
-                            <td class="text-end">H : <b>@tH_Cont</b></td>
-                            <td class="text-end">F : <b>@tF_Cont</b></td>
+                            <td class="fw-semibold text-dark">EFA (Cont.)</td>
+                            <td class="text-end">H : <b class="text-dark">@tH_Cont</b></td>
+                            <td class="text-end">F : <b class="text-dark">@tF_Cont</b></td>
                         </tr>
                         <tr>
-                            <td class="fw-semibold">Fram (Vac.)</td>
-                            <td class="text-end">H : <b>@tH_Fram</b></td>
-                            <td class="text-end">F : <b>@tF_Fram</b></td>
+                            <td class="fw-semibold text-dark">Fram (Vac.)</td>
+                            <td class="text-end">H : <b class="text-dark">@tH_Fram</b></td>
+                            <td class="text-end">F : <b class="text-dark">@tF_Fram</b></td>
                         </tr>
                     </table>
                 </div>
@@ -172,25 +291,27 @@
 
         <!-- Carte 4 : Résumé Détaillé Total Administratif -->
         <div class="col-md-3">
-            <div class="card text-white bg-secondary shadow-sm h-100">
-                <div class="card-body">
-                    <h5 class="card-title fw-bold mb-2">🏢 Total Admin : <span class="fs-4">@aGenAdmin</span></h5>
-                    <hr class="my-1 border-light">
-                    <table class="w-100 small text-white" style="line-height: 1.5;">
+            <div class="modern-card bloc-admin h-100 p-3 d-flex flex-column justify-content-between">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="kpi-label" style="color: #334155;">🏢 Nombre total des Personnels Administratif</span>
+                    <span class="badge rounded-pill text-bg-secondary fs-6 px-3 shadow-xs">@aGenAdmin</span>
+                </div>
+                <div class="detail-mini-table">
+                    <table class="w-100 small text-secondary" style="line-height: 1.65;">
                         <tr>
-                            <td class="fw-semibold">Fonctionnaires</td>
-                            <td class="text-end">H : <b>@aH_Fonct</b></td>
-                            <td class="text-end">F : <b>@aF_Fonct</b></td>
+                            <td class="fw-semibold text-dark">Fonctionnaires</td>
+                            <td class="text-end">H : <b class="text-dark">@aH_Fonct</b></td>
+                            <td class="text-end">F : <b class="text-dark">@aF_Fonct</b></td>
                         </tr>
                         <tr>
-                            <td class="fw-semibold">EFA (Cont.)</td>
-                            <td class="text-end">H : <b>@aH_Cont</b></td>
-                            <td class="text-end">F : <b>@aF_Cont</b></td>
+                            <td class="fw-semibold text-dark">EFA (Cont.)</td>
+                            <td class="text-end">H : <b class="text-dark">@aH_Cont</b></td>
+                            <td class="text-end">F : <b class="text-dark">@aF_Cont</b></td>
                         </tr>
                         <tr>
-                            <td class="fw-semibold">Fram (Vac.)</td>
-                            <td class="text-end">H : <b>@aH_Fram</b></td>
-                            <td class="text-end">F : <b>@aF_Fram</b></td>
+                            <td class="fw-semibold text-dark">Fram (Vac.)</td>
+                            <td class="text-end">H : <b class="text-dark">@aH_Fram</b></td>
+                            <td class="text-end">F : <b class="text-dark">@aF_Fram</b></td>
                         </tr>
                     </table>
                 </div>
@@ -199,126 +320,69 @@
     </div>
 
     <!-- ================================================================= -->
-    <!-- 1B. BLOCS CHIFFRES QUALIFICATION PÉDAGOGIQUE (CAPEN / MAPEN)       -->
+    <!-- 1B. BLOCS CHIFFRES SYNTHÈSE (QUALIFIÉS / FONCTIONNAIRES / EFA)   -->
     <!-- ================================================================= -->
+    <div class="section-divider-title">Synthèse Enseignants Littéraires & Scientifiques</div>
     <div class="row g-3 mb-4">
-        <!-- 1ER BLOC CHIFFRE : Enseignant qualifié littéraire -->
-        <div class="col-lg-6">
-            <div class="card shadow-sm h-100 border-0" style="background-color: #eef2ff; border-left: 5px solid #4338ca !important;">
-                <div class="card-header fw-bold text-white" style="background-color: #4338ca;">
-                    📖 Enseignant qualifié littéraire (CAPEN / MAPEN)
+        <!-- 1er Bloc -->
+        <div class="col-md-4">
+            <div class="modern-card bloc-qualifie h-100 p-3 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="kpi-label mb-2" style="color: #6d28d9;">🎓 Qualification Pédagogique</div>
+                    <div class="synth-item">
+                        <span> Nombre des Enseignants qualifié literaire</span>
+                        <span class="synth-badge" style="color: #5b21b6;">@qualifieLitt</span>
+                    </div>
+                    <div class="synth-item">
+                        <span>Nombre des Enseignant qualifié scientifique</span>
+                        <span class="synth-badge" style="color: #5b21b6;">@qualifieSci</span>
+                    </div>
                 </div>
-                <div class="card-body small d-flex flex-column justify-content-between">
-                    <div class="row g-2">
-                        @foreach (var mat in matieresLitteraires)
-                        {
-                            <div class="col-md-6">
-                                <div class="border rounded p-2 bg-white h-100 shadow-2xs" style="border-color: #c7d2fe !important;">
-                                    <div class="fw-bold border-bottom pb-1 mb-1" style="color: #3730a3;">@mat</div>
-                                    <div>EFA : <b>@formaterRatioStatut(mat, "EFA")</b></div>
-                                    <div>FONCT : <b>@formaterRatioStatut(mat, "FONCTIONNAIRE")</b></div>
-                                    <div>FRAM : <b>@formaterRatioStatut(mat, "VACATAIRE")</b></div>
-                                    <div class="mt-1 fw-bold" style="color: #4338ca;">TOTAL : <b>@formaterRatioMatiere(mat)</b></div>
-                                </div>
-                            </div>
-                        }
-                    </div>
-
-                    <div class="mt-3 p-2 rounded text-white fs-6 fw-bold" style="background-color: #312e81;">
-                        GRAND TOTAL : @compterQualifiesGroupe(matieresLitteraires)
-                    </div>
+                <div class="synth-total-box" style="background: linear-gradient(90deg, #6d28d9 0%, #5b21b6 100%);">
+                    <span>TOTAL</span>
+                    <span class="fs-5">@totalQualifie</span>
                 </div>
             </div>
         </div>
 
-        <!-- 2ÈME BLOC CHIFFRE : Enseignant qualifié scientifique -->
-        <div class="col-lg-6">
-            <div class="card shadow-sm h-100 border-0" style="background-color: #ecfdf5; border-left: 5px solid #047857 !important;">
-                <div class="card-header fw-bold text-white" style="background-color: #047857;">
-                    🔬 Enseignant qualifié scientifique (CAPEN / MAPEN)
-                </div>
-                <div class="card-body small d-flex flex-column justify-content-between">
-                    <div class="row g-2">
-                        @foreach (var mat in matieresScientifiques)
-                        {
-                            <div class="col-md-6">
-                                <div class="border rounded p-2 bg-white h-100 shadow-2xs" style="border-color: #a7f3d0 !important;">
-                                    <div class="fw-bold border-bottom pb-1 mb-1" style="color: #065f46;">@mat</div>
-                                    <div>EFA : <b>@formaterRatioStatut(mat, "EFA")</b></div>
-                                    <div>FONCT : <b>@formaterRatioStatut(mat, "FONCTIONNAIRE")</b></div>
-                                    <div>FRAM : <b>@formaterRatioStatut(mat, "VACATAIRE")</b></div>
-                                    <div class="mt-1 fw-bold" style="color: #047857;">TOTAL : <b>@formaterRatioMatiere(mat)</b></div>
-                                </div>
-                            </div>
-                        }
+        <!-- 2ème Bloc -->
+        <div class="col-md-4">
+            <div class="modern-card bloc-fonctionnaire h-100 p-3 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="kpi-label mb-2" style="color: #0f766e;">🏛️ Nombre des Fonctionnaires</div>
+                    <div class="synth-item">
+                        <span>Enseignant Fonctionnaire Littéraire</span>
+                        <span class="synth-badge" style="color: #115e59;">@fonctLitt</span>
                     </div>
-
-                    <div class="mt-3 p-2 rounded text-white fs-6 fw-bold" style="background-color: #064e3b;">
-                        GRAND TOTAL : @compterQualifiesGroupe(matieresScientifiques)
+                    <div class="synth-item">
+                        <span>Enseignant Fonctionaire Scientifique</span>
+                        <span class="synth-badge" style="color: #115e59;">@fonctSci</span>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ================================================================= -->
-    <!-- 1C. BLOCS CHIFFRES EFFECTIFS PAR STATUT (TOUS DIPLÔMES CONFONDUS) -->
-    <!-- ================================================================= -->
-    <div class="row g-3 mb-4">
-        <!-- 3ÈME BLOC CHIFFRE : Enseignants Littéraires (Fonct, EFA, FRAM - Tous diplômes) -->
-        <div class="col-lg-6">
-            <div class="card shadow-sm h-100 border-0" style="background-color: #fffbeb; border-left: 5px solid #d97706 !important;">
-                <div class="card-header fw-bold text-dark" style="background-color: #fbbf24;">
-                    📚 Enseignants Littéraires par Statut (Tous diplômes)
-                </div>
-                <div class="card-body small d-flex flex-column justify-content-between">
-                    <div class="row g-2">
-                        @foreach (var mat in matieresLitteraires)
-                        {
-                            <div class="col-md-6">
-                                <div class="border rounded p-2 bg-white h-100 shadow-2xs" style="border-color: #fde68a !important;">
-                                    <div class="fw-bold border-bottom pb-1 mb-1" style="color: #92400e;">@mat</div>
-                                    <div>FONCT : <b>@compterEffectifStatut(mat, "FONCTIONNAIRE")</b></div>
-                                    <div>EFA (Contractuel) : <b>@compterEffectifStatut(mat, "EFA")</b></div>
-                                    <div>FRAM : <b>@compterEffectifStatut(mat, "VACATAIRE")</b></div>
-                                    <div class="mt-1 fw-bold" style="color: #b45309;">TOTAL : <b>@compterEffectifMatiere(mat)</b></div>
-                                </div>
-                            </div>
-                        }
-                    </div>
-
-                    <div class="mt-3 p-2 rounded text-white fs-6 fw-bold" style="background-color: #92400e;">
-                        GRAND TOTAL : @compterGrandTotalGroupe(matieresLitteraires)
-                    </div>
+                <div class="synth-total-box" style="background: linear-gradient(90deg, #0d9488 0%, #0f766e 100%);">
+                    <span>TOTAL</span>
+                    <span class="fs-5">@totalFonct</span>
                 </div>
             </div>
         </div>
 
-        <!-- 4ÈME BLOC CHIFFRE : Enseignants Scientifiques (Fonct, EFA, FRAM - Tous diplômes) -->
-        <div class="col-lg-6">
-            <div class="card shadow-sm h-100 border-0" style="background-color: #f0f9ff; border-left: 5px solid #0284c7 !important;">
-                <div class="card-header fw-bold text-white" style="background-color: #0284c7;">
-                    🧪 Enseignants Scientifiques par Statut (Tous diplômes)
+        <!-- 3ème Bloc -->
+        <div class="col-md-4">
+            <div class="modern-card bloc-contractuel h-100 p-3 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="kpi-label mb-2" style="color: #0369a1;">📝 Nombre des Contractuels (EFA)</div>
+                    <div class="synth-item">
+                        <span>Enseignant Contractuel Littéraire</span>
+                        <span class="synth-badge" style="color: #075985;">@contLitt</span>
+                    </div>
+                    <div class="synth-item">
+                        <span>Enseignant Contractuel scientifique</span>
+                        <span class="synth-badge" style="color: #075985;">@contSci</span>
+                    </div>
                 </div>
-                <div class="card-body small d-flex flex-column justify-content-between">
-                    <div class="row g-2">
-                        @foreach (var mat in matieresScientifiques)
-                        {
-                            <div class="col-md-6">
-                                <div class="border rounded p-2 bg-white h-100 shadow-2xs" style="border-color: #bae6fd !important;">
-                                    <div class="fw-bold border-bottom pb-1 mb-1" style="color: #075985;">@mat</div>
-                                    <div>FONCT : <b>@compterEffectifStatut(mat, "FONCTIONNAIRE")</b></div>
-                                    <div>EFA (Contractuel) : <b>@compterEffectifStatut(mat, "EFA")</b></div>
-                                    <div>FRAM : <b>@compterEffectifStatut(mat, "VACATAIRE")</b></div>
-                                    <div class="mt-1 fw-bold" style="color: #0284c7;">TOTAL : <b>@compterEffectifMatiere(mat)</b></div>
-                                </div>
-                            </div>
-                        }
-                    </div>
-
-                    <div class="mt-3 p-2 rounded text-white fs-6 fw-bold" style="background-color: #075985;">
-                        GRAND TOTAL : @compterGrandTotalGroupe(matieresScientifiques)
-                    </div>
+                <div class="synth-total-box" style="background: linear-gradient(90deg, #0284c7 0%, #0369a1 100%);">
+                    <span>TOTAL</span>
+                    <span class="fs-5">@totalCont</span>
                 </div>
             </div>
         </div>
@@ -327,19 +391,20 @@
     <!-- ================================================================= -->
     <!-- 2. GRAPHIQUES ANALYTIQUES (Chart.js)                              -->
     <!-- ================================================================= -->
+    <div class="section-divider-title">Visualisation Analytique</div>
     <div class="row g-4 mb-4">
         <div class="col-lg-5">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white fw-bold py-3">Répartition par Statut Global</div>
-                <div class="card-body d-flex justify-content-center align-items-center" style="height: 280px;">
+            <div class="modern-card bloc-chart h-100">
+                <div class="bg-white fw-bold px-4 py-3 border-bottom text-dark">Répartition par Statut Global</div>
+                <div class="p-3 d-flex justify-content-center align-items-center" style="height: 290px;">
                     <canvas id="statutChart"></canvas>
                 </div>
             </div>
         </div>
         <div class="col-lg-7">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white fw-bold py-3">Top 6 des Matières / Postes</div>
-                <div class="card-body d-flex justify-content-center align-items-center" style="height: 280px;">
+            <div class="modern-card bloc-chart h-100">
+                <div class="bg-white fw-bold px-4 py-3 border-bottom text-dark">Top 6 des Matières / Postes</div>
+                <div class="p-3 d-flex justify-content-center align-items-center" style="height: 290px;">
                     <canvas id="matiereChart"></canvas>
                 </div>
             </div>
@@ -384,7 +449,7 @@
                     labels: Object.keys(statutsCount),
                     datasets: [{
                         data: Object.values(statutsCount),
-                        backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b']
+                        backgroundColor: ['#4f46e5', '#10b981', '#0ea5e9', '#f59e0b', '#ef4444']
                     }]
                 },
                 options: { responsive: true, maintainAspectRatio: false }
@@ -412,7 +477,8 @@
                     datasets: [{
                         label: 'Effectif',
                         data: sortedMatieres.map(item => item[1]),
-                        backgroundColor: '#4e73df'
+                        backgroundColor: '#4f46e5',
+                        borderRadius: 6
                     }]
                 },
                 options: {
@@ -429,7 +495,7 @@
             let statutImg = statutChartInstance ? statutChartInstance.toBase64Image() : '';
             let matiereImg = matiereChartInstance ? matiereChartInstance.toBase64Image() : '';
 
-            var pageImpression = window.open('', '_blank', 'width=950,height=750');
+            var pageImpression = window.open('', '_blank', 'width=1024,height=780');
             
             if (!pageImpression) {
                 alert("Veuillez autoriser les pop-ups pour pouvoir imprimer.");
@@ -442,74 +508,100 @@
                     <title>Impression - Tableau de Bord Global</title>
                     <style>
                         @@page {
-                            margin-top: 15px;
-                            margin-bottom: 15px;
+                            size: A4 portrait;
+                            margin: 12mm 14mm;
+                        }
+
+                        * {
+                            box-sizing: border-box;
+                            -webkit-print-color-adjust: exact !important;
+                            print-color-adjust: exact !important;
                         }
 
                         body { 
                             font-family: 'Segoe UI', Arial, sans-serif; 
-                            color: #333; 
-                            padding: 20px 30px; 
+                            color: #1e293b; 
+                            margin: 0;
+                            padding: 0; 
+                            background: #ffffff;
+                        }
+
+                        .print-banner {
+                            text-align: center;
+                            padding-bottom: 12px;
+                            margin-bottom: 18px;
+                            border-bottom: 2px solid #cbd5e1;
                         }
                         
-                        h2 { color: #1e3a8a; margin-top: 0; margin-bottom: 5px; font-size: 20px; text-transform: uppercase; text-align: center; }
-                        .subtitle { text-align: center; color: #475569; font-size: 14px; margin-bottom: 25px; }
-                        
-                        .row { display: flex; flex-wrap: wrap; margin-bottom: 15px; gap: 15px; justify-content: center; }
-                        .col-md-3 { width: 22%; min-width: 200px; box-sizing: border-box; }
-                        .col-lg-5, .col-lg-7 { width: 48%; min-width: 300px; box-sizing: border-box; text-align: center; }
-                        
-                        .card { border: 1px solid #94a3b8; border-radius: 8px; padding: 15px; margin-bottom: 15px; background: #fff; }
-                        .card-title { font-size: 15px; font-weight: bold; margin-bottom: 8px; color: #1e293b; }
-                        .display-6 { font-size: 24px; font-weight: bold; margin: 5px 0; }
-                        .small { font-size: 12px; line-height: 1.4; color: #334155; }
-                        hr { border: 0; border-top: 1px solid #94a3b8; margin: 8px 0; }
-                        
-                        .lit-card { background-color: #eef2ff; border-left: 5px solid #4338ca; text-align: left; }
-                        .lit-title { color: #312e81; font-weight: bold; margin-bottom: 8px; }
-                        .lit-total { background-color: #312e81; color: #fff; padding: 6px 10px; border-radius: 5px; margin-top: 8px; font-size: 13px; font-weight: bold; }
+                        h2 { color: #0f172a; margin: 0 0 4px 0; font-size: 19px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.4px; }
+                        .subtitle { color: #64748b; font-size: 13px; font-weight: 500; }
 
-                        .sci-card { background-color: #ecfdf5; border-left: 5px solid #047857; text-align: left; }
-                        .sci-title { color: #064e3b; font-weight: bold; margin-bottom: 8px; }
-                        .sci-total { background-color: #064e3b; color: #fff; padding: 6px 10px; border-radius: 5px; margin-top: 8px; font-size: 13px; font-weight: bold; }
-
-                        .stat-lit-card { background-color: #fffbeb; border-left: 5px solid #d97706; text-align: left; }
-                        .stat-lit-title { color: #92400e; font-weight: bold; margin-bottom: 8px; }
-                        .stat-lit-total { background-color: #92400e; color: #fff; padding: 6px 10px; border-radius: 5px; margin-top: 8px; font-size: 13px; font-weight: bold; }
-
-                        .stat-sci-card { background-color: #f0f9ff; border-left: 5px solid #0284c7; text-align: left; }
-                        .stat-sci-title { color: #075985; font-weight: bold; margin-bottom: 8px; }
-                        .stat-sci-total { background-color: #075985; color: #fff; padding: 6px 10px; border-radius: 5px; margin-top: 8px; font-size: 13px; font-weight: bold; }
+                        .print-section-label {
+                            font-size: 11px;
+                            font-weight: 800;
+                            text-transform: uppercase;
+                            letter-spacing: 0.7px;
+                            color: #475569;
+                            margin: 12px 0 8px 0;
+                        }
                         
-                        img.chart-print { max-width: 100%; height: 200px; object-fit: contain; margin-top: 10px; }
-                        .signature { text-align: right; margin-top: 35px; font-style: italic; font-size: 14px; color: #334155; }
+                        .row { display: flex; flex-wrap: wrap; margin-bottom: 12px; gap: 12px; justify-content: space-between; }
+                        .col-md-3 { width: calc(25% - 9px); min-width: 150px; }
+                        .col-md-4 { width: calc(33.33% - 8px); min-width: 190px; }
+                        .col-lg-5 { width: calc(42% - 6px); min-width: 240px; text-align: center; }
+                        .col-lg-7 { width: calc(58% - 6px); min-width: 280px; text-align: center; }
                         
-                        table.print-table { width: 100%; font-size: 12px; border-collapse: collapse; }
-                        table.print-table td { padding: 2px 0; }
+                        .card { border: 1px solid #cbd5e1; border-radius: 10px; padding: 12px; background: #fff; height: 100%; display: flex; flex-direction: column; justify-content: space-between; }
+                        .card-title { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+                        .display-6 { font-size: 24px; font-weight: 800; margin: 4px 0; color: #0f172a; }
+                        .small { font-size: 11.5px; line-height: 1.4; color: #334155; }
+                        hr { border: 0; border-top: 1px solid rgba(15, 23, 42, 0.12); margin: 6px 0; }
+
+                        .p-bloc-personnel { background-color: #eef2ff; border-left: 5px solid #4338ca; }
+                        .p-bloc-sexe { background-color: #ecfdf5; border-left: 5px solid #059669; }
+                        .p-bloc-ens { background-color: #fffbeb; border-left: 5px solid #d97706; }
+                        .p-bloc-admin { background-color: #f1f5f9; border-left: 5px solid #334155; }
+
+                        .p-bloc-qual { background-color: #f5f3ff; border-left: 5px solid #7c3aed; }
+                        .p-bloc-fonct { background-color: #f0fdfa; border-left: 5px solid #0d9488; }
+                        .p-bloc-cont { background-color: #f0f9ff; border-left: 5px solid #0284c7; }
+                        
+                        .synth-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 2px; border-bottom: 1px dashed rgba(15, 23, 42, 0.15); font-size: 12px; }
+                        .synth-row:last-of-type { border-bottom: none; }
+                        .synth-total { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; margin-top: 8px; border-radius: 7px; font-size: 13px; font-weight: 800; color: #ffffff; }
+                        
+                        img.chart-print { max-width: 100%; max-height: 190px; object-fit: contain; margin: 6px auto 0 auto; }
+                        .signature { text-align: right; margin-top: 24px; font-style: italic; font-size: 13.5px; font-weight: 600; color: #334155; }
+                        
+                        table.print-table { width: 100%; font-size: 11.5px; border-collapse: collapse; background: rgba(255,255,255,0.75); border-radius: 6px; }
+                        table.print-table td { padding: 2px 4px; }
                     </style>
                 </head>
                 <body>
-                    <h2>Tableau de Bord Global - Lycée Raherivelo Ramamonjy</h2>
-                    <div class="subtitle">Situation en date du ${today}</div>
-                    
+                    <div class="print-banner">
+                        <h2>Tableau de Bord Global — Lycée Raherivelo Ramamonjy</h2>
+                        <div class="subtitle">Situation en date du ${today}</div>
+                    </div>
+
+                    <div class="print-section-label">Indicateurs Globaux & Répartition par Catégorie</div>
                     <div class="row">
                         <div class="col-md-3">
-                            <div class="card" style="border-left: 4px solid #4f46e5;">
-                                <div class="card-title">Total Personnel</div>
+                            <div class="card p-bloc-personnel">
+                                <div class="card-title" style="color: #4338ca;">Total Personnel</div>
                                 <div class="display-6">@Model.Count</div>
-                                <div class="small">Agents enregistrés</div>
+                                <div class="small" style="color: #3730a3;">Agents enregistrés</div>
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="card" style="border-left: 4px solid #10b981;">
-                                <div class="card-title">Par Sexe</div>
-                                <div class="small">Hommes : <b>@Model.Count(p => p.Sexe != null && (p.Sexe.ToUpper() == "H" || p.Sexe.ToUpper().StartsWith("M")))</b></div>
-                                <div class="small">Femmes : <b>@Model.Count(p => p.Sexe != null && (p.Sexe.ToUpper() == "F" || p.Sexe.ToUpper().StartsWith("F")))</b></div>
+                            <div class="card p-bloc-sexe">
+                                <div class="card-title" style="color: #059669;">Par Sexe</div>
+                                <div class="small">Hommes : <b>@totalHommes</b></div>
+                                <div class="small">Femmes : <b>@totalFemmes</b></div>
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="card" style="border-left: 4px solid #f59e0b;">
-                                <div class="card-title">📚 Total Enseignants : @tGenEns</div>
+                            <div class="card p-bloc-ens">
+                                <div class="card-title" style="color: #b45309;">📚 Total Enseignants : <b>@tGenEns</b></div>
                                 <hr>
                                 <table class="print-table">
                                     <tr><td>Fonct</td><td style="text-align:right;">H : <b>@tH_Fonct</b></td><td style="text-align:right;">F : <b>@tF_Fonct</b></td></tr>
@@ -519,8 +611,8 @@
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="card" style="border-left: 4px solid #64748b;">
-                                <div class="card-title">🏢 Total Admin : @aGenAdmin</div>
+                            <div class="card p-bloc-admin">
+                                <div class="card-title" style="color: #334155;">🏢 Total Admin : <b>@aGenAdmin</b></div>
                                 <hr>
                                 <table class="print-table">
                                     <tr><td>Fonct</td><td style="text-align:right;">H : <b>@aH_Fonct</b></td><td style="text-align:right;">F : <b>@aF_Fonct</b></td></tr>
@@ -531,92 +623,53 @@
                         </div>
                     </div>
 
+                    <div class="print-section-label">Synthèse Enseignants Littéraires & Scientifiques</div>
                     <div class="row">
-                        <div class="col-lg-5 card lit-card">
-                            <div class="lit-title">📖 Enseignants Qualifiés Littéraires (CAPEN / MAPEN)</div>
-                            <table class="print-table">
-                                @foreach (var mat in matieresLitteraires)
-                                {
-                                    <tr>
-                                        <td style="text-align:left; font-weight:bold;">@mat</td>
-                                        <td>EFA: @formaterRatioStatut(mat, "EFA")</td>
-                                        <td>FONCT: @formaterRatioStatut(mat, "FONCTIONNAIRE")</td>
-                                        <td>FRAM: @formaterRatioStatut(mat, "VACATAIRE")</td>
-                                        <td style="text-align:right; font-weight:bold;">TOTAL: @formaterRatioMatiere(mat)</td>
-                                    </tr>
-                                }
-                            </table>
-                            <div class="lit-total">
-                                GRAND TOTAL : @compterQualifiesGroupe(matieresLitteraires)
+                        <div class="col-md-4">
+                            <div class="card p-bloc-qual">
+                                <div>
+                                    <div class="card-title" style="color: #6d28d9;">🎓 Qualification Pédagogique</div>
+                                    <div class="synth-row"><span>Enseignant qualifié literaire</span><b>@qualifieLitt</b></div>
+                                    <div class="synth-row"><span>Enseignant qualifié scientifique</span><b>@qualifieSci</b></div>
+                                </div>
+                                <div class="synth-total" style="background-color: #6d28d9;"><span>TOTAL</span><span>@totalQualifie</span></div>
                             </div>
                         </div>
-                        <div class="col-lg-7 card sci-card">
-                            <div class="sci-title">🔬 Enseignants Qualifiés Scientifiques (CAPEN / MAPEN)</div>
-                            <table class="print-table">
-                                @foreach (var mat in matieresScientifiques)
-                                {
-                                    <tr>
-                                        <td style="text-align:left; font-weight:bold;">@mat</td>
-                                        <td>EFA: @formaterRatioStatut(mat, "EFA")</td>
-                                        <td>FONCT: @formaterRatioStatut(mat, "FONCTIONNAIRE")</td>
-                                        <td>FRAM: @formaterRatioStatut(mat, "VACATAIRE")</td>
-                                        <td style="text-align:right; font-weight:bold;">TOTAL: @formaterRatioMatiere(mat)</td>
-                                    </tr>
-                                }
-                            </table>
-                            <div class="sci-total">
-                                GRAND TOTAL : @compterQualifiesGroupe(matieresScientifiques)
+                        <div class="col-md-4">
+                            <div class="card p-bloc-fonct">
+                                <div>
+                                    <div class="card-title" style="color: #0f766e;">🏛️ Corps des Fonctionnaires</div>
+                                    <div class="synth-row"><span>Enseignant fonctionnaire Literaire</span><b>@fonctLitt</b></div>
+                                    <div class="synth-row"><span>Enseignant Fonctionaire Scientifique</span><b>@fonctSci</b></div>
+                                </div>
+                                <div class="synth-total" style="background-color: #0d9488;"><span>TOTAL</span><span>@totalFonct</span></div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card p-bloc-cont">
+                                <div>
+                                    <div class="card-title" style="color: #0369a1;">📝 Corps Contractuels (EFA)</div>
+                                    <div class="synth-row"><span>Enseignant contractuel Literaire</span><b>@contLitt</b></div>
+                                    <div class="synth-row"><span>Enseignant Contractuel scientifique</span><b>@contSci</b></div>
+                                </div>
+                                <div class="synth-total" style="background-color: #0284c7;"><span>TOTAL</span><span>@totalCont</span></div>
                             </div>
                         </div>
                     </div>
 
+                    <div class="print-section-label">Visualisation Analytique</div>
                     <div class="row">
-                        <div class="col-lg-5 card stat-lit-card">
-                            <div class="stat-lit-title">📚 Enseignants Littéraires par Statut (Tous diplômes)</div>
-                            <table class="print-table">
-                                @foreach (var mat in matieresLitteraires)
-                                {
-                                    <tr>
-                                        <td style="text-align:left; font-weight:bold;">@mat</td>
-                                        <td>FONCT: @compterEffectifStatut(mat, "FONCTIONNAIRE")</td>
-                                        <td>EFA: @compterEffectifStatut(mat, "EFA")</td>
-                                        <td>FRAM: @compterEffectifStatut(mat, "VACATAIRE")</td>
-                                        <td style="text-align:right; font-weight:bold;">TOTAL: @compterEffectifMatiere(mat)</td>
-                                    </tr>
-                                }
-                            </table>
-                            <div class="stat-lit-total">
-                                GRAND TOTAL : @compterGrandTotalGroupe(matieresLitteraires)
+                        <div class="col-lg-5">
+                            <div class="card">
+                                <div class="card-title" style="color: #0f172a;">Répartition par Statut Global</div>
+                                ${statutImg ? `<img src="${statutImg}" class="chart-print" />` : ''}
                             </div>
                         </div>
-                        <div class="col-lg-7 card stat-sci-card">
-                            <div class="stat-sci-title">🧪 Enseignants Scientifiques par Statut (Tous diplômes)</div>
-                            <table class="print-table">
-                                @foreach (var mat in matieresScientifiques)
-                                {
-                                    <tr>
-                                        <td style="text-align:left; font-weight:bold;">@mat</td>
-                                        <td>FONCT: @compterEffectifStatut(mat, "FONCTIONNAIRE")</td>
-                                        <td>EFA: @compterEffectifStatut(mat, "EFA")</td>
-                                        <td>FRAM: @compterEffectifStatut(mat, "VACATAIRE")</td>
-                                        <td style="text-align:right; font-weight:bold;">TOTAL: @compterEffectifMatiere(mat)</td>
-                                    </tr>
-                                }
-                            </table>
-                            <div class="stat-sci-total">
-                                GRAND TOTAL : @compterGrandTotalGroupe(matieresScientifiques)
+                        <div class="col-lg-7">
+                            <div class="card">
+                                <div class="card-title" style="color: #0f172a;">Top 6 des Matières / Postes</div>
+                                ${matiereImg ? `<img src="${matiereImg}" class="chart-print" />` : ''}
                             </div>
-                        </div>
-                    </div>
-
-                    <div class="row" style="margin-top: 20px;">
-                        <div class="col-lg-5 card">
-                            <div class="card-title">Répartition par Statut Global</div>
-                            ${statutImg ? `<img src="${statutImg}" class="chart-print" />` : ''}
-                        </div>
-                        <div class="col-lg-7 card">
-                            <div class="card-title">Top 6 des Matières / Postes</div>
-                            ${matiereImg ? `<img src="${matiereImg}" class="chart-print" />` : ''}
                         </div>
                     </div>
                     
