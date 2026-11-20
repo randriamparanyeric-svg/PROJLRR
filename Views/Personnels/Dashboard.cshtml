@@ -80,7 +80,40 @@
             return $"{qualifes} / {total}";
         };
 
-        var matieresLitteraires = new List<string> { "MLG", "FRA", "ANG", "ALL", "ESP", "RUS" };
+        Func<List<string>, int> compterQualifiesGroupe = (listeMatieres) =>
+        {
+            return Model.Count(p =>
+                p.Matiere != null &&
+                listeMatieres.Contains(p.Matiere.Trim().ToUpper()) &&
+                estQualifie(p)
+            );
+        };
+
+        // --- FONCTIONS LOCALES DE COMPTAGE TOUS DIPLÔMES CONFONDUS PAR STATUT ---
+        Func<string, string, int> compterEffectifStatut = (matiere, statutCible) =>
+        {
+            return Model.Count(p =>
+                p.Matiere?.Trim().ToUpper() == matiere.ToUpper() &&
+                (p.Statut?.Trim().ToUpper() ?? "") == statutCible.ToUpper()
+            );
+        };
+
+        Func<string, int> compterEffectifMatiere = (matiere) =>
+        {
+            return Model.Count(p =>
+                p.Matiere?.Trim().ToUpper() == matiere.ToUpper()
+            );
+        };
+
+        Func<List<string>, int> compterGrandTotalGroupe = (listeMatieres) =>
+        {
+            return Model.Count(p =>
+                p.Matiere != null &&
+                listeMatieres.Contains(p.Matiere.Trim().ToUpper())
+            );
+        };
+
+        var matieresLitteraires = new List<string> { "MLG", "FRA", "ANG", "ALL", "ESP", "RUS", "PHI", "HG" };
         var matieresScientifiques = new List<string> { "SVT", "MAT", "PC" };
     }
 
@@ -171,24 +204,28 @@
     <div class="row g-3 mb-4">
         <!-- 1ER BLOC CHIFFRE : Enseignant qualifié littéraire -->
         <div class="col-lg-6">
-            <div class="card shadow-sm h-100 border-start border-4 border-primary">
-                <div class="card-header bg-white fw-bold text-primary">
+            <div class="card shadow-sm h-100 border-0" style="background-color: #eef2ff; border-left: 5px solid #4338ca !important;">
+                <div class="card-header fw-bold text-white" style="background-color: #4338ca;">
                     📖 Enseignant qualifié littéraire (CAPEN / MAPEN)
                 </div>
-                <div class="card-body small">
+                <div class="card-body small d-flex flex-column justify-content-between">
                     <div class="row g-2">
                         @foreach (var mat in matieresLitteraires)
                         {
                             <div class="col-md-6">
-                                <div class="border rounded p-2 bg-light h-100">
-                                    <div class="fw-bold text-dark border-bottom pb-1 mb-1">@mat</div>
+                                <div class="border rounded p-2 bg-white h-100 shadow-2xs" style="border-color: #c7d2fe !important;">
+                                    <div class="fw-bold border-bottom pb-1 mb-1" style="color: #3730a3;">@mat</div>
                                     <div>EFA : <b>@formaterRatioStatut(mat, "EFA")</b></div>
                                     <div>FONCT : <b>@formaterRatioStatut(mat, "FONCTIONNAIRE")</b></div>
                                     <div>FRAM : <b>@formaterRatioStatut(mat, "VACATAIRE")</b></div>
-                                    <div class="text-primary mt-1">TOTAL : <b>@formaterRatioMatiere(mat)</b></div>
+                                    <div class="mt-1 fw-bold" style="color: #4338ca;">TOTAL : <b>@formaterRatioMatiere(mat)</b></div>
                                 </div>
                             </div>
                         }
+                    </div>
+
+                    <div class="mt-3 p-2 rounded text-white fs-6 fw-bold" style="background-color: #312e81;">
+                        GRAND TOTAL : @compterQualifiesGroupe(matieresLitteraires)
                     </div>
                 </div>
             </div>
@@ -196,24 +233,91 @@
 
         <!-- 2ÈME BLOC CHIFFRE : Enseignant qualifié scientifique -->
         <div class="col-lg-6">
-            <div class="card shadow-sm h-100 border-start border-4 border-info">
-                <div class="card-header bg-white fw-bold text-info">
+            <div class="card shadow-sm h-100 border-0" style="background-color: #ecfdf5; border-left: 5px solid #047857 !important;">
+                <div class="card-header fw-bold text-white" style="background-color: #047857;">
                     🔬 Enseignant qualifié scientifique (CAPEN / MAPEN)
                 </div>
-                <div class="card-body small">
+                <div class="card-body small d-flex flex-column justify-content-between">
                     <div class="row g-2">
                         @foreach (var mat in matieresScientifiques)
                         {
                             <div class="col-md-6">
-                                <div class="border rounded p-2 bg-light h-100">
-                                    <div class="fw-bold text-dark border-bottom pb-1 mb-1">@mat</div>
+                                <div class="border rounded p-2 bg-white h-100 shadow-2xs" style="border-color: #a7f3d0 !important;">
+                                    <div class="fw-bold border-bottom pb-1 mb-1" style="color: #065f46;">@mat</div>
                                     <div>EFA : <b>@formaterRatioStatut(mat, "EFA")</b></div>
                                     <div>FONCT : <b>@formaterRatioStatut(mat, "FONCTIONNAIRE")</b></div>
                                     <div>FRAM : <b>@formaterRatioStatut(mat, "VACATAIRE")</b></div>
-                                    <div class="text-info mt-1">TOTAL : <b>@formaterRatioMatiere(mat)</b></div>
+                                    <div class="mt-1 fw-bold" style="color: #047857;">TOTAL : <b>@formaterRatioMatiere(mat)</b></div>
                                 </div>
                             </div>
                         }
+                    </div>
+
+                    <div class="mt-3 p-2 rounded text-white fs-6 fw-bold" style="background-color: #064e3b;">
+                        GRAND TOTAL : @compterQualifiesGroupe(matieresScientifiques)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- 1C. BLOCS CHIFFRES EFFECTIFS PAR STATUT (TOUS DIPLÔMES CONFONDUS) -->
+    <!-- ================================================================= -->
+    <div class="row g-3 mb-4">
+        <!-- 3ÈME BLOC CHIFFRE : Enseignants Littéraires (Fonct, EFA, FRAM - Tous diplômes) -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100 border-0" style="background-color: #fffbeb; border-left: 5px solid #d97706 !important;">
+                <div class="card-header fw-bold text-dark" style="background-color: #fbbf24;">
+                    📚 Enseignants Littéraires par Statut (Tous diplômes)
+                </div>
+                <div class="card-body small d-flex flex-column justify-content-between">
+                    <div class="row g-2">
+                        @foreach (var mat in matieresLitteraires)
+                        {
+                            <div class="col-md-6">
+                                <div class="border rounded p-2 bg-white h-100 shadow-2xs" style="border-color: #fde68a !important;">
+                                    <div class="fw-bold border-bottom pb-1 mb-1" style="color: #92400e;">@mat</div>
+                                    <div>FONCT : <b>@compterEffectifStatut(mat, "FONCTIONNAIRE")</b></div>
+                                    <div>EFA (Contractuel) : <b>@compterEffectifStatut(mat, "EFA")</b></div>
+                                    <div>FRAM : <b>@compterEffectifStatut(mat, "VACATAIRE")</b></div>
+                                    <div class="mt-1 fw-bold" style="color: #b45309;">TOTAL : <b>@compterEffectifMatiere(mat)</b></div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="mt-3 p-2 rounded text-white fs-6 fw-bold" style="background-color: #92400e;">
+                        GRAND TOTAL : @compterGrandTotalGroupe(matieresLitteraires)
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4ÈME BLOC CHIFFRE : Enseignants Scientifiques (Fonct, EFA, FRAM - Tous diplômes) -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100 border-0" style="background-color: #f0f9ff; border-left: 5px solid #0284c7 !important;">
+                <div class="card-header fw-bold text-white" style="background-color: #0284c7;">
+                    🧪 Enseignants Scientifiques par Statut (Tous diplômes)
+                </div>
+                <div class="card-body small d-flex flex-column justify-content-between">
+                    <div class="row g-2">
+                        @foreach (var mat in matieresScientifiques)
+                        {
+                            <div class="col-md-6">
+                                <div class="border rounded p-2 bg-white h-100 shadow-2xs" style="border-color: #bae6fd !important;">
+                                    <div class="fw-bold border-bottom pb-1 mb-1" style="color: #075985;">@mat</div>
+                                    <div>FONCT : <b>@compterEffectifStatut(mat, "FONCTIONNAIRE")</b></div>
+                                    <div>EFA (Contractuel) : <b>@compterEffectifStatut(mat, "EFA")</b></div>
+                                    <div>FRAM : <b>@compterEffectifStatut(mat, "VACATAIRE")</b></div>
+                                    <div class="mt-1 fw-bold" style="color: #0284c7;">TOTAL : <b>@compterEffectifMatiere(mat)</b></div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="mt-3 p-2 rounded text-white fs-6 fw-bold" style="background-color: #075985;">
+                        GRAND TOTAL : @compterGrandTotalGroupe(matieresScientifiques)
                     </div>
                 </div>
             </div>
@@ -361,6 +465,22 @@
                         .small { font-size: 12px; line-height: 1.4; color: #334155; }
                         hr { border: 0; border-top: 1px solid #94a3b8; margin: 8px 0; }
                         
+                        .lit-card { background-color: #eef2ff; border-left: 5px solid #4338ca; text-align: left; }
+                        .lit-title { color: #312e81; font-weight: bold; margin-bottom: 8px; }
+                        .lit-total { background-color: #312e81; color: #fff; padding: 6px 10px; border-radius: 5px; margin-top: 8px; font-size: 13px; font-weight: bold; }
+
+                        .sci-card { background-color: #ecfdf5; border-left: 5px solid #047857; text-align: left; }
+                        .sci-title { color: #064e3b; font-weight: bold; margin-bottom: 8px; }
+                        .sci-total { background-color: #064e3b; color: #fff; padding: 6px 10px; border-radius: 5px; margin-top: 8px; font-size: 13px; font-weight: bold; }
+
+                        .stat-lit-card { background-color: #fffbeb; border-left: 5px solid #d97706; text-align: left; }
+                        .stat-lit-title { color: #92400e; font-weight: bold; margin-bottom: 8px; }
+                        .stat-lit-total { background-color: #92400e; color: #fff; padding: 6px 10px; border-radius: 5px; margin-top: 8px; font-size: 13px; font-weight: bold; }
+
+                        .stat-sci-card { background-color: #f0f9ff; border-left: 5px solid #0284c7; text-align: left; }
+                        .stat-sci-title { color: #075985; font-weight: bold; margin-bottom: 8px; }
+                        .stat-sci-total { background-color: #075985; color: #fff; padding: 6px 10px; border-radius: 5px; margin-top: 8px; font-size: 13px; font-weight: bold; }
+                        
                         img.chart-print { max-width: 100%; height: 200px; object-fit: contain; margin-top: 10px; }
                         .signature { text-align: right; margin-top: 35px; font-style: italic; font-size: 14px; color: #334155; }
                         
@@ -412,8 +532,8 @@
                     </div>
 
                     <div class="row">
-                        <div class="col-lg-5 card">
-                            <div class="card-title">📖 Enseignants Qualifiés Littéraires (CAPEN / MAPEN)</div>
+                        <div class="col-lg-5 card lit-card">
+                            <div class="lit-title">📖 Enseignants Qualifiés Littéraires (CAPEN / MAPEN)</div>
                             <table class="print-table">
                                 @foreach (var mat in matieresLitteraires)
                                 {
@@ -426,9 +546,12 @@
                                     </tr>
                                 }
                             </table>
+                            <div class="lit-total">
+                                GRAND TOTAL : @compterQualifiesGroupe(matieresLitteraires)
+                            </div>
                         </div>
-                        <div class="col-lg-7 card">
-                            <div class="card-title">🔬 Enseignants Qualifiés Scientifiques (CAPEN / MAPEN)</div>
+                        <div class="col-lg-7 card sci-card">
+                            <div class="sci-title">🔬 Enseignants Qualifiés Scientifiques (CAPEN / MAPEN)</div>
                             <table class="print-table">
                                 @foreach (var mat in matieresScientifiques)
                                 {
@@ -441,6 +564,48 @@
                                     </tr>
                                 }
                             </table>
+                            <div class="sci-total">
+                                GRAND TOTAL : @compterQualifiesGroupe(matieresScientifiques)
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-5 card stat-lit-card">
+                            <div class="stat-lit-title">📚 Enseignants Littéraires par Statut (Tous diplômes)</div>
+                            <table class="print-table">
+                                @foreach (var mat in matieresLitteraires)
+                                {
+                                    <tr>
+                                        <td style="text-align:left; font-weight:bold;">@mat</td>
+                                        <td>FONCT: @compterEffectifStatut(mat, "FONCTIONNAIRE")</td>
+                                        <td>EFA: @compterEffectifStatut(mat, "EFA")</td>
+                                        <td>FRAM: @compterEffectifStatut(mat, "VACATAIRE")</td>
+                                        <td style="text-align:right; font-weight:bold;">TOTAL: @compterEffectifMatiere(mat)</td>
+                                    </tr>
+                                }
+                            </table>
+                            <div class="stat-lit-total">
+                                GRAND TOTAL : @compterGrandTotalGroupe(matieresLitteraires)
+                            </div>
+                        </div>
+                        <div class="col-lg-7 card stat-sci-card">
+                            <div class="stat-sci-title">🧪 Enseignants Scientifiques par Statut (Tous diplômes)</div>
+                            <table class="print-table">
+                                @foreach (var mat in matieresScientifiques)
+                                {
+                                    <tr>
+                                        <td style="text-align:left; font-weight:bold;">@mat</td>
+                                        <td>FONCT: @compterEffectifStatut(mat, "FONCTIONNAIRE")</td>
+                                        <td>EFA: @compterEffectifStatut(mat, "EFA")</td>
+                                        <td>FRAM: @compterEffectifStatut(mat, "VACATAIRE")</td>
+                                        <td style="text-align:right; font-weight:bold;">TOTAL: @compterEffectifMatiere(mat)</td>
+                                    </tr>
+                                }
+                            </table>
+                            <div class="stat-sci-total">
+                                GRAND TOTAL : @compterGrandTotalGroupe(matieresScientifiques)
+                            </div>
                         </div>
                     </div>
 
